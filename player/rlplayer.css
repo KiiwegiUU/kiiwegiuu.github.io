@@ -139,33 +139,33 @@ video::-webkit-media-controls { /* hide media controls by default */
 }
 
 .ap-prez-container[data-mode='1'] .ap-side-bar{
-	width: 250px;
+	width: 100px;
 	color: rgb(0, 0, 0);
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	font-size: 13px;
 	background-color: rgb(224, 224, 224);
 }
 
 .ap-prez-container[data-mode='2'] .ap-side-bar{
-	width: 250px;
+	width: 100px;
 	color: rgb(0, 0, 0);
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	font-size: 13px;
 	background-color: rgb(224, 224, 224);
 }
 
 .ap-prez-container[data-mode='3'] .ap-side-bar{
-	width: 250px;
+	width: 100px;
 	color: rgb(0, 0, 0);
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	font-size: 13px;
 	background-color: rgb(224, 224, 224);
 }
 
 .ap-prez-container[data-mode='4'] .ap-side-bar{
-	width: 250px;
+	width: 100px;
 	color: rgb(0, 0, 0);
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	font-size: 13px;
 	background-color: rgb(224, 224, 224);
 }
@@ -372,7 +372,7 @@ video::-webkit-media-controls { /* hide media controls by default */
 }
 
 .ap-prez-container[data-mode='1'] .ap-popup {
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	font-size: 13px;
 	color: rgb(0, 0, 0);
 	background-color: rgb(224, 224, 224);
@@ -380,7 +380,7 @@ video::-webkit-media-controls { /* hide media controls by default */
 }
 
 .ap-prez-container[data-mode='2'] .ap-popup {
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	font-size: 13px;
 	color: rgb(0, 0, 0);
 	background-color: rgb(224, 224, 224);
@@ -388,7 +388,7 @@ video::-webkit-media-controls { /* hide media controls by default */
 }
 
 .ap-prez-container[data-mode='3'] .ap-popup {
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	font-size: 13px;
 	color: rgb(0, 0, 0);
 	background-color: rgb(224, 224, 224);
@@ -396,7 +396,7 @@ video::-webkit-media-controls { /* hide media controls by default */
 }
 
 .ap-prez-container[data-mode='4'] .ap-popup {
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	font-size: 13px;
 	color: rgb(0, 0, 0);
 	background-color: rgb(224, 224, 224);
@@ -541,7 +541,7 @@ video::-webkit-media-controls { /* hide media controls by default */
 
 .ap-prez-container[data-mode='1'] .ap-resources-container {
 	font-size: 13px;
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	background-color: rgb(224, 224, 224);
 	color: rgb(0, 0, 0);
 	border-color: rgb(179, 179, 179);
@@ -549,7 +549,7 @@ video::-webkit-media-controls { /* hide media controls by default */
 
 .ap-prez-container[data-mode='2'] .ap-resources-container {
 	font-size: 13px;
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	background-color: rgb(224, 224, 224);
 	color: rgb(0, 0, 0);
 	border-color: rgb(179, 179, 179);
@@ -557,7 +557,7 @@ video::-webkit-media-controls { /* hide media controls by default */
 
 .ap-prez-container[data-mode='3'] .ap-resources-container {
 	font-size: 13px;
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	background-color: rgb(224, 224, 224);
 	color: rgb(0, 0, 0);
 	border-color: rgb(179, 179, 179);
@@ -565,7 +565,7 @@ video::-webkit-media-controls { /* hide media controls by default */
 
 .ap-prez-container[data-mode='4'] .ap-resources-container {
 	font-size: 13px;
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	background-color: rgb(224, 224, 224);
 	color: rgb(0, 0, 0);
 	border-color: rgb(179, 179, 179);
@@ -653,7 +653,7 @@ video::-webkit-media-controls { /* hide media controls by default */
 
 .ap-prez-container[data-mode='1'] .ap-toc-container {
 	font-size: 13px;
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	background-color: rgb(230, 230, 230);
 	color: rgb(0, 0, 0);
 	border-color: rgb(179, 179, 179);
@@ -661,7 +661,7 @@ video::-webkit-media-controls { /* hide media controls by default */
 
 .ap-prez-container[data-mode='2'] .ap-toc-container {
 	font-size: 13px;
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	background-color: rgb(230, 230, 230);
 	color: rgb(0, 0, 0);
 	border-color: rgb(179, 179, 179);
@@ -669,7 +669,7 @@ video::-webkit-media-controls { /* hide media controls by default */
 
 .ap-prez-container[data-mode='3'] .ap-toc-container {
 	font-size: 13px;
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	background-color: rgb(230, 230, 230);
 	color: rgb(0, 0, 0);
 	border-color: rgb(179, 179, 179);
@@ -677,7 +677,7 @@ video::-webkit-media-controls { /* hide media controls by default */
 
 .ap-prez-container[data-mode='4'] .ap-toc-container {
 	font-size: 13px;
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	background-color: rgb(230, 230, 230);
 	color: rgb(0, 0, 0);
 	border-color: rgb(179, 179, 179);
@@ -1427,7 +1427,7 @@ video::-webkit-media-controls { /* hide media controls by default */
 .ap-prez-container[data-mode='1'] .ap-toolbar,
 .ap-prez-container[data-mode='1'] .ap-slider-tooltip {
 	font-size: 13px;
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	color: rgb(0, 0, 0);
 	background-color: rgb(224, 224, 224);
 	border-color: rgb(179, 179, 179);
@@ -1436,7 +1436,7 @@ video::-webkit-media-controls { /* hide media controls by default */
 .ap-prez-container[data-mode='2'] .ap-toolbar,
 .ap-prez-container[data-mode='2'] .ap-slider-tooltip {
 	font-size: 13px;
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	color: rgb(0, 0, 0);
 	background-color: rgb(224, 224, 224);
 	border-color: rgb(179, 179, 179);
@@ -1445,7 +1445,7 @@ video::-webkit-media-controls { /* hide media controls by default */
 .ap-prez-container[data-mode='3'] .ap-toolbar,
 .ap-prez-container[data-mode='3'] .ap-slider-tooltip {
 	font-size: 13px;
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	color: rgb(0, 0, 0);
 	background-color: rgb(224, 224, 224);
 	border-color: rgb(179, 179, 179);
@@ -1454,7 +1454,7 @@ video::-webkit-media-controls { /* hide media controls by default */
 .ap-prez-container[data-mode='4'] .ap-toolbar,
 .ap-prez-container[data-mode='4'] .ap-slider-tooltip {
 	font-size: 13px;
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	color: rgb(0, 0, 0);
 	background-color: rgb(224, 224, 224);
 	border-color: rgb(179, 179, 179);
@@ -1501,7 +1501,7 @@ video::-webkit-media-controls { /* hide media controls by default */
 }
 
 .ap-prez-container[data-mode='1'] .ap-menu {
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	font-size: 13px;
 	color: rgb(0, 0, 0);
 	background-color: rgb(224, 224, 224);
@@ -1509,7 +1509,7 @@ video::-webkit-media-controls { /* hide media controls by default */
 }
 
 .ap-prez-container[data-mode='2'] .ap-menu {
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	font-size: 13px;
 	color: rgb(0, 0, 0);
 	background-color: rgb(224, 224, 224);
@@ -1517,7 +1517,7 @@ video::-webkit-media-controls { /* hide media controls by default */
 }
 
 .ap-prez-container[data-mode='3'] .ap-menu {
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	font-size: 13px;
 	color: rgb(0, 0, 0);
 	background-color: rgb(224, 224, 224);
@@ -1525,7 +1525,7 @@ video::-webkit-media-controls { /* hide media controls by default */
 }
 
 .ap-prez-container[data-mode='4'] .ap-menu {
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	font-size: 13px;
 	color: rgb(0, 0, 0);
 	background-color: rgb(224, 224, 224);
@@ -2164,19 +2164,19 @@ video::-webkit-media-controls { /* hide media controls by default */
 }
 
 .ap-prez-container[data-mode='1'] .ap-media-menu-item {
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	font-size: 13px;
 }
 .ap-prez-container[data-mode='2'] .ap-media-menu-item {
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	font-size: 13px;
 }
 .ap-prez-container[data-mode='3'] .ap-media-menu-item {
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	font-size: 13px;
 }
 .ap-prez-container[data-mode='4'] .ap-media-menu-item {
-	font-family: Source Sans Pro Semibold;
+	font-family: Andika;
 	font-size: 13px;
 }
 

@@ -46,25 +46,11 @@
          url('resources/font_3.woff');
 }
 @font-face{
-    font-family: 'Source Sans Pro Semibold';
-    font-style: normal;
-    font-weight: 600;
-    src: local('Source Sans Pro Semibold'),
-         url('resources/font_4.woff');
-}
-@font-face{
-    font-family: 'Source Sans Pro Semibold';
-    font-style: italic;
-    font-weight: 600;
-    src: local('Source Sans Pro Semibold Italic'),
-         url('resources/font_5.woff');
-}
-@font-face{
     font-family: 'Times New Roman';
     font-style: normal;
     font-weight: 400;
     src: local('Times New Roman'),
-         url('resources/font_6.woff');
+         url('resources/font_4.woff');
 }
 
 
