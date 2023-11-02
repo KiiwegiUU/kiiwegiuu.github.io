@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Audio Slider</title>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <input type="range" id="slide" min="0" max="1" step=".02" value="0" disabled>
+<script>
+const slider = document.getElementById('slide');
+const ctx = new AudioContext();
+
+fetch("https://kiiwegiuu.github.io/media/l_iri.ogg")
+  .then( resp => resp.arrayBuffer() )
+  .then( buf => ctx.decodeAudioData(buf) )
+  .then( prepareUI )
+  .catch( console.error );
+  
+function prepareUI( audioBuf ) {
+  let source;
+  slider.oninput = e => {
+    if( source ) { source.stop(0); }
+    source = ctx.createBufferSource();
+    source.buffer = audioBuf;
+    source.connect(ctx.destination);
+    const offset = slider.value * audioBuf.duration;
+    const duration = 0.1;
+    source.start(0, offset, duration);
+  };
+  slider.disabled = false;
+}
+
+  </script>
+</body>
+</html>
+
