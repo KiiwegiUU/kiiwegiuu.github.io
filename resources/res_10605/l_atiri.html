@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Audio Slider</title>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <input type="range" id="slide" min="0" max="1" step=".02" value=".5">
+<script>
+const slider = document.getElementById('slide');
+const ctx = new AudioContext();
+
+fetch("https://kiiwegiuu.github.io/media/l_atiri.ogg")
+  .then( resp => resp.arrayBuffer() )
+  .then( buf => ctx.decodeAudioData(buf) )
+  .then( prepareUI )
+  .catch( console.error );
+  
+function prepareUI( audioBuf ) {
+  let source;
+  
+  // Add touch events
+  if (isMobileDevice()) {
+    slider.addEventListener('touchmove', function(e) {
+      if( source ) { source.stop(0); }
+      source = ctx.createBufferSource();
+      source.buffer = audioBuf;
+      source.connect(ctx.destination);
+      const offset = slider.value * audioBuf.duration;
+      const duration = 0.1;
+      source.source(0, offset, duration);
+      source.start();
+    });
+    
+  } else {
+    slider.oninput = e => {
+      if( source ) { source.stop(0); }
+      source = ctx.createBufferSource();
+      source.buffer = audioBuf;
+      source.connect(ctx.destination);
+      const offset = slider.value * audioBuf.duration;
+      const duration = 0.1;
+      source.start(0, offset, duration);
+    };
+  } 
+  slider.disabled = false;
+}
+
+function isMobileDevice() {
+  return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+}
+
+</script>
+</body>
+</html>
+

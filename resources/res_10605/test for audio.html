@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        #slider {
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <input type="range" min="0" max="1" value=".5" step="0.02" id="slider" autoplay>
+    <audio id="audio" src="https://kiiwegiuu.github.io/media/l_te.ogg"></audio>
+
+    <script>
+        var slider = document.getElementById('slider');
+        var audio = document.getElementById('audio');
+        a
+
+        slider.addEventListener('input', function() {
+            audio.currentTime = audio.duration * slider.value;
+            audio.play();
+            setTimeout(function() {
+                audio.pause();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
+
