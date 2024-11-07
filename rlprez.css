@@ -39,18 +39,25 @@
          url('resources/font_2.woff');
 }
 @font-face{
+    font-family: 'Arial';
+    font-style: normal;
+    font-weight: 700;
+    src: local('Arial Bold'),
+         url('resources/font_3.woff');
+}
+@font-face{
     font-family: 'Calibri';
     font-style: normal;
     font-weight: 400;
     src: local('Calibri'),
-         url('resources/font_3.woff');
+         url('resources/font_4.woff');
 }
 @font-face{
     font-family: 'Calibri';
     font-style: normal;
     font-weight: 700;
     src: local('Calibri Bold'),
-         url('resources/font_4.woff');
+         url('resources/font_5.woff');
 }
 
 
