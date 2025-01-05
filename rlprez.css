@@ -32,35 +32,80 @@
          url('resources/font_1.woff');
 }
 @font-face{
+    font-family: 'Andika New Basic';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Andika New Basic'),
+         url('resources/font_2.woff');
+}
+@font-face{
+    font-family: 'Andika New Basic';
+    font-style: normal;
+    font-weight: 700;
+    src: local('Andika New Basic Bold'),
+         url('resources/font_3.woff');
+}
+@font-face{
     font-family: 'Arial';
     font-style: normal;
     font-weight: 400;
     src: local('Arial'),
-         url('resources/font_2.woff');
+         url('resources/font_4.woff');
 }
 @font-face{
     font-family: 'Arial';
     font-style: normal;
     font-weight: 700;
     src: local('Arial Bold'),
-         url('resources/font_3.woff');
+         url('resources/font_5.woff');
 }
 @font-face{
     font-family: 'Calibri';
     font-style: normal;
     font-weight: 400;
     src: local('Calibri'),
-         url('resources/font_4.woff');
+         url('resources/font_6.woff');
 }
 @font-face{
     font-family: 'Calibri';
     font-style: normal;
     font-weight: 700;
     src: local('Calibri Bold'),
-         url('resources/font_5.woff');
+         url('resources/font_7.woff');
 }
 
 
+.ap-correct-values-dropbtn:hover {
+  background-color: #ddd;
+}
+.ap-correct-values-dropdown {
+  position: relative;
+  display: inline-block;
+}
+.ap-correct-values-dropdown-content {
+  display: none;
+  position: absolute;
+  color: black;
+  background-color: #f1f1f1;
+  min-width: 100px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+.ap-correct-values-dropdown-content li
+{
+  color: black;
+  padding: 4px 4px;
+  cursor: auto;
+}
+.ap-correct-values-dropdown-content li:hover {
+  background-color: #ddd;
+}
+.ap-correct-values-dropdown:hover .ap-correct-values-dropdown-content {
+  min-width: 100px;
+}
+.ap-correct-values-dropdown:hover{
+  background-color: #ddd;
+}
 
 
 /* Hotspot animation */
