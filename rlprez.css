@@ -1,7 +1,7 @@
 /*!
  * Copyright (c) Atomi Systems, Inc. All rights reserved.
- * Version: 9.1.5
- * Date: 2024.06.12
+ * Version: 9.2.0
+ * Date: 2025.01.22
  */
 #lqMz5QfJ .ap-focused {
 	outline: 1px dashed black;
@@ -32,46 +32,39 @@
          url('resources/font_1.woff');
 }
 @font-face{
-    font-family: 'Andika New Basic';
-    font-style: normal;
-    font-weight: 400;
-    src: local('Andika New Basic'),
-         url('resources/font_2.woff');
-}
-@font-face{
-    font-family: 'Andika New Basic';
-    font-style: normal;
-    font-weight: 700;
-    src: local('Andika New Basic Bold'),
-         url('resources/font_3.woff');
-}
-@font-face{
     font-family: 'Arial';
     font-style: normal;
     font-weight: 400;
     src: local('Arial'),
-         url('resources/font_4.woff');
+         url('resources/font_2.woff');
 }
 @font-face{
     font-family: 'Arial';
     font-style: normal;
     font-weight: 700;
     src: local('Arial Bold'),
-         url('resources/font_5.woff');
+         url('resources/font_3.woff');
 }
 @font-face{
     font-family: 'Calibri';
     font-style: normal;
     font-weight: 400;
     src: local('Calibri'),
-         url('resources/font_6.woff');
+         url('resources/font_4.woff');
 }
 @font-face{
     font-family: 'Calibri';
     font-style: normal;
     font-weight: 700;
     src: local('Calibri Bold'),
-         url('resources/font_7.woff');
+         url('resources/font_5.woff');
+}
+@font-face{
+    font-family: 'Webdings';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Webdings'),
+         url('resources/font_6.woff');
 }
 
 
