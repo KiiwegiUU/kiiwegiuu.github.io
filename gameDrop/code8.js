@@ -208,6 +208,14 @@ gdjs.levelFinishedScreenCode.GDLevelSixheaderTimerObjects5= [];
 gdjs.levelFinishedScreenCode.GDLevelSixheaderTimerObjects6= [];
 gdjs.levelFinishedScreenCode.GDLevelSixheaderTimerObjects7= [];
 gdjs.levelFinishedScreenCode.GDLevelSixheaderTimerObjects8= [];
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects1= [];
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects2= [];
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects3= [];
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects4= [];
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects5= [];
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects6= [];
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects7= [];
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects8= [];
 
 
 gdjs.levelFinishedScreenCode.asyncCallback14374532 = function (runtimeScene, asyncObjectsList) {
@@ -804,6 +812,14 @@ gdjs.levelFinishedScreenCode.GDLevelSixheaderTimerObjects5.length = 0;
 gdjs.levelFinishedScreenCode.GDLevelSixheaderTimerObjects6.length = 0;
 gdjs.levelFinishedScreenCode.GDLevelSixheaderTimerObjects7.length = 0;
 gdjs.levelFinishedScreenCode.GDLevelSixheaderTimerObjects8.length = 0;
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects1.length = 0;
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects2.length = 0;
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects3.length = 0;
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects4.length = 0;
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects5.length = 0;
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects6.length = 0;
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects7.length = 0;
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects8.length = 0;
 
 gdjs.levelFinishedScreenCode.eventsList10(runtimeScene);
 gdjs.levelFinishedScreenCode.GDstar4Objects1.length = 0;
@@ -1014,6 +1030,14 @@ gdjs.levelFinishedScreenCode.GDLevelSixheaderTimerObjects5.length = 0;
 gdjs.levelFinishedScreenCode.GDLevelSixheaderTimerObjects6.length = 0;
 gdjs.levelFinishedScreenCode.GDLevelSixheaderTimerObjects7.length = 0;
 gdjs.levelFinishedScreenCode.GDLevelSixheaderTimerObjects8.length = 0;
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects1.length = 0;
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects2.length = 0;
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects3.length = 0;
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects4.length = 0;
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects5.length = 0;
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects6.length = 0;
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects7.length = 0;
+gdjs.levelFinishedScreenCode.GDquestionMarkObjects8.length = 0;
 
 
 return;

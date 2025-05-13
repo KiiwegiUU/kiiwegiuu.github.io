@@ -135,6 +135,9 @@ gdjs.levelMenuScreenCode.GDLevelSixTimeObjects3= [];
 gdjs.levelMenuScreenCode.GDLevelSixheaderTimerObjects1= [];
 gdjs.levelMenuScreenCode.GDLevelSixheaderTimerObjects2= [];
 gdjs.levelMenuScreenCode.GDLevelSixheaderTimerObjects3= [];
+gdjs.levelMenuScreenCode.GDquestionMarkObjects1= [];
+gdjs.levelMenuScreenCode.GDquestionMarkObjects2= [];
+gdjs.levelMenuScreenCode.GDquestionMarkObjects3= [];
 
 
 gdjs.levelMenuScreenCode.eventsList0 = function(runtimeScene) {
@@ -822,7 +825,8 @@ if (isConditionTrue_0) {
 }
 
 
-};gdjs.levelMenuScreenCode.eventsList14 = function(runtimeScene) {
+};gdjs.levelMenuScreenCode.mapOfGDgdjs_9546levelMenuScreenCode_9546GDquestionMarkObjects1Objects = Hashtable.newFrom({"questionMark": gdjs.levelMenuScreenCode.GDquestionMarkObjects1});
+gdjs.levelMenuScreenCode.eventsList14 = function(runtimeScene) {
 
 {
 
@@ -989,6 +993,35 @@ gdjs.levelMenuScreenCode.eventsList13(runtimeScene);
 }
 
 
+{
+
+gdjs.copyArray(runtimeScene.getObjects("questionMark"), gdjs.levelMenuScreenCode.GDquestionMarkObjects1);
+
+let isConditionTrue_0 = false;
+isConditionTrue_0 = false;
+isConditionTrue_0 = gdjs.evtTools.input.isMouseButtonReleased(runtimeScene, "Left");
+if (isConditionTrue_0) {
+isConditionTrue_0 = false;
+isConditionTrue_0 = gdjs.evtTools.input.cursorOnObject(gdjs.levelMenuScreenCode.mapOfGDgdjs_9546levelMenuScreenCode_9546GDquestionMarkObjects1Objects, runtimeScene, true, false);
+}
+if (isConditionTrue_0) {
+{gdjs.evtTools.runtimeScene.replaceScene(runtimeScene, "gameIntro", false);
+}{runtimeScene.getGame().getVariables().getFromIndex(40).setBoolean(true);
+}}
+
+}
+
+
+{
+
+
+let isConditionTrue_0 = false;
+{
+}
+
+}
+
+
 };
 
 gdjs.levelMenuScreenCode.func = function(runtimeScene) {
@@ -1129,6 +1162,9 @@ gdjs.levelMenuScreenCode.GDLevelSixTimeObjects3.length = 0;
 gdjs.levelMenuScreenCode.GDLevelSixheaderTimerObjects1.length = 0;
 gdjs.levelMenuScreenCode.GDLevelSixheaderTimerObjects2.length = 0;
 gdjs.levelMenuScreenCode.GDLevelSixheaderTimerObjects3.length = 0;
+gdjs.levelMenuScreenCode.GDquestionMarkObjects1.length = 0;
+gdjs.levelMenuScreenCode.GDquestionMarkObjects2.length = 0;
+gdjs.levelMenuScreenCode.GDquestionMarkObjects3.length = 0;
 
 gdjs.levelMenuScreenCode.eventsList14(runtimeScene);
 gdjs.levelMenuScreenCode.GDlevelSixMenuBoxObjects1.length = 0;
@@ -1266,6 +1302,9 @@ gdjs.levelMenuScreenCode.GDLevelSixTimeObjects3.length = 0;
 gdjs.levelMenuScreenCode.GDLevelSixheaderTimerObjects1.length = 0;
 gdjs.levelMenuScreenCode.GDLevelSixheaderTimerObjects2.length = 0;
 gdjs.levelMenuScreenCode.GDLevelSixheaderTimerObjects3.length = 0;
+gdjs.levelMenuScreenCode.GDquestionMarkObjects1.length = 0;
+gdjs.levelMenuScreenCode.GDquestionMarkObjects2.length = 0;
+gdjs.levelMenuScreenCode.GDquestionMarkObjects3.length = 0;
 
 
 return;

@@ -65,6 +65,9 @@ gdjs.levelOneCode.GDLevelSixTimeObjects3= [];
 gdjs.levelOneCode.GDLevelSixheaderTimerObjects1= [];
 gdjs.levelOneCode.GDLevelSixheaderTimerObjects2= [];
 gdjs.levelOneCode.GDLevelSixheaderTimerObjects3= [];
+gdjs.levelOneCode.GDquestionMarkObjects1= [];
+gdjs.levelOneCode.GDquestionMarkObjects2= [];
+gdjs.levelOneCode.GDquestionMarkObjects3= [];
 
 
 gdjs.levelOneCode.eventsList0 = function(runtimeScene) {
@@ -1286,6 +1289,9 @@ gdjs.levelOneCode.GDLevelSixTimeObjects3.length = 0;
 gdjs.levelOneCode.GDLevelSixheaderTimerObjects1.length = 0;
 gdjs.levelOneCode.GDLevelSixheaderTimerObjects2.length = 0;
 gdjs.levelOneCode.GDLevelSixheaderTimerObjects3.length = 0;
+gdjs.levelOneCode.GDquestionMarkObjects1.length = 0;
+gdjs.levelOneCode.GDquestionMarkObjects2.length = 0;
+gdjs.levelOneCode.GDquestionMarkObjects3.length = 0;
 
 gdjs.levelOneCode.eventsList17(runtimeScene);
 gdjs.levelOneCode.GDNewTextObjects1.length = 0;
@@ -1351,6 +1357,9 @@ gdjs.levelOneCode.GDLevelSixTimeObjects3.length = 0;
 gdjs.levelOneCode.GDLevelSixheaderTimerObjects1.length = 0;
 gdjs.levelOneCode.GDLevelSixheaderTimerObjects2.length = 0;
 gdjs.levelOneCode.GDLevelSixheaderTimerObjects3.length = 0;
+gdjs.levelOneCode.GDquestionMarkObjects1.length = 0;
+gdjs.levelOneCode.GDquestionMarkObjects2.length = 0;
+gdjs.levelOneCode.GDquestionMarkObjects3.length = 0;
 
 
 return;

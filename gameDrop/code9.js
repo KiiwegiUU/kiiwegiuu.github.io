@@ -50,6 +50,8 @@ gdjs.levelFailedScreenCode.GDLevelSixTimeObjects1= [];
 gdjs.levelFailedScreenCode.GDLevelSixTimeObjects2= [];
 gdjs.levelFailedScreenCode.GDLevelSixheaderTimerObjects1= [];
 gdjs.levelFailedScreenCode.GDLevelSixheaderTimerObjects2= [];
+gdjs.levelFailedScreenCode.GDquestionMarkObjects1= [];
+gdjs.levelFailedScreenCode.GDquestionMarkObjects2= [];
 
 
 gdjs.levelFailedScreenCode.mapOfGDgdjs_9546levelFailedScreenCode_9546GDreplayButtonObjects1Objects = Hashtable.newFrom({"replayButton": gdjs.levelFailedScreenCode.GDreplayButtonObjects1});
@@ -169,6 +171,8 @@ gdjs.levelFailedScreenCode.GDLevelSixTimeObjects1.length = 0;
 gdjs.levelFailedScreenCode.GDLevelSixTimeObjects2.length = 0;
 gdjs.levelFailedScreenCode.GDLevelSixheaderTimerObjects1.length = 0;
 gdjs.levelFailedScreenCode.GDLevelSixheaderTimerObjects2.length = 0;
+gdjs.levelFailedScreenCode.GDquestionMarkObjects1.length = 0;
+gdjs.levelFailedScreenCode.GDquestionMarkObjects2.length = 0;
 
 gdjs.levelFailedScreenCode.eventsList0(runtimeScene);
 gdjs.levelFailedScreenCode.GDstar4Objects1.length = 0;
@@ -221,6 +225,8 @@ gdjs.levelFailedScreenCode.GDLevelSixTimeObjects1.length = 0;
 gdjs.levelFailedScreenCode.GDLevelSixTimeObjects2.length = 0;
 gdjs.levelFailedScreenCode.GDLevelSixheaderTimerObjects1.length = 0;
 gdjs.levelFailedScreenCode.GDLevelSixheaderTimerObjects2.length = 0;
+gdjs.levelFailedScreenCode.GDquestionMarkObjects1.length = 0;
+gdjs.levelFailedScreenCode.GDquestionMarkObjects2.length = 0;
 
 
 return;

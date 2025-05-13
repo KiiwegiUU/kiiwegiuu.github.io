@@ -65,6 +65,9 @@ gdjs.levelSixCode.GDLevelSixTimeObjects3= [];
 gdjs.levelSixCode.GDLevelSixheaderTimerObjects1= [];
 gdjs.levelSixCode.GDLevelSixheaderTimerObjects2= [];
 gdjs.levelSixCode.GDLevelSixheaderTimerObjects3= [];
+gdjs.levelSixCode.GDquestionMarkObjects1= [];
+gdjs.levelSixCode.GDquestionMarkObjects2= [];
+gdjs.levelSixCode.GDquestionMarkObjects3= [];
 
 
 gdjs.levelSixCode.eventsList0 = function(runtimeScene) {
@@ -292,7 +295,7 @@ if (isConditionTrue_0) {
 
 };gdjs.levelSixCode.mapOfGDgdjs_9546levelSixCode_9546GDgameTileObjects2Objects = Hashtable.newFrom({"gameTile": gdjs.levelSixCode.GDgameTileObjects2});
 gdjs.levelSixCode.mapOfGDgdjs_9546levelSixCode_9546GDgameTileObjects3Objects = Hashtable.newFrom({"gameTile": gdjs.levelSixCode.GDgameTileObjects3});
-gdjs.levelSixCode.asyncCallback14309900 = function (runtimeScene, asyncObjectsList) {
+gdjs.levelSixCode.asyncCallback11415908 = function (runtimeScene, asyncObjectsList) {
 asyncObjectsList.restoreLocalVariablesContainers(gdjs.levelSixCode.localVariables);
 gdjs.copyArray(runtimeScene.getObjects("correctWordText"), gdjs.levelSixCode.GDcorrectWordTextObjects3);
 gdjs.copyArray(asyncObjectsList.getObjects("gameTile"), gdjs.levelSixCode.GDgameTileObjects3);
@@ -326,7 +329,7 @@ gdjs.levelSixCode.eventsList5 = function(runtimeScene) {
 const asyncObjectsList = new gdjs.LongLivedObjectsList();
 asyncObjectsList.backupLocalVariablesContainers(gdjs.levelSixCode.localVariables);
 for (const obj of gdjs.levelSixCode.GDgameTileObjects2) asyncObjectsList.addObject("gameTile", obj);
-runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelSixCode.asyncCallback14309900(runtimeScene, asyncObjectsList)));
+runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelSixCode.asyncCallback11415908(runtimeScene, asyncObjectsList)));
 }
 }
 
@@ -337,7 +340,7 @@ runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4)
 gdjs.levelSixCode.mapOfGDgdjs_9546levelSixCode_9546GDfooterObjects2Objects = Hashtable.newFrom({"footer": gdjs.levelSixCode.GDfooterObjects2});
 gdjs.levelSixCode.mapOfGDgdjs_9546levelSixCode_9546GDsplatObjects2Objects = Hashtable.newFrom({"splat": gdjs.levelSixCode.GDsplatObjects2});
 gdjs.levelSixCode.mapOfGDgdjs_9546levelSixCode_9546GDgameTileObjects3Objects = Hashtable.newFrom({"gameTile": gdjs.levelSixCode.GDgameTileObjects3});
-gdjs.levelSixCode.asyncCallback14316228 = function (runtimeScene, asyncObjectsList) {
+gdjs.levelSixCode.asyncCallback9347100 = function (runtimeScene, asyncObjectsList) {
 asyncObjectsList.restoreLocalVariablesContainers(gdjs.levelSixCode.localVariables);
 gdjs.copyArray(runtimeScene.getObjects("correctWordText"), gdjs.levelSixCode.GDcorrectWordTextObjects3);
 gdjs.copyArray(asyncObjectsList.getObjects("splat"), gdjs.levelSixCode.GDsplatObjects3);
@@ -375,7 +378,7 @@ const asyncObjectsList = new gdjs.LongLivedObjectsList();
 asyncObjectsList.backupLocalVariablesContainers(gdjs.levelSixCode.localVariables);
 for (const obj of gdjs.levelSixCode.GDgameTileObjects2) asyncObjectsList.addObject("gameTile", obj);
 for (const obj of gdjs.levelSixCode.GDsplatObjects2) asyncObjectsList.addObject("splat", obj);
-runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelSixCode.asyncCallback14316228(runtimeScene, asyncObjectsList)));
+runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelSixCode.asyncCallback9347100(runtimeScene, asyncObjectsList)));
 }
 }
 
@@ -385,7 +388,7 @@ runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4)
 };gdjs.levelSixCode.mapOfGDgdjs_9546levelSixCode_9546GDgameTileObjects2Objects = Hashtable.newFrom({"gameTile": gdjs.levelSixCode.GDgameTileObjects2});
 gdjs.levelSixCode.mapOfGDgdjs_9546levelSixCode_9546GDfooterObjects2Objects = Hashtable.newFrom({"footer": gdjs.levelSixCode.GDfooterObjects2});
 gdjs.levelSixCode.mapOfGDgdjs_9546levelSixCode_9546GDsplatObjects2Objects = Hashtable.newFrom({"splat": gdjs.levelSixCode.GDsplatObjects2});
-gdjs.levelSixCode.asyncCallback14321196 = function (runtimeScene, asyncObjectsList) {
+gdjs.levelSixCode.asyncCallback14299212 = function (runtimeScene, asyncObjectsList) {
 asyncObjectsList.restoreLocalVariablesContainers(gdjs.levelSixCode.localVariables);
 gdjs.copyArray(asyncObjectsList.getObjects("splat"), gdjs.levelSixCode.GDsplatObjects3);
 
@@ -405,7 +408,7 @@ gdjs.levelSixCode.eventsList7 = function(runtimeScene) {
 const asyncObjectsList = new gdjs.LongLivedObjectsList();
 asyncObjectsList.backupLocalVariablesContainers(gdjs.levelSixCode.localVariables);
 for (const obj of gdjs.levelSixCode.GDsplatObjects2) asyncObjectsList.addObject("splat", obj);
-runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelSixCode.asyncCallback14321196(runtimeScene, asyncObjectsList)));
+runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelSixCode.asyncCallback14299212(runtimeScene, asyncObjectsList)));
 }
 }
 
@@ -415,7 +418,7 @@ runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4)
 };gdjs.levelSixCode.mapOfGDgdjs_9546levelSixCode_9546GDgameTileObjects1Objects = Hashtable.newFrom({"gameTile": gdjs.levelSixCode.GDgameTileObjects1});
 gdjs.levelSixCode.mapOfGDgdjs_9546levelSixCode_9546GDfooterObjects1Objects = Hashtable.newFrom({"footer": gdjs.levelSixCode.GDfooterObjects1});
 gdjs.levelSixCode.mapOfGDgdjs_9546levelSixCode_9546GDsplatObjects1Objects = Hashtable.newFrom({"splat": gdjs.levelSixCode.GDsplatObjects1});
-gdjs.levelSixCode.asyncCallback14324716 = function (runtimeScene, asyncObjectsList) {
+gdjs.levelSixCode.asyncCallback14327788 = function (runtimeScene, asyncObjectsList) {
 asyncObjectsList.restoreLocalVariablesContainers(gdjs.levelSixCode.localVariables);
 gdjs.copyArray(asyncObjectsList.getObjects("splat"), gdjs.levelSixCode.GDsplatObjects2);
 
@@ -435,7 +438,7 @@ gdjs.levelSixCode.eventsList8 = function(runtimeScene) {
 const asyncObjectsList = new gdjs.LongLivedObjectsList();
 asyncObjectsList.backupLocalVariablesContainers(gdjs.levelSixCode.localVariables);
 for (const obj of gdjs.levelSixCode.GDsplatObjects1) asyncObjectsList.addObject("splat", obj);
-runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelSixCode.asyncCallback14324716(runtimeScene, asyncObjectsList)));
+runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelSixCode.asyncCallback14327788(runtimeScene, asyncObjectsList)));
 }
 }
 
@@ -794,7 +797,7 @@ if (isConditionTrue_0) {
 
 };gdjs.levelSixCode.mapOfGDgdjs_9546levelSixCode_9546GDgameTileObjects1Objects = Hashtable.newFrom({"gameTile": gdjs.levelSixCode.GDgameTileObjects1});
 gdjs.levelSixCode.mapOfGDgdjs_9546levelSixCode_9546GDsplatObjects2Objects = Hashtable.newFrom({"splat": gdjs.levelSixCode.GDsplatObjects2});
-gdjs.levelSixCode.asyncCallback14333012 = function (runtimeScene, asyncObjectsList) {
+gdjs.levelSixCode.asyncCallback14300092 = function (runtimeScene, asyncObjectsList) {
 asyncObjectsList.restoreLocalVariablesContainers(gdjs.levelSixCode.localVariables);
 gdjs.copyArray(asyncObjectsList.getObjects("splat"), gdjs.levelSixCode.GDsplatObjects3);
 
@@ -814,14 +817,14 @@ const parentAsyncObjectsList = asyncObjectsList;
 const asyncObjectsList = gdjs.LongLivedObjectsList.from(parentAsyncObjectsList);
 asyncObjectsList.backupLocalVariablesContainers(gdjs.levelSixCode.localVariables);
 for (const obj of gdjs.levelSixCode.GDsplatObjects2) asyncObjectsList.addObject("splat", obj);
-runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelSixCode.asyncCallback14333012(runtimeScene, asyncObjectsList)));
+runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelSixCode.asyncCallback14300092(runtimeScene, asyncObjectsList)));
 }
 }
 
 }
 
 
-};gdjs.levelSixCode.asyncCallback14331876 = function (runtimeScene, asyncObjectsList) {
+};gdjs.levelSixCode.asyncCallback14307940 = function (runtimeScene, asyncObjectsList) {
 asyncObjectsList.restoreLocalVariablesContainers(gdjs.levelSixCode.localVariables);
 gdjs.copyArray(asyncObjectsList.getObjects("gameTile"), gdjs.levelSixCode.GDgameTileObjects2);
 
@@ -849,7 +852,7 @@ gdjs.levelSixCode.eventsList13 = function(runtimeScene) {
 const asyncObjectsList = new gdjs.LongLivedObjectsList();
 asyncObjectsList.backupLocalVariablesContainers(gdjs.levelSixCode.localVariables);
 for (const obj of gdjs.levelSixCode.GDgameTileObjects1) asyncObjectsList.addObject("gameTile", obj);
-runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait((1070 - (( gdjs.levelSixCode.GDgameTileObjects1.length === 0 ) ? 0 :gdjs.levelSixCode.GDgameTileObjects1[0].getPointY(""))) / 2140), (runtimeScene) => (gdjs.levelSixCode.asyncCallback14331876(runtimeScene, asyncObjectsList)));
+runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait((1070 - (( gdjs.levelSixCode.GDgameTileObjects1.length === 0 ) ? 0 :gdjs.levelSixCode.GDgameTileObjects1[0].getPointY(""))) / 2140), (runtimeScene) => (gdjs.levelSixCode.asyncCallback14307940(runtimeScene, asyncObjectsList)));
 }
 }
 
@@ -1159,6 +1162,41 @@ if (isConditionTrue_0) {
 {
 
 
+let isConditionTrue_0 = false;
+isConditionTrue_0 = false;
+isConditionTrue_0 = gdjs.evtTools.runtimeScene.sceneJustBegins(runtimeScene);
+if (isConditionTrue_0) {
+{gdjs.evtTools.sound.playSoundOnChannel(runtimeScene, "g10.ogg", 0, false, 100, 1);
+}{runtimeScene.getScene().getVariables().getFromIndex(3).setNumber(11);
+}}
+
+}
+
+
+{
+
+
+let isConditionTrue_0 = false;
+isConditionTrue_0 = false;
+isConditionTrue_0 = gdjs.evtTools.sound.isSoundOnChannelStopped(runtimeScene, 0);
+if (isConditionTrue_0) {
+isConditionTrue_0 = false;
+{isConditionTrue_0 = (runtimeScene.getScene().getVariables().getFromIndex(3).getAsNumber() == 11);
+}
+}
+if (isConditionTrue_0) {
+{gdjs.evtTools.sound.playSoundOnChannel(runtimeScene, "g11.ogg", 0, false, 100, 1);
+}{runtimeScene.getScene().getVariables().getFromIndex(3).setNumber(12);
+}}
+
+}
+
+
+};gdjs.levelSixCode.eventsList19 = function(runtimeScene) {
+
+{
+
+
 
 }
 
@@ -1271,10 +1309,7 @@ gdjs.levelSixCode.eventsList17(runtimeScene);
 {
 
 
-let isConditionTrue_0 = false;
-{
-}
-
+gdjs.levelSixCode.eventsList18(runtimeScene);
 }
 
 
@@ -1346,8 +1381,11 @@ gdjs.levelSixCode.GDLevelSixTimeObjects3.length = 0;
 gdjs.levelSixCode.GDLevelSixheaderTimerObjects1.length = 0;
 gdjs.levelSixCode.GDLevelSixheaderTimerObjects2.length = 0;
 gdjs.levelSixCode.GDLevelSixheaderTimerObjects3.length = 0;
+gdjs.levelSixCode.GDquestionMarkObjects1.length = 0;
+gdjs.levelSixCode.GDquestionMarkObjects2.length = 0;
+gdjs.levelSixCode.GDquestionMarkObjects3.length = 0;
 
-gdjs.levelSixCode.eventsList18(runtimeScene);
+gdjs.levelSixCode.eventsList19(runtimeScene);
 gdjs.levelSixCode.GDNewTextObjects1.length = 0;
 gdjs.levelSixCode.GDNewTextObjects2.length = 0;
 gdjs.levelSixCode.GDNewTextObjects3.length = 0;
@@ -1411,6 +1449,9 @@ gdjs.levelSixCode.GDLevelSixTimeObjects3.length = 0;
 gdjs.levelSixCode.GDLevelSixheaderTimerObjects1.length = 0;
 gdjs.levelSixCode.GDLevelSixheaderTimerObjects2.length = 0;
 gdjs.levelSixCode.GDLevelSixheaderTimerObjects3.length = 0;
+gdjs.levelSixCode.GDquestionMarkObjects1.length = 0;
+gdjs.levelSixCode.GDquestionMarkObjects2.length = 0;
+gdjs.levelSixCode.GDquestionMarkObjects3.length = 0;
 
 
 return;
