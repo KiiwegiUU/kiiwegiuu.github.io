@@ -604,6 +604,7 @@ isConditionTrue_0 = false;
 }
 if (isConditionTrue_0) {
 {runtimeScene.getGame().getVariables().getFromIndex(22).setNumber(runtimeScene.getGame().getVariables().getFromIndex(32).getAsNumber());
+}{gdjs.evtTools.storage.writeNumberInJSONFile("gameProgress", "levelOneMaxStars", runtimeScene.getGame().getVariables().getFromIndex(22).getAsNumber());
 }}
 
 }
@@ -638,6 +639,7 @@ isConditionTrue_0 = false;
 }
 if (isConditionTrue_0) {
 {runtimeScene.getGame().getVariables().getFromIndex(23).setNumber(runtimeScene.getGame().getVariables().getFromIndex(33).getAsNumber());
+}{gdjs.evtTools.storage.writeNumberInJSONFile("gameProgress", "levelTwoMaxStars", runtimeScene.getGame().getVariables().getFromIndex(23).getAsNumber());
 }}
 
 }
@@ -672,6 +674,7 @@ isConditionTrue_0 = false;
 }
 if (isConditionTrue_0) {
 {runtimeScene.getGame().getVariables().getFromIndex(24).setNumber(runtimeScene.getGame().getVariables().getFromIndex(34).getAsNumber());
+}{gdjs.evtTools.storage.writeNumberInJSONFile("gameProgress", "levelThreeMaxStars", runtimeScene.getGame().getVariables().getFromIndex(24).getAsNumber());
 }}
 
 }
@@ -706,6 +709,7 @@ isConditionTrue_0 = false;
 }
 if (isConditionTrue_0) {
 {runtimeScene.getGame().getVariables().getFromIndex(25).setNumber(runtimeScene.getGame().getVariables().getFromIndex(35).getAsNumber());
+}{gdjs.evtTools.storage.writeNumberInJSONFile("gameProgress", "levelFourMaxStars", runtimeScene.getGame().getVariables().getFromIndex(25).getAsNumber());
 }}
 
 }
@@ -740,6 +744,7 @@ isConditionTrue_0 = false;
 }
 if (isConditionTrue_0) {
 {runtimeScene.getGame().getVariables().getFromIndex(26).setNumber(runtimeScene.getGame().getVariables().getFromIndex(36).getAsNumber());
+}{gdjs.evtTools.storage.writeNumberInJSONFile("gameProgress", "levelFiveMaxStars", runtimeScene.getGame().getVariables().getFromIndex(26).getAsNumber());
 }}
 
 }
@@ -776,6 +781,7 @@ isConditionTrue_0 = false;
 }
 if (isConditionTrue_0) {
 {runtimeScene.getGame().getVariables().getFromIndex(38).setNumber(runtimeScene.getGame().getVariables().getFromIndex(37).getAsNumber());
+}{gdjs.evtTools.storage.writeNumberInJSONFile("gameProgress", "highestLevelSixTimer", runtimeScene.getGame().getVariables().getFromIndex(38).getAsNumber());
 }}
 
 }
@@ -825,8 +831,7 @@ if (isConditionTrue_0) {
 }
 
 
-};gdjs.levelMenuScreenCode.mapOfGDgdjs_9546levelMenuScreenCode_9546GDquestionMarkObjects1Objects = Hashtable.newFrom({"questionMark": gdjs.levelMenuScreenCode.GDquestionMarkObjects1});
-gdjs.levelMenuScreenCode.eventsList14 = function(runtimeScene) {
+};gdjs.levelMenuScreenCode.eventsList14 = function(runtimeScene) {
 
 {
 
@@ -835,6 +840,33 @@ let isConditionTrue_0 = false;
 isConditionTrue_0 = false;
 isConditionTrue_0 = gdjs.evtTools.runtimeScene.sceneJustBegins(runtimeScene);
 if (isConditionTrue_0) {
+{gdjs.evtTools.storage.readNumberFromJSONFile("gameProgress", "levelOnePassed", runtimeScene, runtimeScene.getGame().getVariables().getFromIndex(27));
+}{gdjs.evtTools.storage.readNumberFromJSONFile("gameProgress", "levelTwoPassed", runtimeScene, runtimeScene.getGame().getVariables().getFromIndex(28));
+}{gdjs.evtTools.storage.readNumberFromJSONFile("gameProgress", "levelThreePassed", runtimeScene, runtimeScene.getGame().getVariables().getFromIndex(29));
+}{gdjs.evtTools.storage.readNumberFromJSONFile("gameProgress", "levelFourPassed", runtimeScene, runtimeScene.getGame().getVariables().getFromIndex(30));
+}{gdjs.evtTools.storage.readNumberFromJSONFile("gameProgress", "levelFivePassed", runtimeScene, runtimeScene.getGame().getVariables().getFromIndex(31));
+}{gdjs.evtTools.storage.readNumberFromJSONFile("gameProgress", "highestLevelSixTimer", runtimeScene, runtimeScene.getGame().getVariables().getFromIndex(38));
+}{gdjs.evtTools.storage.readNumberFromJSONFile("gameProgress", "levelOneMaxStars", runtimeScene, runtimeScene.getGame().getVariables().getFromIndex(22));
+}{gdjs.evtTools.storage.readNumberFromJSONFile("gameProgress", "levelTwoMaxStars", runtimeScene, runtimeScene.getGame().getVariables().getFromIndex(23));
+}{gdjs.evtTools.storage.readNumberFromJSONFile("gameProgress", "levelThreeMaxStars", runtimeScene, runtimeScene.getGame().getVariables().getFromIndex(24));
+}{gdjs.evtTools.storage.readNumberFromJSONFile("gameProgress", "levelFourMaxStars", runtimeScene, runtimeScene.getGame().getVariables().getFromIndex(25));
+}{gdjs.evtTools.storage.readNumberFromJSONFile("gameProgress", "levelFiveMaxStars", runtimeScene, runtimeScene.getGame().getVariables().getFromIndex(26));
+}}
+
+}
+
+
+};gdjs.levelMenuScreenCode.mapOfGDgdjs_9546levelMenuScreenCode_9546GDquestionMarkObjects1Objects = Hashtable.newFrom({"questionMark": gdjs.levelMenuScreenCode.GDquestionMarkObjects1});
+gdjs.levelMenuScreenCode.eventsList15 = function(runtimeScene) {
+
+{
+
+
+let isConditionTrue_0 = false;
+isConditionTrue_0 = false;
+isConditionTrue_0 = gdjs.evtTools.runtimeScene.sceneJustBegins(runtimeScene);
+if (isConditionTrue_0) {
+gdjs.copyArray(runtimeScene.getObjects("LevelSixTime"), gdjs.levelMenuScreenCode.GDLevelSixTimeObjects1);
 gdjs.copyArray(runtimeScene.getObjects("Level_1"), gdjs.levelMenuScreenCode.GDLevel_95951Objects1);
 gdjs.copyArray(runtimeScene.getObjects("Level_2"), gdjs.levelMenuScreenCode.GDLevel_95952Objects1);
 gdjs.copyArray(runtimeScene.getObjects("Level_3"), gdjs.levelMenuScreenCode.GDLevel_95953Objects1);
@@ -929,6 +961,9 @@ for(var i = 0, len = gdjs.levelMenuScreenCode.GDLevel_95955Objects1.length ;i < 
 for(var i = 0, len = gdjs.levelMenuScreenCode.GDLevel_95956Objects1.length ;i < len;++i) {
     gdjs.levelMenuScreenCode.GDLevel_95956Objects1[i].getBehavior("Opacity").setOpacity(130);
 }
+for(var i = 0, len = gdjs.levelMenuScreenCode.GDLevelSixTimeObjects1.length ;i < len;++i) {
+    gdjs.levelMenuScreenCode.GDLevelSixTimeObjects1[i].getBehavior("Opacity").setOpacity(130);
+}
 }{for(var i = 0, len = gdjs.levelMenuScreenCode.GDmenuLevelBox1Objects1.length ;i < len;++i) {
     gdjs.levelMenuScreenCode.GDmenuLevelBox1Objects1[i].getBehavior("Opacity").setOpacity(130);
 }
@@ -953,6 +988,7 @@ for(var i = 0, len = gdjs.levelMenuScreenCode.GDmenuLevelBox4Objects1.length ;i 
 }{for(var i = 0, len = gdjs.levelMenuScreenCode.GDmenuLevelBox1Objects1.length ;i < len;++i) {
     gdjs.levelMenuScreenCode.GDmenuLevelBox1Objects1[i].getBehavior("Opacity").setOpacity(255);
 }
+}{runtimeScene.getGame().getVariables().getFromIndex(40).setBoolean(false);
 }}
 
 }
@@ -962,13 +998,6 @@ for(var i = 0, len = gdjs.levelMenuScreenCode.GDmenuLevelBox4Objects1.length ;i 
 
 
 gdjs.levelMenuScreenCode.eventsList0(runtimeScene);
-}
-
-
-{
-
-
-
 }
 
 
@@ -995,6 +1024,13 @@ gdjs.levelMenuScreenCode.eventsList13(runtimeScene);
 
 {
 
+
+gdjs.levelMenuScreenCode.eventsList14(runtimeScene);
+}
+
+
+{
+
 gdjs.copyArray(runtimeScene.getObjects("questionMark"), gdjs.levelMenuScreenCode.GDquestionMarkObjects1);
 
 let isConditionTrue_0 = false;
@@ -1008,16 +1044,6 @@ if (isConditionTrue_0) {
 {gdjs.evtTools.runtimeScene.replaceScene(runtimeScene, "gameIntro", false);
 }{runtimeScene.getGame().getVariables().getFromIndex(40).setBoolean(true);
 }}
-
-}
-
-
-{
-
-
-let isConditionTrue_0 = false;
-{
-}
 
 }
 
@@ -1166,7 +1192,7 @@ gdjs.levelMenuScreenCode.GDquestionMarkObjects1.length = 0;
 gdjs.levelMenuScreenCode.GDquestionMarkObjects2.length = 0;
 gdjs.levelMenuScreenCode.GDquestionMarkObjects3.length = 0;
 
-gdjs.levelMenuScreenCode.eventsList14(runtimeScene);
+gdjs.levelMenuScreenCode.eventsList15(runtimeScene);
 gdjs.levelMenuScreenCode.GDlevelSixMenuBoxObjects1.length = 0;
 gdjs.levelMenuScreenCode.GDlevelSixMenuBoxObjects2.length = 0;
 gdjs.levelMenuScreenCode.GDlevelSixMenuBoxObjects3.length = 0;

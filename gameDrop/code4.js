@@ -300,7 +300,7 @@ if (isConditionTrue_0) {
 
 };gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDgameTileObjects2Objects = Hashtable.newFrom({"gameTile": gdjs.levelThreeCode.GDgameTileObjects2});
 gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDgameTileObjects3Objects = Hashtable.newFrom({"gameTile": gdjs.levelThreeCode.GDgameTileObjects3});
-gdjs.levelThreeCode.asyncCallback11415284 = function (runtimeScene, asyncObjectsList) {
+gdjs.levelThreeCode.asyncCallback14845156 = function (runtimeScene, asyncObjectsList) {
 asyncObjectsList.restoreLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 gdjs.copyArray(runtimeScene.getObjects("correctWordText"), gdjs.levelThreeCode.GDcorrectWordTextObjects3);
 gdjs.copyArray(asyncObjectsList.getObjects("gameTile"), gdjs.levelThreeCode.GDgameTileObjects3);
@@ -334,7 +334,7 @@ gdjs.levelThreeCode.eventsList5 = function(runtimeScene) {
 const asyncObjectsList = new gdjs.LongLivedObjectsList();
 asyncObjectsList.backupLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 for (const obj of gdjs.levelThreeCode.GDgameTileObjects2) asyncObjectsList.addObject("gameTile", obj);
-runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback11415284(runtimeScene, asyncObjectsList)));
+runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback14845156(runtimeScene, asyncObjectsList)));
 }
 }
 
@@ -345,7 +345,7 @@ runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4)
 gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDfooterObjects2Objects = Hashtable.newFrom({"footer": gdjs.levelThreeCode.GDfooterObjects2});
 gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDsplatObjects2Objects = Hashtable.newFrom({"splat": gdjs.levelThreeCode.GDsplatObjects2});
 gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDgameTileObjects3Objects = Hashtable.newFrom({"gameTile": gdjs.levelThreeCode.GDgameTileObjects3});
-gdjs.levelThreeCode.asyncCallback11425460 = function (runtimeScene, asyncObjectsList) {
+gdjs.levelThreeCode.asyncCallback14851276 = function (runtimeScene, asyncObjectsList) {
 asyncObjectsList.restoreLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 gdjs.copyArray(runtimeScene.getObjects("correctWordText"), gdjs.levelThreeCode.GDcorrectWordTextObjects3);
 gdjs.copyArray(asyncObjectsList.getObjects("splat"), gdjs.levelThreeCode.GDsplatObjects3);
@@ -383,7 +383,7 @@ const asyncObjectsList = new gdjs.LongLivedObjectsList();
 asyncObjectsList.backupLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 for (const obj of gdjs.levelThreeCode.GDgameTileObjects2) asyncObjectsList.addObject("gameTile", obj);
 for (const obj of gdjs.levelThreeCode.GDsplatObjects2) asyncObjectsList.addObject("splat", obj);
-runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback11425460(runtimeScene, asyncObjectsList)));
+runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback14851276(runtimeScene, asyncObjectsList)));
 }
 }
 
@@ -393,7 +393,7 @@ runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4)
 };gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDgameTileObjects2Objects = Hashtable.newFrom({"gameTile": gdjs.levelThreeCode.GDgameTileObjects2});
 gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDfooterObjects2Objects = Hashtable.newFrom({"footer": gdjs.levelThreeCode.GDfooterObjects2});
 gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDsplatObjects2Objects = Hashtable.newFrom({"splat": gdjs.levelThreeCode.GDsplatObjects2});
-gdjs.levelThreeCode.asyncCallback11433796 = function (runtimeScene, asyncObjectsList) {
+gdjs.levelThreeCode.asyncCallback14856596 = function (runtimeScene, asyncObjectsList) {
 asyncObjectsList.restoreLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 gdjs.copyArray(asyncObjectsList.getObjects("splat"), gdjs.levelThreeCode.GDsplatObjects3);
 
@@ -413,7 +413,7 @@ gdjs.levelThreeCode.eventsList7 = function(runtimeScene) {
 const asyncObjectsList = new gdjs.LongLivedObjectsList();
 asyncObjectsList.backupLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 for (const obj of gdjs.levelThreeCode.GDsplatObjects2) asyncObjectsList.addObject("splat", obj);
-runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback11433796(runtimeScene, asyncObjectsList)));
+runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback14856596(runtimeScene, asyncObjectsList)));
 }
 }
 
@@ -423,7 +423,7 @@ runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4)
 };gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDgameTileObjects1Objects = Hashtable.newFrom({"gameTile": gdjs.levelThreeCode.GDgameTileObjects1});
 gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDfooterObjects1Objects = Hashtable.newFrom({"footer": gdjs.levelThreeCode.GDfooterObjects1});
 gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDsplatObjects1Objects = Hashtable.newFrom({"splat": gdjs.levelThreeCode.GDsplatObjects1});
-gdjs.levelThreeCode.asyncCallback11482468 = function (runtimeScene, asyncObjectsList) {
+gdjs.levelThreeCode.asyncCallback14859580 = function (runtimeScene, asyncObjectsList) {
 asyncObjectsList.restoreLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 gdjs.copyArray(asyncObjectsList.getObjects("splat"), gdjs.levelThreeCode.GDsplatObjects2);
 
@@ -443,7 +443,7 @@ gdjs.levelThreeCode.eventsList8 = function(runtimeScene) {
 const asyncObjectsList = new gdjs.LongLivedObjectsList();
 asyncObjectsList.backupLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 for (const obj of gdjs.levelThreeCode.GDsplatObjects1) asyncObjectsList.addObject("splat", obj);
-runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback11482468(runtimeScene, asyncObjectsList)));
+runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback14859580(runtimeScene, asyncObjectsList)));
 }
 }
 
@@ -491,7 +491,7 @@ if (isConditionTrue_0) {
 {for(var i = 0, len = gdjs.levelThreeCode.GDgameTileObjects2.length ;i < len;++i) {
     gdjs.levelThreeCode.GDgameTileObjects2[i].returnVariable(gdjs.levelThreeCode.GDgameTileObjects2[i].getVariables().getFromIndex(0)).setBoolean(false);
 }
-}{gdjs.evtTools.sound.playSound(runtimeScene, "correct.ogg", false, 100, 1);
+}{gdjs.evtTools.sound.playSound(runtimeScene, "correct.mp3", false, 100, 1);
 }{for(var i = 0, len = gdjs.levelThreeCode.GDgameTileObjects2.length ;i < len;++i) {
     gdjs.levelThreeCode.GDgameTileObjects2[i].deleteFromScene(runtimeScene);
 }
@@ -559,7 +559,7 @@ gdjs.levelThreeCode.GDsplatObjects2.length = 0;
 }
 }{runtimeScene.getGame().getVariables().getFromIndex(12).setNumber(runtimeScene.getGame().getVariables().getFromIndex(12).getAsNumber() + 1);
 }{runtimeScene.getGame().getVariables().getFromIndex(8).setBoolean(true);
-}{gdjs.evtTools.sound.playSound(runtimeScene, "sandExplosion.ogg", false, 100, 1);
+}{gdjs.evtTools.sound.playSound(runtimeScene, "sandExplosion.mp3", false, 100, 1);
 }{gdjs.evtsExt__CameraShake__ShakeCamera.func(runtimeScene, 0.4, 0.2, 0.2, (typeof eventsFunctionContext !== 'undefined' ? eventsFunctionContext : undefined));
 }{gdjs.evtTools.object.createObjectOnScene((typeof eventsFunctionContext !== 'undefined' ? eventsFunctionContext : runtimeScene), gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDsplatObjects2Objects, (( gdjs.levelThreeCode.GDgameTileObjects2.length === 0 ) ? 0 :gdjs.levelThreeCode.GDgameTileObjects2[0].getPointX("")), (( gdjs.levelThreeCode.GDgameTileObjects2.length === 0 ) ? 0 :gdjs.levelThreeCode.GDgameTileObjects2[0].getPointY("")), "");
 }{for(var i = 0, len = gdjs.levelThreeCode.GDgameTileObjects2.length ;i < len;++i) {
@@ -620,7 +620,7 @@ if (isConditionTrue_0) {
 gdjs.levelThreeCode.GDsplatObjects2.length = 0;
 
 {runtimeScene.getGame().getVariables().getFromIndex(8).setBoolean(true);
-}{gdjs.evtTools.sound.playSound(runtimeScene, "sandExplosion.ogg", false, 100, 1);
+}{gdjs.evtTools.sound.playSound(runtimeScene, "sandExplosion.mp3", false, 100, 1);
 }{gdjs.evtsExt__CameraShake__ShakeCamera.func(runtimeScene, 0.4, 0.2, 0.2, (typeof eventsFunctionContext !== 'undefined' ? eventsFunctionContext : undefined));
 }{gdjs.evtTools.object.createObjectOnScene((typeof eventsFunctionContext !== 'undefined' ? eventsFunctionContext : runtimeScene), gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDsplatObjects2Objects, (( gdjs.levelThreeCode.GDgameTileObjects2.length === 0 ) ? 0 :gdjs.levelThreeCode.GDgameTileObjects2[0].getPointX("")), (( gdjs.levelThreeCode.GDgameTileObjects2.length === 0 ) ? 0 :gdjs.levelThreeCode.GDgameTileObjects2[0].getPointY("")), "");
 }{for(var i = 0, len = gdjs.levelThreeCode.GDgameTileObjects2.length ;i < len;++i) {
@@ -670,7 +670,7 @@ if (isConditionTrue_0) {
 gdjs.levelThreeCode.GDsplatObjects1.length = 0;
 
 {runtimeScene.getGame().getVariables().getFromIndex(8).setBoolean(true);
-}{gdjs.evtTools.sound.playSound(runtimeScene, "sandExplosion.ogg", false, 100, 1);
+}{gdjs.evtTools.sound.playSound(runtimeScene, "sandExplosion.mp3", false, 100, 1);
 }{gdjs.evtsExt__CameraShake__ShakeCamera.func(runtimeScene, 0.4, 0.2, 0.2, (typeof eventsFunctionContext !== 'undefined' ? eventsFunctionContext : undefined));
 }{gdjs.evtTools.object.createObjectOnScene((typeof eventsFunctionContext !== 'undefined' ? eventsFunctionContext : runtimeScene), gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDsplatObjects1Objects, (( gdjs.levelThreeCode.GDgameTileObjects1.length === 0 ) ? 0 :gdjs.levelThreeCode.GDgameTileObjects1[0].getPointX("")), (( gdjs.levelThreeCode.GDgameTileObjects1.length === 0 ) ? 0 :gdjs.levelThreeCode.GDgameTileObjects1[0].getPointY("")), "");
 }{for(var i = 0, len = gdjs.levelThreeCode.GDgameTileObjects1.length ;i < len;++i) {
@@ -727,6 +727,7 @@ if (isConditionTrue_0) {
 {gdjs.evtTools.runtimeScene.replaceScene(runtimeScene, "levelFinishedScreen", false);
 }{runtimeScene.getGame().getVariables().getFromIndex(34).setNumber(runtimeScene.getGame().getVariables().getFromIndex(12).getAsNumber());
 }{runtimeScene.getGame().getVariables().getFromIndex(29).setBoolean(true);
+}{gdjs.evtTools.storage.writeNumberInJSONFile("gameProgress", "levelThreePassed", runtimeScene.getGame().getVariables().getFromIndex(29).getAsNumber());
 }}
 
 }
@@ -810,7 +811,7 @@ if (isConditionTrue_0) {
 
 };gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDgameTileObjects1Objects = Hashtable.newFrom({"gameTile": gdjs.levelThreeCode.GDgameTileObjects1});
 gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDsplatObjects2Objects = Hashtable.newFrom({"splat": gdjs.levelThreeCode.GDsplatObjects2});
-gdjs.levelThreeCode.asyncCallback11119076 = function (runtimeScene, asyncObjectsList) {
+gdjs.levelThreeCode.asyncCallback14869260 = function (runtimeScene, asyncObjectsList) {
 asyncObjectsList.restoreLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 gdjs.copyArray(asyncObjectsList.getObjects("splat"), gdjs.levelThreeCode.GDsplatObjects3);
 
@@ -830,20 +831,20 @@ const parentAsyncObjectsList = asyncObjectsList;
 const asyncObjectsList = gdjs.LongLivedObjectsList.from(parentAsyncObjectsList);
 asyncObjectsList.backupLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 for (const obj of gdjs.levelThreeCode.GDsplatObjects2) asyncObjectsList.addObject("splat", obj);
-runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback11119076(runtimeScene, asyncObjectsList)));
+runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback14869260(runtimeScene, asyncObjectsList)));
 }
 }
 
 }
 
 
-};gdjs.levelThreeCode.asyncCallback11452980 = function (runtimeScene, asyncObjectsList) {
+};gdjs.levelThreeCode.asyncCallback14867996 = function (runtimeScene, asyncObjectsList) {
 asyncObjectsList.restoreLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 gdjs.copyArray(asyncObjectsList.getObjects("gameTile"), gdjs.levelThreeCode.GDgameTileObjects2);
 
 gdjs.levelThreeCode.GDsplatObjects2.length = 0;
 
-{gdjs.evtTools.sound.playSound(runtimeScene, "sandExplosion.ogg", false, 100, 1);
+{gdjs.evtTools.sound.playSound(runtimeScene, "sandExplosion.mp3", false, 100, 1);
 }{gdjs.evtsExt__CameraShake__ShakeCamera.func(runtimeScene, 0.4, 0.2, 0.2, (typeof eventsFunctionContext !== 'undefined' ? eventsFunctionContext : undefined));
 }{gdjs.evtTools.object.createObjectOnScene((typeof eventsFunctionContext !== 'undefined' ? eventsFunctionContext : runtimeScene), gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDsplatObjects2Objects, (( gdjs.levelThreeCode.GDgameTileObjects2.length === 0 ) ? 0 :gdjs.levelThreeCode.GDgameTileObjects2[0].getPointX("")), (( gdjs.levelThreeCode.GDgameTileObjects2.length === 0 ) ? 0 :gdjs.levelThreeCode.GDgameTileObjects2[0].getPointY("")), "");
 }{for(var i = 0, len = gdjs.levelThreeCode.GDgameTileObjects2.length ;i < len;++i) {
@@ -865,7 +866,7 @@ gdjs.levelThreeCode.eventsList13 = function(runtimeScene) {
 const asyncObjectsList = new gdjs.LongLivedObjectsList();
 asyncObjectsList.backupLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 for (const obj of gdjs.levelThreeCode.GDgameTileObjects1) asyncObjectsList.addObject("gameTile", obj);
-runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait((1070 - (( gdjs.levelThreeCode.GDgameTileObjects1.length === 0 ) ? 0 :gdjs.levelThreeCode.GDgameTileObjects1[0].getPointY(""))) / 2140), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback11452980(runtimeScene, asyncObjectsList)));
+runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait((1070 - (( gdjs.levelThreeCode.GDgameTileObjects1.length === 0 ) ? 0 :gdjs.levelThreeCode.GDgameTileObjects1[0].getPointY(""))) / 2140), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback14867996(runtimeScene, asyncObjectsList)));
 }
 }
 
