@@ -300,7 +300,7 @@ if (isConditionTrue_0) {
 
 };gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDgameTileObjects2Objects = Hashtable.newFrom({"gameTile": gdjs.levelThreeCode.GDgameTileObjects2});
 gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDgameTileObjects3Objects = Hashtable.newFrom({"gameTile": gdjs.levelThreeCode.GDgameTileObjects3});
-gdjs.levelThreeCode.asyncCallback14845156 = function (runtimeScene, asyncObjectsList) {
+gdjs.levelThreeCode.asyncCallback14858436 = function (runtimeScene, asyncObjectsList) {
 asyncObjectsList.restoreLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 gdjs.copyArray(runtimeScene.getObjects("correctWordText"), gdjs.levelThreeCode.GDcorrectWordTextObjects3);
 gdjs.copyArray(asyncObjectsList.getObjects("gameTile"), gdjs.levelThreeCode.GDgameTileObjects3);
@@ -334,7 +334,7 @@ gdjs.levelThreeCode.eventsList5 = function(runtimeScene) {
 const asyncObjectsList = new gdjs.LongLivedObjectsList();
 asyncObjectsList.backupLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 for (const obj of gdjs.levelThreeCode.GDgameTileObjects2) asyncObjectsList.addObject("gameTile", obj);
-runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback14845156(runtimeScene, asyncObjectsList)));
+runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback14858436(runtimeScene, asyncObjectsList)));
 }
 }
 
@@ -345,7 +345,7 @@ runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4)
 gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDfooterObjects2Objects = Hashtable.newFrom({"footer": gdjs.levelThreeCode.GDfooterObjects2});
 gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDsplatObjects2Objects = Hashtable.newFrom({"splat": gdjs.levelThreeCode.GDsplatObjects2});
 gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDgameTileObjects3Objects = Hashtable.newFrom({"gameTile": gdjs.levelThreeCode.GDgameTileObjects3});
-gdjs.levelThreeCode.asyncCallback14851276 = function (runtimeScene, asyncObjectsList) {
+gdjs.levelThreeCode.asyncCallback14864556 = function (runtimeScene, asyncObjectsList) {
 asyncObjectsList.restoreLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 gdjs.copyArray(runtimeScene.getObjects("correctWordText"), gdjs.levelThreeCode.GDcorrectWordTextObjects3);
 gdjs.copyArray(asyncObjectsList.getObjects("splat"), gdjs.levelThreeCode.GDsplatObjects3);
@@ -383,7 +383,7 @@ const asyncObjectsList = new gdjs.LongLivedObjectsList();
 asyncObjectsList.backupLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 for (const obj of gdjs.levelThreeCode.GDgameTileObjects2) asyncObjectsList.addObject("gameTile", obj);
 for (const obj of gdjs.levelThreeCode.GDsplatObjects2) asyncObjectsList.addObject("splat", obj);
-runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback14851276(runtimeScene, asyncObjectsList)));
+runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback14864556(runtimeScene, asyncObjectsList)));
 }
 }
 
@@ -393,7 +393,7 @@ runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4)
 };gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDgameTileObjects2Objects = Hashtable.newFrom({"gameTile": gdjs.levelThreeCode.GDgameTileObjects2});
 gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDfooterObjects2Objects = Hashtable.newFrom({"footer": gdjs.levelThreeCode.GDfooterObjects2});
 gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDsplatObjects2Objects = Hashtable.newFrom({"splat": gdjs.levelThreeCode.GDsplatObjects2});
-gdjs.levelThreeCode.asyncCallback14856596 = function (runtimeScene, asyncObjectsList) {
+gdjs.levelThreeCode.asyncCallback14869876 = function (runtimeScene, asyncObjectsList) {
 asyncObjectsList.restoreLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 gdjs.copyArray(asyncObjectsList.getObjects("splat"), gdjs.levelThreeCode.GDsplatObjects3);
 
@@ -413,7 +413,7 @@ gdjs.levelThreeCode.eventsList7 = function(runtimeScene) {
 const asyncObjectsList = new gdjs.LongLivedObjectsList();
 asyncObjectsList.backupLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 for (const obj of gdjs.levelThreeCode.GDsplatObjects2) asyncObjectsList.addObject("splat", obj);
-runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback14856596(runtimeScene, asyncObjectsList)));
+runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback14869876(runtimeScene, asyncObjectsList)));
 }
 }
 
@@ -423,7 +423,7 @@ runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4)
 };gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDgameTileObjects1Objects = Hashtable.newFrom({"gameTile": gdjs.levelThreeCode.GDgameTileObjects1});
 gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDfooterObjects1Objects = Hashtable.newFrom({"footer": gdjs.levelThreeCode.GDfooterObjects1});
 gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDsplatObjects1Objects = Hashtable.newFrom({"splat": gdjs.levelThreeCode.GDsplatObjects1});
-gdjs.levelThreeCode.asyncCallback14859580 = function (runtimeScene, asyncObjectsList) {
+gdjs.levelThreeCode.asyncCallback14872860 = function (runtimeScene, asyncObjectsList) {
 asyncObjectsList.restoreLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 gdjs.copyArray(asyncObjectsList.getObjects("splat"), gdjs.levelThreeCode.GDsplatObjects2);
 
@@ -443,7 +443,7 @@ gdjs.levelThreeCode.eventsList8 = function(runtimeScene) {
 const asyncObjectsList = new gdjs.LongLivedObjectsList();
 asyncObjectsList.backupLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 for (const obj of gdjs.levelThreeCode.GDsplatObjects1) asyncObjectsList.addObject("splat", obj);
-runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback14859580(runtimeScene, asyncObjectsList)));
+runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback14872860(runtimeScene, asyncObjectsList)));
 }
 }
 
@@ -811,7 +811,7 @@ if (isConditionTrue_0) {
 
 };gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDgameTileObjects1Objects = Hashtable.newFrom({"gameTile": gdjs.levelThreeCode.GDgameTileObjects1});
 gdjs.levelThreeCode.mapOfGDgdjs_9546levelThreeCode_9546GDsplatObjects2Objects = Hashtable.newFrom({"splat": gdjs.levelThreeCode.GDsplatObjects2});
-gdjs.levelThreeCode.asyncCallback14869260 = function (runtimeScene, asyncObjectsList) {
+gdjs.levelThreeCode.asyncCallback14882540 = function (runtimeScene, asyncObjectsList) {
 asyncObjectsList.restoreLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 gdjs.copyArray(asyncObjectsList.getObjects("splat"), gdjs.levelThreeCode.GDsplatObjects3);
 
@@ -831,14 +831,14 @@ const parentAsyncObjectsList = asyncObjectsList;
 const asyncObjectsList = gdjs.LongLivedObjectsList.from(parentAsyncObjectsList);
 asyncObjectsList.backupLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 for (const obj of gdjs.levelThreeCode.GDsplatObjects2) asyncObjectsList.addObject("splat", obj);
-runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback14869260(runtimeScene, asyncObjectsList)));
+runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait(0.4), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback14882540(runtimeScene, asyncObjectsList)));
 }
 }
 
 }
 
 
-};gdjs.levelThreeCode.asyncCallback14867996 = function (runtimeScene, asyncObjectsList) {
+};gdjs.levelThreeCode.asyncCallback14881276 = function (runtimeScene, asyncObjectsList) {
 asyncObjectsList.restoreLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 gdjs.copyArray(asyncObjectsList.getObjects("gameTile"), gdjs.levelThreeCode.GDgameTileObjects2);
 
@@ -866,7 +866,7 @@ gdjs.levelThreeCode.eventsList13 = function(runtimeScene) {
 const asyncObjectsList = new gdjs.LongLivedObjectsList();
 asyncObjectsList.backupLocalVariablesContainers(gdjs.levelThreeCode.localVariables);
 for (const obj of gdjs.levelThreeCode.GDgameTileObjects1) asyncObjectsList.addObject("gameTile", obj);
-runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait((1070 - (( gdjs.levelThreeCode.GDgameTileObjects1.length === 0 ) ? 0 :gdjs.levelThreeCode.GDgameTileObjects1[0].getPointY(""))) / 2140), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback14867996(runtimeScene, asyncObjectsList)));
+runtimeScene.getAsyncTasksManager().addTask(gdjs.evtTools.runtimeScene.wait((1070 - (( gdjs.levelThreeCode.GDgameTileObjects1.length === 0 ) ? 0 :gdjs.levelThreeCode.GDgameTileObjects1[0].getPointY(""))) / 2140), (runtimeScene) => (gdjs.levelThreeCode.asyncCallback14881276(runtimeScene, asyncObjectsList)));
 }
 }
 

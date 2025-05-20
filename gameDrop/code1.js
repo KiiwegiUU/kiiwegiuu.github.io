@@ -989,6 +989,7 @@ for(var i = 0, len = gdjs.levelMenuScreenCode.GDmenuLevelBox4Objects1.length ;i 
     gdjs.levelMenuScreenCode.GDmenuLevelBox1Objects1[i].getBehavior("Opacity").setOpacity(255);
 }
 }{runtimeScene.getGame().getVariables().getFromIndex(40).setBoolean(false);
+}{gdjs.evtTools.sound.stopSoundOnChannel(runtimeScene, 0);
 }}
 
 }
