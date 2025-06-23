@@ -2306,13 +2306,14 @@ self.addEventListener('install', event => {
   self.skipWaiting(); // activate worker immediately
 });
 
-
+// ACTIVATE: Clear old caches
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheName !== CACHE_NAME) {
+            console.log(`🗑️ Deleting old cache: ${cacheName}`);
             return caches.delete(cacheName);
           }
         })
@@ -2322,10 +2323,11 @@ self.addEventListener('activate', event => {
   self.clients.claim(); // take control of pages ASAP
 });
 
+// FETCH: Serve from cache, fallback to network, dynamically cache
 self.addEventListener('fetch', event => {
   let requestURL = new URL(event.request.url);
 
-  // Normalize to relative paths for cache matching
+  // Normalize cache key to relative path
   let cacheKey = requestURL.pathname.startsWith('/')
     ? requestURL.pathname.substring(1)
     : requestURL.pathname;
@@ -2336,9 +2338,22 @@ self.addEventListener('fetch', event => {
         if (cachedResponse) {
           return cachedResponse;
         }
+
         return fetch(event.request).then(networkResponse => {
-          // Optionally cache dynamically
+          if (
+            event.request.method === 'GET' &&
+            networkResponse &&
+            networkResponse.status === 200 &&
+            networkResponse.type === 'basic'
+          ) {
+            // Dynamically cache the new resource
+            cache.put(cacheKey, networkResponse.clone());
+            console.log(`📥 Dynamically cached: ${cacheKey}`);
+          }
+
           return networkResponse;
+        }).catch(err => {
+          console.warn(`❌ Fetch failed for: ${cacheKey}`, err);
         });
       });
     })
