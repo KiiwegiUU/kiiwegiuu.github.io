@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tutorial-cache-v1';
+const CACHE_NAME = 'tutorial-cache-v1-dynamic';
 const urlsToCache = [
     '.htaccess',
     'manifest.json',
