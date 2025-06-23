@@ -79,13 +79,16 @@ self.addEventListener('activate', event => {
   self.clients.claim(); // Take control immediately
 });
 
-// FETCH: Serve from cache, fallback to network, then dynamically cache
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
+  const requestURL = new URL(event.request.url);
+  const sameOrigin = requestURL.origin === self.location.origin;
+  const cacheKey = sameOrigin ? requestURL.pathname.replace(/^\/+/, '') : event.request.url;
+
   event.respondWith(
     caches.open(CACHE_NAME).then(async cache => {
-      const cachedResponse = await cache.match(event.request);
+      const cachedResponse = await cache.match(cacheKey);
       if (cachedResponse) {
         return cachedResponse;
       }
@@ -97,12 +100,12 @@ self.addEventListener('fetch', event => {
           networkResponse.status === 200 &&
           networkResponse.type === 'basic'
         ) {
-          cache.put(event.request, networkResponse.clone());
-          console.log(`📥 Dynamically cached: ${event.request.url}`);
+          cache.put(cacheKey, networkResponse.clone());
+          console.log(`📥 Dynamically cached: ${cacheKey}`);
         }
         return networkResponse;
       } catch (err) {
-        console.warn(`❌ Fetch failed for: ${event.request.url}`, err);
+        console.warn(`❌ Fetch failed for: ${cacheKey}`, err);
         throw err;
       }
     })
