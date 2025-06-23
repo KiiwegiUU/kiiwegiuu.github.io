@@ -1,12 +1,10 @@
 const CACHE_NAME = 'tutorial-cache-v1-dynamic';
 const urlsToCache = [
-    '.htaccess',
     'manifest.json',
     'player',
     'resources',
     'rlprez.css',
     'rlprez.js',
-    'service-worker',
     'tutorial.html',
     'player/rlplayer.css',
     'player/rlplayer.js',
