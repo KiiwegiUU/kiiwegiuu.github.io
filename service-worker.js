@@ -2323,15 +2323,23 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Try cache first, fallback to network
+  let requestURL = new URL(event.request.url);
+
+  // Normalize to relative paths for cache matching
+  let cacheKey = requestURL.pathname.startsWith('/')
+    ? requestURL.pathname.substring(1)
+    : requestURL.pathname;
+
   event.respondWith(
-    caches.match(event.request).then(cachedResponse => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then(networkResponse => {
-        // Optionally cache new requests here
-        return networkResponse;
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.match(cacheKey).then(cachedResponse => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        return fetch(event.request).then(networkResponse => {
+          // Optionally cache dynamically
+          return networkResponse;
+        });
       });
     })
   );
