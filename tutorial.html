@@ -28,16 +28,44 @@
 			outline: none;
 		}
 	</style>
+
+	<!-- ✅ ADDED: Backup/restore localStorage before anything else runs -->
+	<script>
+		(function () {
+			const backupKey = '__progress_backup';
+			const watchedKeys = ['rlprez_progress', 'lessonStatus', 'userProgress']; // Adjust if needed
+
+			// Restore progress if missing
+			const backup = localStorage.getItem(backupKey);
+			if (backup) {
+				try {
+					const { key, value } = JSON.parse(backup);
+					if (key && value && !localStorage.getItem(key)) {
+						localStorage.setItem(key, value);
+						console.log('✅ Progress restored from backup');
+					}
+				} catch (e) {
+					console.warn('⚠️ Could not parse backup:', e);
+				}
+			}
+
+			// Watch for updates to progress
+			const originalSetItem = localStorage.setItem;
+			localStorage.setItem = function (key, value) {
+				if (watchedKeys.some(k => key.includes(k))) {
+					localStorage.setItem(backupKey, JSON.stringify({ key, value }));
+				}
+				return originalSetItem.apply(this, arguments);
+			};
+		})();
+	</script>
+	<!-- ✅ END ADDITION -->
+
 	<link rel="stylesheet" type="text/css" href="player/rlplayer.css" />
 	<script type="text/javascript" src="player/rlplayer.js"></script>
 	<script type="text/javascript" src="player/rlplayer.lang.en-US.js"></script>
-	
-	
-	
-	
-	
-
 </head>
+
 <body>
 	<div id="lqMz5QfJ" class="ap-prez-container" lang="en-US" dir="ltr">
 		<script type="text/javascript">
@@ -48,7 +76,7 @@
 		</script>
 	</div>
 
-	<!-- ✅ Add this right before </body> -->
+	<!-- ✅ Keep service worker and persistent storage setup -->
 	<script>
 		if ('serviceWorker' in navigator) {
 			window.addEventListener('load', () => {
@@ -58,15 +86,14 @@
 			});
 		}
 		if ('storage' in navigator && 'persist' in navigator.storage) {
-		navigator.storage.persist().then(granted => {
-      	if (granted) {
-        console.log('🔒 Persistent storage granted');
-      } else {
-        console.warn('❗ Persistent storage not granted');
-      }
-    });
-  }
+			navigator.storage.persist().then(granted => {
+				if (granted) {
+					console.log('🔒 Persistent storage granted');
+				} else {
+					console.warn('❗ Persistent storage not granted');
+				}
+			});
+		}
 	</script>
 </body>
 </html>
-
