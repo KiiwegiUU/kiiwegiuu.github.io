@@ -1,7 +1,7 @@
 /*!
  * Copyright (c) Atomi Systems, Inc. All rights reserved.
- * Version: 9.3.0
- * Date: 2025.04.08
+ * Version: 10.1.0
+ * Date: 2025.10.24
  */
 #lqMz5QfJ .ap-focused {
 	outline: 1px dashed black;
@@ -58,6 +58,13 @@
     font-weight: 700;
     src: local('Calibri Bold'),
          url('resources/font_5.woff');
+}
+@font-face{
+    font-family: 'Wingdings';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Wingdings'),
+         url('resources/font_6.woff');
 }
 
 
