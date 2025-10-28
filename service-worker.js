@@ -1,5 +1,5 @@
 //Every update change in the folders needs a new v# below to update for users.  Do this after change transfered.
-const CACHE_NAME = 'tutorial-cache-v2-dynamic';
+const CACHE_NAME = 'tutorial-cache-v1-dynamic';
 const urlsToCache = [
   'manifest.json',
   // (Optional: a few files you want guaranteed offline from the start)
