@@ -1,9 +1,11 @@
 //Every update change in the folders needs a new v# below to update for users.  Do this after change transfered.
-const CACHE_NAME = 'tutorial-cache-v13-dynamic';
+const CACHE_NAME = 'tutorial-cache-v14-dynamic';
 const urlsToCache = [
   'manifest.json',
   // (Optional: a few files you want guaranteed offline from the start)
 ];
+  
+console.log("Service Worker cache name:", CACHE_NAME);
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -52,8 +54,6 @@ self.addEventListener('fetch', event => {
     );
     return; // stop further handling
   }
-
-  console.log("Service Worker cache name:", CACHE_NAME);
 
   // Original caching logic
   event.respondWith(
