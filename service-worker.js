@@ -43,22 +43,27 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
+  // Intercept missing thumbnails
+  if (event.request.url.includes('/thumb_')) {
+    // Respond with a tiny transparent PNG
+    const emptyImage = new Uint8Array([137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,1,0,0,0,1,8,6,0,0,0,31,21,196,137,0,0,0,12,73,68,65,84,8,29,99,0,1,0,0,5,0,1,13,10,26,10,0,0,0,0,73,69,78,68,174,66,96,130]);
+    event.respondWith(
+      new Response(emptyImage, { headers: { 'Content-Type': 'image/png' } })
+    );
+    return; // stop further handling
+  }
+
+  // Original caching logic
   event.respondWith(
     caches.open(CACHE_NAME).then(async cache => {
       const cachedResponse = await cache.match(event.request);
       if (cachedResponse) {
-        // Use the cached response, but let the browser validate in the background
         return cachedResponse;
       }
 
       try {
-        // Let the browser handle cache headers (ETag, etc.)
         const networkResponse = await fetch(event.request, { cache: 'default' });
-        if (
-          networkResponse &&
-          networkResponse.status === 200 &&
-          networkResponse.type === 'basic'
-        ) {
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
           cache.put(event.request, networkResponse.clone());
           console.log(`📥 Cached dynamically: ${event.request.url}`);
         }
@@ -70,3 +75,4 @@ self.addEventListener('fetch', event => {
     })
   );
 });
+
