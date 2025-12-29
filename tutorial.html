@@ -88,7 +88,7 @@
 		if ('storage' in navigator && 'persist' in navigator.storage) {
 			navigator.storage.persist().then(granted => {
 				if (granted) {
-					console.log('🔒 Persistent storage granted');
+					console.log('🔒 Test storage granted');
 				} else {
 					console.warn('❗ Persistent storage not granted');
 				}
