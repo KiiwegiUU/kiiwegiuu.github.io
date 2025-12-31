@@ -26,7 +26,7 @@
     <string name="fullScopeUrl" translatable="false">https://kiiwegiuu.github.io/</string>
     <string name="generatorApp" translatable="false">bubblewrap-cli</string>
     <string name="hostName" translatable="false">kiiwegiuu.github.io</string>
-    <string name="launchUrl" translatable="false">https://kiiwegiuu.github.io/tutorial.html</string>
+    <string name="launchUrl" translatable="false">https://kiiwegiuu.github.io/logo.html</string>
     <string name="launcherName" translatable="false">TamaKegeriye</string>
     <string name="orientation" translatable="false">portrait-primary</string>
     <string name="providerAuthority" translatable="false">org.kiiwegiuu.tma.tamakegeriyo.fileprovider</string>

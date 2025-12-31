@@ -23,7 +23,7 @@ plugins {
 def twaManifest = [
     applicationId: 'org.kiiwegiuu.tma.tamakegeriyo',
     hostName: 'kiiwegiuu.github.io', // The domain being opened in the TWA.
-    launchUrl: '/tutorial.html', // The start path for the TWA. Must be relative to the domain.
+    launchUrl: '/logo.html', // The start path for the TWA. Must be relative to the domain.
     name: 'Nuguun Tama Kegeriye', // The application name.
     launcherName: 'TamaKegeriye', // The name shown on the Android Launcher.
     themeColor: '#0D47A1', // The color used for the status bar.
@@ -57,8 +57,8 @@ android {
         applicationId "org.kiiwegiuu.tma.tamakegeriyo"
         minSdkVersion 21
         targetSdkVersion 35
-        versionCode 2
-        versionName "2"
+        versionCode 3
+        versionName "3"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name

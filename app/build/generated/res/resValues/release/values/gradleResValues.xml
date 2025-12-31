@@ -34,7 +34,7 @@
     <!-- Value from default config. -->
     <string name="hostName" translatable="false">kiiwegiuu.github.io</string>
     <!-- Value from default config. -->
-    <string name="launchUrl" translatable="false">https://kiiwegiuu.github.io/tutorial.html</string>
+    <string name="launchUrl" translatable="false">https://kiiwegiuu.github.io/logo.html</string>
     <!-- Value from default config. -->
     <string name="launcherName" translatable="false">TamaKegeriye</string>
     <!-- Value from default config. -->
