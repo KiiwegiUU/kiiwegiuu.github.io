@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ServiceNow Master Study Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .perspective-1000 { perspective: 1000px; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .backface-hidden { backface-visibility: hidden; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .transition-transform-600 { transition: transform 0.6s; }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a5b4fc; }
+
+        .btn-correct { background-color: #22c55e; }
+        .btn-wrong { background-color: #ef4444; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen font-sans">
+
+    <div id="startScreen" class="min-h-screen flex items-center justify-center p-6">
+        <div class="max-w-2xl w-full bg-white rounded-3xl shadow-2xl p-8 md:p-12 border border-slate-100">
+            <div class="text-center mb-10">
+                <h1 class="text-3xl font-black text-slate-800 mb-2">ServiceNow Study Hub</h1>
+                <p class="text-slate-500">Select the sections you wish to study</p>
+            </div>
+
+            <div id="sectionGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <label class="flex items-center p-4 bg-slate-50 rounded-2xl cursor-pointer hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all group">
+                    <input type="checkbox" value="Decks 1 & 2" checked class="w-5 h-5 rounded border-slate-300 text-indigo-600">
+                    <span class="ml-4 font-semibold text-slate-700 group-hover:text-indigo-700">Decks 1 & 2 (63)</span>
+                </label>
+                <label class="flex items-center p-4 bg-slate-50 rounded-2xl cursor-pointer hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all group">
+                    <input type="checkbox" value="Deck 3" checked class="w-5 h-5 rounded border-slate-300 text-indigo-600">
+                    <span class="ml-4 font-semibold text-slate-700 group-hover:text-indigo-700">Deck 3 (78)</span>
+                </label>
+                    <label class="flex items-center p-4 bg-slate-50 rounded-2xl cursor-pointer hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all group">
+                    <input type="checkbox" value="Old Reporting" checked class="w-5 h-5 rounded border-slate-300 text-indigo-600">
+                    <span class="ml-4 font-semibold text-slate-700 group-hover:text-indigo-700">Old Reporting and Report Types(23)</span>
+                </label>
+                    </label>
+                    <label class="flex items-center p-4 bg-slate-50 rounded-2xl cursor-pointer hover:bg-indigo-50 border border-transparent hover:border-indigo-200 transition-all group">
+                    <input type="checkbox" value="Deck 4" checked class="w-5 h-5 rounded border-slate-300 text-indigo-600">
+                    <span class="ml-4 font-semibold text-slate-700 group-hover:text-indigo-700">Deck 4 (30)</span>
+                </label>
+            </div>
+
+            <div class="flex items-center justify-between p-4 bg-indigo-50 rounded-2xl mb-10 border border-indigo-100">
+                <span class="font-bold text-indigo-900">Randomize Card Order</span>
+                <button id="shuffleToggle" onclick="toggleShuffle()" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 bg-slate-200">
+                    <span id="shuffleDot" class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 translate-x-0"></span>
+                </button>
+            </div>
+
+            <button onclick="startSession()" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-xl hover:bg-indigo-700 shadow-xl transition-all transform hover:-translate-y-1">
+                Start Studying
+            </button>
+        </div>
+    </div>
+
+    <div id="studyInterface" class="hidden">
+        <nav class="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-50 shadow-sm">
+            <div class="max-w-4xl mx-auto flex justify-between items-center">
+                <button onclick="exitSession()" class="text-slate-500 hover:text-indigo-600 font-bold flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Menu
+                </button>
+                <div class="flex bg-slate-100 p-1 rounded-lg">
+                    <button id="reviewBtn" onclick="setMode('review')" class="px-4 py-2 rounded-md transition-all font-medium text-sm">Review</button>
+                    <button id="flashcardBtn" onclick="setMode('flashcards')" class="px-4 py-2 rounded-md transition-all font-medium text-sm">Test</button>
+                    <button id="quizBtn" onclick="setMode('quiz')" class="px-4 py-2 rounded-md transition-all font-medium text-sm">Quiz</button>
+                </div>
+            </div>
+        </nav>
+
+        <main class="max-w-4xl mx-auto p-6">
+            <div class="mb-8">
+                <div class="flex justify-between text-xs font-semibold text-slate-500 mb-2">
+                    <span id="progressText">Question 1 of 138</span>
+                    <span id="percentText">0%</span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-2">
+                    <div id="progressBar" class="bg-indigo-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div id="flashcardView">
+                <div class="perspective-1000 w-full h-80 md:h-[400px] cursor-pointer group" onclick="toggleFlip()">
+                    <div id="cardInner" class="relative w-full h-full transform-style-3d transition-transform-600 shadow-2xl rounded-3xl">
+                        <div class="absolute inset-0 backface-hidden bg-white rounded-3xl flex items-center justify-center p-10 text-center border border-slate-200 overflow-y-auto">
+                            <p id="cardFront" class="text-xl md:text-2xl font-bold text-slate-700 leading-relaxed whitespace-pre-wrap"></p>
+                            <div class="absolute bottom-6 text-xs text-slate-400 font-bold uppercase tracking-widest">Tap to Flip</div>
+                        </div>
+                        <div class="absolute inset-0 backface-hidden bg-slate-50 rounded-3xl flex items-center justify-center p-10 text-center rotate-y-180 border-2 border-indigo-200 overflow-y-auto">
+                            <p id="cardBack" class="text-xl md:text-2xl font-bold text-indigo-900 leading-relaxed whitespace-pre-wrap"></p>
+                            <div class="absolute bottom-6 text-xs text-indigo-400 font-bold uppercase tracking-widest">Answer</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="testControls" class="grid grid-cols-2 gap-4 mt-8">
+                    <button onclick="handleMark(false)" class="flex flex-col items-center justify-center p-4 bg-red-50 text-red-600 border border-red-100 rounded-2xl hover:bg-red-100 transition-colors">
+                        <span class="font-black text-lg">Study Again</span>
+                        <span class="text-xs opacity-70">Mark as Incorrect</span>
+                    </button>
+                    <button onclick="handleMark(true)" class="flex flex-col items-center justify-center p-4 bg-green-50 text-green-600 border border-green-100 rounded-2xl hover:bg-green-100 transition-colors">
+                        <span class="font-black text-lg">Got it</span>
+                        <span class="text-xs opacity-70">Mark as Correct</span>
+                    </button>
+                </div>
+                
+                <div class="flex justify-center gap-4 mt-6">
+                    <button onclick="prevItem()" class="px-8 py-2 text-slate-400 hover:text-slate-600 transition-colors font-bold uppercase text-xs tracking-widest">Previous</button>
+                    <button id="reviewNextBtn" onclick="nextItem()" class="px-8 py-2 text-slate-400 hover:text-slate-600 transition-colors font-bold uppercase text-xs tracking-widest hidden">Next</button>
+                </div>
+            </div>
+
+            <div id="quizView" class="hidden">
+                <div class="bg-white rounded-3xl shadow-xl p-8 md:p-12 border border-slate-100">
+                    <h2 id="quizQuestion" class="text-xl md:text-2xl font-black text-slate-800 mb-10 leading-tight whitespace-pre-wrap"></h2>
+                    <div id="quizOptions" class="space-y-4"></div>
+                    <div id="quizFeedback" class="mt-10 hidden p-6 rounded-2xl text-center font-bold text-lg"></div>
+                    <div class="mt-10 flex justify-end">
+                        <button id="quizNextBtn" onclick="nextItem()" class="px-10 py-3 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 font-bold hidden shadow-lg">Continue</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="resultsView" class="hidden text-center py-16 bg-white rounded-3xl shadow-xl border border-slate-100">
+                <div class="inline-block p-6 bg-indigo-100 rounded-full mb-8 text-indigo-600">
+                    <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                </div>
+                <h2 class="text-4xl font-black text-slate-800 mb-2" id="resultsTitle">Session Summary</h2>
+                <p class="text-xl text-slate-500 mb-8" id="resultsStats"></p>
+                
+                <div class="flex flex-col gap-4 max-w-xs mx-auto">
+                    <button id="retryWrongBtn" onclick="retryIncorrect()" class="hidden px-8 py-4 bg-red-500 text-white rounded-2xl hover:bg-red-600 font-black text-xl transition-all shadow-xl shadow-red-100">
+                        Review Incorrect
+                    </button>
+                    <button onclick="exitSession()" class="px-8 py-4 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 font-black text-xl transition-all shadow-xl">
+                        Back to Menu
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const rawData = [
+            // [Decks 1 & 2 - 63 items]
+            { s: "Decks 1 & 2", q: "What is the system property required to be added and set to true to see impersonation events in the System Log?\n\n[LD1: Platform Overview and Navigation]", a: "glide.sys.log_impersonation" },
+            { s: "Decks 1 & 2", q: "Groups are represented by a record on the ______ table.\n\n[LD2: Instance Configuration]", a: "Group [sys_user_group]" },
+            { s: "Decks 1 & 2", q: "Modernized Work Experience – what are the 4 modules that comprise Employee Experience?\n\n[LD1: Platform Overview and Navigation]", a: "– HR Service Delivery, – Workplace Service Delivery, – Safe Workplace Suite, – Employee Center Portal" },
+            { s: "Decks 1 & 2", q: "What are the 5 main elements on the top right of the Unified Navigation Header to the right of the global search? (assume logged in as system administrator)\n\n[LD1: Platform Overview and Navigation]", a: "Application Scope picker (Globe), sidebar, usage analytics, help, notifications, user" },
+            { s: "Decks 1 & 2", q: "True/False: Applying a role to a user will apply that role's permissions as well as the permissions of any role's contained within.\n\n[LD2: Instance Configuration]", a: "True" },
+            { s: "Decks 1 & 2", q: "What is the name of the 'bubble' in the center of the navigation header whose purpose is to remind you where you are inside the platform?\n\n[LD1: Platform Overview and Navigation]", a: "Contextual app pill" },
+            { s: "Decks 1 & 2", q: "What roles are required to impersonate other users?\n\n[LD1: Platform Overview and Navigation]", a: "'admin' and 'impersonator'" },
+            { s: "Decks 1 & 2", q: "Modernized Work Experience – what are the 3 modules that comprise Operating Excellence?\n\n[LD1: Platform Overview and Navigation]", a: "– Global Business Services, – Strategic Portfolio Management, – Legal Service Delivery" },
+            { s: "Decks 1 & 2", q: "Why would you grant an approver_user role?\n\n[LD2: Instance Configuration]", a: "Granted to a user who has the ability to view/modify approval records, but no other roles (does not include itil)." },
+            { s: "Decks 1 & 2", q: "Name 6 common types of fields found in Forms.\n\n[LD1: Platform Overview and Navigation]", a: "– Choice, – Date/Time, – List, – Reference, – String, – True/False" },
+            { s: "Decks 1 & 2", q: "Who is the current CEO of ServiceNow?\n\n[LD1: Platform Overview and Navigation]", a: "Bill McDermott" },
+            { s: "Decks 1 & 2", q: "What path in the All Menu brings up the Plugins module?\n\n[LD2: Instance Configuration]", a: "All > System Definition > Plugins" },
+            { s: "Decks 1 & 2", q: "ServiceNow Platform is in aPaaS. What does this stand for and what does it mean?\n\n[LD1: Platform Overview and Navigation]", a: "Application Platform–as–a–Service. Means the application is hosted in the Cloud and companies don’t need to manage equipment necessary to host these applications." },
+            { s: "Decks 1 & 2", q: "Modernized Work Experience – what are the 4 modules that comprise Build and Automate?\n\n[LD1: Platform Overview and Navigation]", a: "– App Engine Studio, ServiceNow Studio, Workflow Studio, Creator Studio" },
+            { s: "Decks 1 & 2", q: "What path in the All Menu allows you to customize system properties?\n\n[LD2: Instance Configuration]", a: "All > System Properties > System" },
+            { s: "Decks 1 & 2", q: "What path in the All Menu allows you to manage the Companies list?\n\n[LD2: Instance Configuration]", a: "All > User Administration > Companies or All > Organization > Companies" },
+            { s: "Decks 1 & 2", q: "Under the User Preferences menu, what are the 6 global preference types can you customize?\n\n[LD1: Platform Overview and Navigation]", a: "– Display, Theme, Accessibility, Debugging, Language and Region, User Experience" },
+            { s: "Decks 1 & 2", q: "What is the Service Operations Workspace used for?\n\n[LD1: Platform Overview and Navigation]", a: "– Unified experience for multiple ITSM workflows, – Task records for Incidents, Requests, Walk–ups, Calls, etc." },
+            { s: "Decks 1 & 2", q: "Why would you grant a specialized administrator role?\n\n[LD2: Instance Configuration]", a: "Granted to a user who is accountable for managing specific functions or applications (ex. HR, Knowledge Base, assignment rules, reports, web services)" },
+            { s: "Decks 1 & 2", q: "Describe the difference between configuration and customization.\n\n[LD2: Instance Configuration]", a: "configuration: most of what an admin can do without code; customization: performed when a customer requires additional functionality / features not pre–existing in the platform" },
+            { s: "Decks 1 & 2", q: "Define the difference between these 3 actions: Save (via right–click header), Update or Submit.\n\n[LD1: Platform Overview and Navigation]", a: "Save: saves the record and remains there; Update: saves the record and returns to previous page; Submit: saves a new record and returns to previous page" },
+            { s: "Decks 1 & 2", q: "Roles are represented by a record that exists on the ____________ table. Define a role.\n\n[LD2: Instance Configuration]", a: "Role [sys_user_role]; role: collection of permissions defining user access to applications and what actions they can take." },
+            { s: "Decks 1 & 2", q: "What path in the All Menu allows you to launch the Employee Center?\n\n[LD1: Platform Overview and Navigation]", a: "All > Self–Service > Employee Center" },
+            { s: "Decks 1 & 2", q: "Can employees make requests directly from the Employee Center?\n\n[LD1: Platform Overview and Navigation]", a: "Yes. Employees can make requests by selecting the relevant knowledge base article pertaining to their problem." },
+            { s: "Decks 1 & 2", q: "What 2 checks should you perform before installing a new Plugin?\n\n[LD2: Instance Configuration]", a: "1. The role required to activate the plugin, 2. The related plugins that will be installed or activated" },
+            { s: "Decks 1 & 2", q: "Why would the user menu look like this? (encircled red with a red up arrow)\n\n[LD1: Platform Overview and Navigation]", a: "This icon indicates that the administrator is currently elevated to a higher privilege." },
+            { s: "Decks 1 & 2", q: "What are the 5 main tabs on the top left of the Unified Navigation Header?\n\n[LD1: Platform Overview and Navigation]", a: "All, Favorites, History, Workspaces, Admin" },
+            { s: "Decks 1 & 2", q: "Who is the founder of ServiceNow?\n\n[LD1: Platform Overview and Navigation]", a: "Fred Luddy" },
+            { s: "Decks 1 & 2", q: "What path in the All Menu allows you to see your group’s work?\n\n[LD1: Platform Overview and Navigation]", a: "All > Service Desk > My Groups Work" },
+            { s: "Decks 1 & 2", q: "The System Administrator role has almost all roles with 2 exceptions. What are they?\n\n[LD2: Instance Configuration]", a: "1. HR, 2. Security Operations" },
+            { s: "Decks 1 & 2", q: "ServiceNow utilizes an advanced, multi–instance, single–tenant architecture by default. What does single–tenant mean?\n\n[LD2: Instance Configuration]", a: "single–tenant: each instance features an isolated database containing data, applications and customizations" },
+            { s: "Decks 1 & 2", q: "There are 5 highlighted benefits to using ServiceNow.\n\n[LD1: Platform Overview and Navigation]", a: "– Configurable web–based interface, – Single system of record, – Single data model allows sharing between apps/departments, – Integration with other enterprise systems / plug–play, – Custom Applications" },
+            { s: "Decks 1 & 2", q: "What are the 5 Role (Persona) types available in the platform?\n\n[LD2: Instance Configuration]", a: "System Administrator, Specialized Administrator, Process User, Approver, Requester" },
+            { s: "Decks 1 & 2", q: "What path in the All Menu allows you to bring up the Application Manager?\n\n[LD2: Instance Configuration]", a: "All > System Applications > All Available Applications > All" },
+            { s: "Decks 1 & 2", q: "What path in the All Menu brings up Users, Groups or Roles administration modules?\n\n[LD2: Instance Configuration]", a: "– All > User Administration > Users/Groups/Roles OR – All > System Security > Users and Groups > Users/Groups/Roles" },
+            { s: "Decks 1 & 2", q: "Which 3 areas can you not access when you impersonate a user with an application–specific admin role?\n\n[LD1: Platform Overview and Navigation]", a: "– Security incidents, – Profile information including password changes, – Filter navigator access is restricted" },
+            { s: "Decks 1 & 2", q: "Describe the difference between Work Notes and Additional Comments in a Form view.\n\n[LD1: Platform Overview and Navigation]", a: "Work Notes: document internal notes, not visible externally; Additional Comments: visible to customers" },
+            { s: "Decks 1 & 2", q: "What is the Employee Center?\n\n[LD1: Platform Overview and Navigation]", a: "Unified portal provides a centralized experience for internal employees" },
+            { s: "Decks 1 & 2", q: "Applications are installed in application scopes. Define what this is.\n\n[LD2: Instance Configuration]", a: "application scope: protects applications by restricting access to the application’s files/data from other applications/services." },
+            { s: "Decks 1 & 2", q: "Name 3 of the many common ways to interact with the ServiceNow platform.\n\n[LD1: Platform Overview and Navigation]", a: "– Workspace, – List, – Form, – Dashboard, – Knowledge Base, – Service Catalog" },
+            { s: "Decks 1 & 2", q: "What path in the All Menu allows you to customize your company image and colors?\n\n[LD2: Instance Configuration]", a: "All > System Properties > My Company" },
+            { s: "Decks 1 & 2", q: "Modernized Work Experience – what are the 4 modules that comprise Technology Excellence?\n\n[LD1: Platform Overview and Navigation]", a: "– ITSM, – ITOM, – Security Operations, – IT Asset Management" },
+            { s: "Decks 1 & 2", q: "Why would you grant a process user role?\n\n[LD2: Instance Configuration]", a: "Granted to a user who has clearly defined paths and workflows in the platform and have one or more roles, including itil and approver_user (ex. Incident, Change Management)" },
+            { s: "Decks 1 & 2", q: "What is an instance and what are the 3 typical environments for this?\n\n[LD2: Instance Configuration]", a: "instance: copy of ServiceNow environment specific to customer; 1. Production, 2. Non–Prod, 3. Development" },
+            { s: "Decks 1 & 2", q: "Users are represented by a record on the ______ table.\n\n[LD2: Instance Configuration]", a: "User [sys_user]" },
+            { s: "Decks 1 & 2", q: "Why would you grant a requester user role?\n\n[LD2: Instance Configuration]", a: "Granted to users who do not have roles but can submit and manage their own requests (ex. Employee Self Service)" },
+            { s: "Decks 1 & 2", q: "What are the 4 base workflows available within the ServiceNow platform to choose from?\n\n[LD1: Platform Overview and Navigation]", a: "1. IT Workflows, 2. Employee Workflows, 3. Customer Workflows, 4. Creator Workflows" },
+            { s: "Decks 1 & 2", q: "Modernized Work Experience – what are the 2 modules that comprise Customer Experience?\n\n[LD1: Platform Overview and Navigation]", a: "– CSM (Customer Service Management), – FSM (Field Service Management)" },
+            { s: "Decks 1 & 2", q: "Admins can choose to Elevate role. What role does this elevate to and why would you use this feature?\n\n[LD1: Platform Overview and Navigation]", a: "'security_admin'; allows users to modify ACL (access control lists)" },
+            { s: "Decks 1 & 2", q: "What path in the All Menu allows you to create a new Incident?\n\n[LD1: Platform Overview and Navigation]", a: "All > Incident > Create New" },
+            { s: "Decks 1 & 2", q: "Which 3 roles are recommended to create logins for testing purposes?\n\n[LD1: Platform Overview and Navigation]", a: "app_admin, itil, ess" },
+            { s: "Decks 1 & 2", q: "What are the 4 interfaces you can interact with and experience within the ServiceNow platform?\n\n[LD1: Platform Overview and Navigation]", a: "1. The Next Experience (Unified Navigation), 2. Now Mobile App, 3. Service Portal, 4. Employee Center" },
+            { s: "Decks 1 & 2", q: "Complete this sentence: “Everything in ServiceNow is ______”.\n\n[LD1: Platform Overview and Navigation]", a: "a record in a table." },
+            { s: "Decks 1 & 2", q: "What is this element of the interface called?\n\n[LD1: Platform Overview and Navigation]", a: "Unified Navigation Header" },
+            { s: "Decks 1 & 2", q: "Why would the user menu look like this? (white eye icon)\n\n[LD1: Platform Overview and Navigation]", a: "This icon indicates that the administrator is currently impersonating another user." },
+            { s: "Decks 1 & 2", q: "Which 2 fields are mandatory for Incident creation?\n\n[LD1: Platform Overview and Navigation]", a: "– Caller, – Short Description" },
+            { s: "Decks 1 & 2", q: "If you cannot find a certain plugin, what other options are available?\n\n[LD2: Instance Configuration]", a: "Check the ServiceNow Store. Failing that, submit a request to ServiceNow." },
+            { s: "Decks 1 & 2", q: "What is a baseline implementation?\n\n[LD2: Instance Configuration]", a: "baseline implementation: a set of installed applications on an instance prior to config or customization." },
+            { s: "Decks 1 & 2", q: "There are 5 key areas that comprise the Modernized Work Experience. What are they?\n\n[LD1: Platform Overview and Navigation]", a: "– Customer Experience, – Technology Excellence, – Employee Experience, – Operating Excellence, – Build and Automate" },
+            { s: "Decks 1 & 2", q: "Name 3 of the many benefits of the Employee Center.\n\n[LD1: Platform Overview and Navigation]", a: "– Access to information and services across all departments, – Can be accessed through any type of device, – News and Events" },
+            { s: "Decks 1 & 2", q: "What do these icons represent on the right panel support tools of a Service Operations Workspace for an Incident record?", a: "Record Information, Recommendation, Agent Assist, Expert-on-call, collaborate, attachments, template, email template" },
+            { s: "Decks 1 & 2", q: "What is the system property required to be activated and set to true to implement the dark theme?\n\n[LD2: Instance Configuration]", a: "glide.ui.polaris.dark_themes_enabled" },
+            { s: "Decks 1 & 2", q: "Best practice: rather than adding roles to individual users, what should you do?\n\n[LD2: Instance Configuration]", a: "Create a group matching the required role and assign the role to the group. Then add the user to the group." },
+            { s: "Deck 3", q: "A list displays a set of records from a table. What does a row and column represent?", a: "Row: One record; Column: One field." },
+            { s: "Deck 3", q: "Identify these features of the List interface (Next Experience).", a: "1. List Selector/Title, 2. Breadcrumbs, 3. Column Search, 4. Column Headers, 5. Field Values." },
+            { s: "Deck 3", q: "How do you create a Tag from a List view?", a: "Right-click a field value and select Assign Tag." },
+            { s: "Deck 3", q: "Provide the 3 List Context (or Control) menus.", a: "1. List Controls, 2. Column Options, 3. Record Context Menu." },
+            { s: "Deck 3", q: "What are the 3 components that make up a filter condition?", a: "1. Field, 2. Operator, 3. Value." },
+            { s: "Deck 3", q: "What are 4 quick-edit functions available via right-click in a List?", a: "1. Assign to me, 2. Assign tag, 3. Approve, 4. Reject." },
+            { s: "Deck 3", q: "What does a list view define?", a: "A version of the list specifying which fields appear and their order." },
+            { s: "Deck 3", q: "What are the default sort controls for a list if none exist?", a: "Order field, number field, name field, or the designated display field." },
+            { s: "Deck 3", q: "What role is required to change column order for all users?", a: "personalize_list." },
+            { s: "Deck 3", q: "How do you bring up configuration for a List Layout?", a: "Column Options > Configure > List Layout." },
+            { s: "Deck 3", q: "What path in the All Menu allows you to edit Modules?", a: "All > System Definition > Application Menus." },
+            { s: "Deck 3", q: "In a List, what is the gear icon called? What does it allow?", a: "Personalize List. Allows users to locally Add/Remove/Rearrange columns." },
+            { s: "Deck 3", q: "When creating a new Module what are the 2 tabs needed?", a: "Visibility (set roles) and Link Type (set table/filter)." },
+            { s: "Deck 3", q: "What are the 3 context menus in a Workspace List?", a: "Grab Icon (Move), More Options (Filter), More UI Actions (Show Matching)." },
+            { s: "Deck 3", q: "How do you configure a list layout from within Classic view?", a: "Column options menu > Configure > List Layout." },
+            { s: "Deck 3", q: "What are the options for viewing Lists in Workspace?", a: "List view, Record view (Preview), and Open in New Tab." },
+            { s: "Deck 3", q: "How do you edit data directly within a Workspace?", a: "Use Record Preview (side panel) or double-click for Inline Editing." },
+            { s: "Deck 3", q: "What system property enables double-click inline editing in Workspace?", a: "glide.lists.inline_editing_enabled." },
+            { s: "Deck 3", q: "An Application/Module list in Classic is equivalent to what in Workspace?", a: "A UX List within a List Category." },
+            { s: "Deck 3", q: "What tool allows you to build new Categories/UX Lists for Workspaces?", a: "UI Builder." },
+            { s: "Deck 3", q: "What are the 3 steps to building a new UX List in UI Builder?", a: "1. Create Category, 2. Create UX List, 3. Map to Audience." },
+            { s: "Deck 3", q: "What needs to happen to make a UX List visible?", a: "Define the Audience and link it to the List Applicability." },
+            { s: "Deck 3", q: "What should you check before accessing UI Builder?", a: "Ensure your Application Scope is correct." },
+            { s: "Deck 3", q: "What does a form do?", a: "Displays information from a single record." },
+            { s: "Deck 3", q: "Identify these features of the Form interface in Classic view.", a: "1. Back, 2. Context Menu, 3. Title, 4. Attachments, 5. Activity Stream, 6. Personalize, 7. More Options, 8. Submit/Update, 9. Resolve, 10. Prev/Next." },
+            { s: "Deck 3", q: "Before configuring a form, what should you select first?", a: "The appropriate View." },
+            { s: "Deck 3", q: "What are the 3 main methods available to configure a form?", a: "1. Form Builder (Recommended), 2. Form Design (Visual), 3. Form Layout (Slushbucket)." },
+            { s: "Deck 3", q: "Which form config methods allow for 'dot-walking' to fields on related tables?", a: "Form Layout and Form Builder." },
+            { s: "Deck 3", q: "How do you edit Related Lists on a Form?", a: "Configure > Related Lists." },
+            { s: "Deck 3", q: "How do you personalize a form in Workspace?", a: "Details tab > Additional Actions dots > Personalize form." },
+            { s: "Deck 3", q: "How do you disable user Form Personalization?", a: "Set system property glide.ui.personalize_form.role to admin." },
+            { s: "Deck 3", q: "What must you verify before editing a Form for a Workspace?", a: "Correct Application Scope and View (Workspace). Pink background (Design) or header banner (Builder) warn of wrong scope." },
+            { s: "Deck 3", q: "What are the 4 main panels of the modern Form Builder?", a: "1. Header, 2. Left Pane (Components), 3. Center Canvas, 4. Right Pane (Properties)." },
+            { s: "Deck 3", q: "How do you add a dot-walked field using modern Form Builder?", a: "Drag Reference field onto canvas; expand in the appearing dialog to select related fields." },
+            { s: "Deck 3", q: "What is a formatter?", a: "Element used to display non-field info (e.g. Activity Stream)." },
+            { s: "Deck 3", q: "How do you add an item to a Choice List?", a: "Right-click Label > Configure Choices, or use Form Builder right pane." },
+            { s: "Deck 3", q: "Difference between Show Choice List and Configure Choices?", a: "Show Choice List: all tables of same type; Configure Choices: specific table." },
+            { s: "Deck 3", q: "What are the different Impact and Urgency levels?", a: "1 - High, 2 - Medium, 3 - Low" },
+            { s: "Deck 3", q: "What are the different Priority levels?", a: "1 - Critical, 2 - High, 3 - Moderate, 4 - Low, 5 - Planning" },
+            { s: "Deck 3", q: "What are the different State choices?", a: "New, In Progress, On Hold, Resolved, Closed, Canceled" },
+            { s: "Deck 3", q: "How do you add an item to a reference list on a Form?", a: "Lookup icon (Magnifier) > Click 'New'." },
+            { s: "Deck 3", q: "Define a VTB and its 2 types.", a: "Visual Task Board. 1. Freeform, 2. Data-driven." },
+            { s: "Deck 3", q: "What are the 4 sections within a VTB?", a: "Taskboard Tools, Quick Panel (assignees), Lanes (categories), Cards (records)." },
+            { s: "Deck 3", q: "Modern path to create dashboards/visualizations?", a: "All > Platform Analytics > Analytics Center." },
+            { s: "Deck 3", q: "Modern path to view Dashboards?", a: "All > Platform Analytics > Library > Dashboards." },
+            { s: "Deck 3", q: "Modern path to view visualizations?", a: "All > Platform Analytics > Library > Data Visualizations." },
+            { s: "Deck 3", q: "What are the share levels in Platform Analytics?", a: "Users, Groups, and Roles." },
+            { s: "Deck 3", q: "How can shared users interact with platform analytics?", a: "Can view, can edit, can share." },
+            { s: "Deck 3", q: "What are the 4 sections in modern Data Visualization designer?", a: "Visualization type, Header and border, Data, Presentation." },
+            { s: "Deck 3", q: "Actions in 'more actions' for visuals/dashboards?", a: "Create new, duplicate, share, export, schedule, bookmark, delete." },
+            { s: "Deck 3", q: "How do you duplicate a Visualization/Dashboard in Platform Analytics?", a: "Three-dot menu (...) > Duplicate." },
+            { s: "Deck 3", q: "How do you generate a direct URL for a Visual/Dashboard?", a: "More Actions (...) > Share > Copy Link." },
+            { s: "Deck 3", q: "What are the 3 'Viewable By' options for a Tag?", a: "Me, Groups and Users, Everyone." },
+            { s: "Deck 3", q: "What can show performance trends over time?", a: "Visualizations, visualizations on dashboards." },
+            { s: "Deck 3", q: "Why use a Form Template and how is it accessed?", a: "Auto-populating fields. Access via More Options (...) > Toggle Template Bar." },
+            { s: "Deck 3", q: "Role required to share templates with groups?", a: "template_editor_group." },
+            { s: "Deck 3", q: "Why restrict template creation?", a: "Security risk; can bypass Mandatory fields or UI Policies." },
+            { s: "Deck 3", q: "Path to create Email Client Templates?", a: "All > Email Client > Email Client Templates." },
+            { s: "Deck 3", q: "Role required for Quick Messages?", a: "email_client_quick_message_author." },
+            { s: "Deck 3", q: "Path for Quick Messages?", a: "All > Email Client > Quick Messages." },
+            { s: "Deck 3", q: "Syntax to reference field values in Quick Messages?", a: "${table_name.field_name}" },
+            { s: "Deck 3", q: "Path to view/create Notifications?", a: "All > System Notification > Email > Notifications." },
+            { s: "Deck 3", q: "Path to view Email Layouts and purpose?", a: "All > System Policy > Email > Layouts. Specify HTML content for body." },
+            { s: "Deck 3", q: "Path to view Email Templates and purpose?", a: "All > System Notification > Email > Templates. Create subject and body." },
+            { s: "Deck 3", q: "What are the 3 tabs of a Notification?", a: "1. When to send, 2. Who will receive, 3. What it will contain." },
+            { s: "Deck 3", q: "Benefit of watermark label?", a: "Allows platform to match incoming email to records." },
+            { s: "Deck 3", q: "Default length of Watermark label?", a: "31 characters." },
+            { s: "Deck 3", q: "What is the Sidebar module used for?", a: "Real–time collaboration and discussion pertaining to a record." },
+            { s: "Deck 3", q: "What is Integration Hub used for? Actions name?", a: "3rd-party integrations; actions are Spokes." },
+            { s: "Deck 3", q: "What does Automation Center do?", a: "Central hub to manage all automation (RPA, Flow, etc.)." },
+            { s: "Deck 3", q: "What does Predictive Intelligence do?", a: "Uses Machine Learning to categorize or route records." },
+            { s: "Deck 3", q: "What role initiates Predictive Intelligence setup?", a: "ml_admin." },
+            { s: "Deck 3", q: "Path to Instance Scan?", a: "All > Instance Scan." },
+            { s: "Deck 3", q: "4 types of Checks in Instance Scan?", a: "Table, Column, Script Only, Linter." },
+            { s: "Deck 3", q: "Where to look for Release Notes?", a: "docs.servicenow.com." },
+            { s: "Deck 3", q: "Module to plan upgrades?", a: "Upgrade Center." },
+            { s: "Deck 3", q: "Define Family, Upgrading, and Updating.", a: "Family: release name. Upgrading: new family. Updating: new patch." },
+            { s: "Deck 3", q: "What are the 7 high–level phases of an Upgrade?", a: "1. Read notes, 2. Prepare dev, 3. Verify config, 4. Upgrade/validate dev, 5. Upgrade/validate non-prod, 6. Prepare prod, 7. Upgrade prod." },
+
+            // [Old Reporting]
+            { s: "Old Reporting", q: "Describe the old workflow for creating reports.", a: "Identify data source, select report type, configure data to display, style the chart" },
+            { s: "Old Reporting", q: "What is the path to access Report Sources?", a: "all >platform analytics administration > data sources >report sources" },
+            { s: "Old Reporting", q: "What is the path to create a new report using the classic menu?", a: "all>platform analytics administration > usage and governance >reports .. then create new" },
+            { s: "Old Reporting", q: "Name the 3 source types for visualizations.", a: "3 source types for visualizations - table (non-system, most common), data, external import (external import seems deprecated... must create table first)" },
+            { s: "Old Reporting", q: "Define a data source in the context of reporting and list its sub-types.", a: "a data source defines one or more filter conditions that are predefined that a report creator can simply reuse instead of redefining in each report. - these are broken down into indicator sources, breakdown sources, report sources, import tables." },
+            { s: "Old Reporting", q: "Which roles are required to use or create a Report Source?", a: "Any user with the report_user role can use a Report Source. Users with the report_admin role can also create Report Sources." },
+            { s: "Old Reporting", q: "What is a known limitation regarding creating reports with Analytics Q&A?", a: "Could be mine only but creating a report with Analytics Q&A seems to not work anymore" },
+            { s: "Old Reporting", q: "Define a Bar Chart.", a: "A Bar chart lets you perform comparisons by grouping records into categories using an attribute" },
+            { s: "Old Reporting", q: "What is the benefit of using both Stack by and Group by in a report?", a: "Using both Stack by and Group by lets you categorize your data by two attributes simultaneously." },
+            { s: "Old Reporting", q: "What does adding one or more 'Additional group by' fields enable?", a: "Adding one or more Additional group by fields enables you to dynamically \"slice and dice\" your data." },
+            { s: "Old Reporting", q: "What does the Aggregation setting allow you to do?", a: "The Aggregation setting lets you calculate aggregate information about your data, such as maximum duration, minimum reassignment count, or average cost." },
+            { s: "Old Reporting", q: "What happens when you select the 'Display data table' check box?", a: "Selecting the check next to Display data table makes a table representing the same information in text table form." },
+            { s: "Old Reporting", q: "Define a Pie Chart.", a: "A Pie chart allows you to perform comparisons of individual pieces of data to the whole." },
+            { s: "Old Reporting", q: "Define Single score reports.", a: "Single score reports display a single value or metric that is key to your business." },
+            { s: "Old Reporting", q: "What is the purpose of building a Time Series report?", a: "Build a Time Series report to present the historical performance of an attribute and detect changes in its trend and pattern of movement over time." },
+            { s: "Old Reporting", q: "How do you manually configure the historical data trend in a Time Series report?", a: "To manually configure the historical data trend in a Time Series report, set the Trend by, Per, and Aggregation properties." },
+            { s: "Old Reporting", q: "Which Time Series report visualization types are available in the Report Designer?", a: "e following Time Series report visualization types are available in the Type section of the Report Designer: column, spline, area, line, step line" },
+            { s: "Old Reporting", q: "Define Multidimensional reports.", a: "Multidimensional reports visualize data from multiple attributes in a single table or graph." },
+            { s: "Old Reporting", q: "Define Bubble charts.", a: "Bubble charts display a graph with two to four dimensions, resembling both a scatter plot and a proportional area chart." },
+            { s: "Old Reporting", q: "Define a Heatmap report.", a: "A Heatmap report displays data values on a matrix using different colors." },
+            { s: "Old Reporting", q: "Define Multilevel pivot tables.", a: "Multilevel pivot tables display a collection of data broken down by multiple dimensions in a single table." },
+            { s: "Old Reporting", q: "What is the outcome of publishing a report?", a: "Publishing your report generates a shareable link for anyone to access your report." },
+            { s: "Old Reporting", q: "Is the Publish functionality enabled by default, and how do you enable it?", a: "Note that the Publish functionality is not enabled by default. Set the glide.report.published_reports.enabled property to true to enable." },
+
+            //[Deck 4]
+            { s: "Deck 4", q: "There are 5 portals available in the baseline implementation. What are they? [LD4: Self–Service & Automation]", a: "1. Employee Center (/esc) 2. Service Portal (/sp) 3. Knowledge Portal (/kb) 4. Change Advisory Board (CAB) Workbench (/cab) 5. Instance Security Center (/isc)" },
+            { s: "Deck 4", q: "Which role, in addition to \"admin\", allows a user to manage Knowledge Bases? [LD4: Self–Service & Automation]", a: "knowledge_admin" },
+            { s: "Deck 4", q: "What path in the All Menu allows you to view Knowledge Bases? [LD4: Self–Service & Automation]", a: "All > Self–Service > Knowledge or All > Service Desk > Knowledge" },
+            { s: "Deck 4", q: "Which 3 methods are available to sort documentation within a Knowledge Base?", a: "1. Relevancy (most useful) 2. Most recently updated 3. Number of views" },
+            { s: "Deck 4", q: "What path in the All Menu allows you to view Knowledge Management Guided Setup? Similarly, what path in the All Menu allows you to administrate Knowledge Bases? [LD4: Self–Service & Automation]", a: "All > Knowledge > Administration > Guided Setup and All > Knowledge > Administration > Knowledge Base" },
+            { s: "Deck 4", q: "How many articles can be associated with a Knowledge Base? How many categories can a Knowledge Base contain? [LD4: Self–Service & Automation]", a: "Articles: 1, Categories: Many" },
+            { s: "Deck 4", q: "What do Knowledge Bases use to define which users can create, read, write and retire articles? [LD4: Self–Service & Automation]", a: "User Criteria" },
+            { s: "Deck 4", q: "User Criteria is applied at the Knowledge Base level. What 4 outcomes does User Criteria contain? [LD4: Self–Service & Automation]", a: "1. canRead 2. cantRead 3. canContribute 4. cantContribute" },
+            { s: "Deck 4", q: "Which property should be changed to ensure only logged in users can access a Knowledge Base? [LD4: Self–Service & Automation]", a: "glide.knowman.block_access_with_no_user_criteria" },
+            { s: "Deck 4", q: "What are the 6 base Workflows available in the ServiceNow baseline instance provided in training? [LD4: Self–Service & Automation]", a: "1. Approval Publish 2. Approval Retire 3. Instant Publish 4. Instant Retire 5. Publish Knowledge 6. Retire Knowledge" },
+            { s: "Deck 4", q: "What are the 6 steps that provide a general overview of how to setup a Knowledge Base and setup approval workflows through a group and User Criteria?", a: "1. Create the KB (knowledge base) 2. Create a group to manage the KB approvals 3. Assign the [knowledge_manager] and [approver_user] roles to the group 4. Update the Owner, Publish/Retire workflows and add the group under Can Contribute for KB 5. Create User Criteria 6. Apply User Criteria to Can Read for KB" },
+            { s: "Deck 4", q: "Which role, in addition to \"admin\", allows a user to manage Service Catalogs? [LD4: Self–Service & Automation]", a: "catalog_admin" },
+            { s: "Deck 4", q: "What path in the All Menu allows you to create or modify Catalog Items and variables? [LD4: Self–Service & Automation]", a: "All > Service Catalog > Catalog Definitions > Maintain Items" },
+            { s: "Deck 4", q: "What are Service Catalog variables? Provide 3 common types. [LD4: Self–Service & Automation]", a: "variables: provide options to tailor a catalog item to the customer’s needs, helping define the structure of the item form displayed. – Multiple Choice – Select Box – Single Line Text – Reference – CheckBox" },
+            { s: "Deck 4", q: "What path in the All Menu allows you to define/create Variable Sets? Why would you use them? [LD4: Self–Service & Automation]", a: "All > Service Catalog > Catalog Variables > Variable Sets. variable set: a container used to store a collection of variables which can be shared between catalog items. Saves time and avoids repetition creating catalog items." },
+            { s: "Deck 4", q: "What are the 5 major components of the Service Catalog? [LD4: Self–Service & Automation]", a: "1. Items 2. Variables 3. Variable Sets 4. Record Producers 5. Flows" },
+            { s: "Deck 4", q: "What is a Record Producer within a Service Catalog used for? [LD4: Self–Service & Automation]", a: "A simplified form, allowing users to provide information that is then translated into task–based records. (ex. User submits a short form outlining a defect, which a Record Producer then turns into a Incident task assigned to the Hardware group)" },
+            { s: "Deck 4", q: "What is the best practice for Record Producers to ensure that standard Service Catalog processes are followed? [LD4: Self–Service & Automation]", a: "Do not create Request Items with Record Producers: – Record Producers should only create Task–based records. – Request Items should be created with Catalog Items." },
+            { s: "Deck 4", q: "Why would you implement an Order Guide? [LD4: Self–Service & Automation]", a: "Order Guides provide the ability to order multiple, related items as a single request." },
+            { s: "Deck 4", q: "For Service Catalog Items, identify the entities that are created upon an order being placed, including prefixes and associated table names. [LD4: Self–Service & Automation]", a: "– REQ# Request [sc_request] – RITM# Requested Item [sc_req_item] – SCTASK# Catalog Task [sc_task]" },
+            { s: "Deck 4", q: "Similar to Knowledge Bases, What does User Criteria do in relation to Service Catalog? [LD4: Self–Service & Automation]", a: "Maintains Catalog security. User Criteria defines conditions that determine which Users can access Service Catalog Items." },
+            { s: "Deck 4", q: "What path in the All Menu allows you to access the Flow Designer? [LD4: Self–Service & Automation]", a: "All > Process Automation > Flow Designer" },
+            { s: "Deck 4", q: "Which roles may be required to work with Flow Designer in various capacities? [LD4: Self–Service & Automation]", a: "– flow_designer – flow_operator – action_designer" },
+            { s: "Deck 4", q: "What does a flow consist of? [LD4: Self–Service & Automation]", a: "A trigger and one or more actions." },
+            { s: "Deck 4", q: "Which 5 trigger types can be displayed in a Flow Diagram? [LD4: Self–Service & Automation]", a: "1. Record triggers 2. Data triggers 3. Inbound email 4. Service Catalog 5. SLA Task" },
+            { s: "Deck 4", q: "Triggers instantiate the flow and can be record–based, date–based or application–based. Define these. [LD4: Self–Service & Automation]", a: "Record–based: triggers after a record has been created or updated; Date–based: triggers run at the specified date/time or scheduled intervals; Application–based: triggers when application–specific conditions are met (application spoke is activated)" },
+            { s: "Deck 4", q: "What are the 4 main components of a Flow? [LD4: Self–Service & Automation]", a: "1. Triggers 2. Conditions 3. Actions 4. Data" },
+            { s: "Deck 4", q: "What is the Process Automation Designer used for? [LD4: Self–Service & Automation]", a: "Enables owners to author cross–enterprise workflows and create a single unified process. Connects multiple flows and actions into an end–to–end business workflow." },
+            { s: "Deck 4", q: "What is the conversational platform called that helps users obtain information, make decisions and perform common work tasks within a messaging interface? [LD4: Self–Service & Automation]", a: "Virtual Agent" },
+        ];
+
+        let studyData = [];
+        let wrongIndices = [];
+        let currentIdx = 0;
+        let currentMode = 'review';
+        let isFlipped = false;
+        let isShuffled = false;
+        let correctCount = 0;
+        let totalAnswered = 0;
+
+        function toggleShuffle() {
+            isShuffled = !isShuffled;
+            const dot = document.getElementById('shuffleDot');
+            const bg = document.getElementById('shuffleToggle');
+            dot.style.transform = isShuffled ? 'translateX(1.25rem)' : 'translateX(0)';
+            bg.className = isShuffled ? 'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 bg-indigo-600' : 'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 bg-slate-200';
+        }
+
+        function startSession() {
+            const selectedSections = Array.from(document.querySelectorAll('#sectionGrid input:checked')).map(cb => cb.value);
+            if (selectedSections.length === 0) {
+                alert("Please select at least one section.");
+                return;
+            }
+
+            studyData = rawData.filter(item => selectedSections.includes(item.s));
+            initNewSession();
+        }
+
+        function initNewSession() {
+            if (isShuffled) {
+                studyData.sort(() => Math.random() - 0.5);
+            }
+
+            currentIdx = 0;
+            wrongIndices = [];
+            correctCount = 0;
+            totalAnswered = 0;
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('studyInterface').classList.remove('hidden');
+            document.getElementById('resultsView').classList.add('hidden');
+            setMode('review');
+        }
+
+        function retryIncorrect() {
+            // Keep only the cards the user got wrong
+            const incorrectItems = wrongIndices.map(i => studyData[i]);
+            studyData = [...incorrectItems];
+            initNewSession();
+        }
+
+        function exitSession() {
+            document.getElementById('studyInterface').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('reviewBtn').className = mode === 'review' ? 'px-4 py-2 rounded-md transition-all font-bold text-sm bg-white shadow-sm text-indigo-600' : 'px-4 py-2 rounded-md transition-all font-medium text-sm text-slate-500 hover:text-slate-700';
+            document.getElementById('flashcardBtn').className = mode === 'flashcards' ? 'px-4 py-2 rounded-md transition-all font-bold text-sm bg-white shadow-sm text-indigo-600' : 'px-4 py-2 rounded-md transition-all font-medium text-sm text-slate-500 hover:text-slate-700';
+            document.getElementById('quizBtn').className = mode === 'quiz' ? 'px-4 py-2 rounded-md transition-all font-bold text-sm bg-white shadow-sm text-indigo-600' : 'px-4 py-2 rounded-md transition-all font-medium text-sm text-slate-500 hover:text-slate-700';
+            
+            document.getElementById('flashcardView').classList.toggle('hidden', mode !== 'flashcards' && mode !== 'review');
+            document.getElementById('quizView').classList.toggle('hidden', mode !== 'quiz');
+            document.getElementById('resultsView').classList.add('hidden');
+
+            if (mode === 'review') {
+                document.getElementById('testControls').classList.add('hidden');
+                document.getElementById('reviewNextBtn').classList.remove('hidden');
+            } else if (mode === 'flashcards') {
+                document.getElementById('testControls').classList.remove('hidden');
+                document.getElementById('reviewNextBtn').classList.add('hidden');
+            }
+            
+            updateDisplay();
+        }
+
+        function toggleFlip() {
+            if (currentMode === 'quiz') return;
+            isFlipped = !isFlipped;
+            document.getElementById('cardInner').classList.toggle('rotate-y-180', isFlipped);
+        }
+
+        function handleMark(isCorrect) {
+            totalAnswered++;
+            if (isCorrect) {
+                correctCount++;
+            } else {
+                if (!wrongIndices.includes(currentIdx)) {
+                    wrongIndices.push(currentIdx);
+                }
+            }
+            nextItem();
+        }
+
+        function updateDisplay() {
+            if (currentIdx >= studyData.length) {
+                showResults();
+                return;
+            }
+
+            const data = studyData[currentIdx];
+            const progress = ((currentIdx) / studyData.length) * 100;
+            
+            document.getElementById('progressText').innerText = `Item ${currentIdx + 1} of ${studyData.length}`;
+            document.getElementById('percentText').innerText = `${Math.round(progress)}%`;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+
+            if (currentMode === 'flashcards' || currentMode === 'review') {
+                isFlipped = false;
+                document.getElementById('cardInner').classList.remove('rotate-y-180');
+                document.getElementById('cardFront').innerText = data.q;
+                document.getElementById('cardBack').innerText = data.a;
+            } else {
+                renderQuiz();
+            }
+        }
+
+        function renderQuiz() {
+            const data = studyData[currentIdx];
+            document.getElementById('quizQuestion').innerText = data.q;
+            document.getElementById('quizNextBtn').classList.add('hidden');
+            document.getElementById('quizFeedback').classList.add('hidden');
+            
+            let options = [data.a];
+            while (options.length < 4) {
+                const randomItem = rawData[Math.floor(Math.random() * rawData.length)].a;
+                if (!options.includes(randomItem)) options.push(randomItem);
+            }
+            options.sort(() => Math.random() - 0.5);
+
+            const container = document.getElementById('quizOptions');
+            container.innerHTML = '';
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-5 rounded-2xl border border-slate-200 hover:bg-slate-50 hover:border-indigo-200 transition-all font-semibold text-slate-600";
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(opt, data.a, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected, correct, element) {
+            const buttons = document.getElementById('quizOptions').querySelectorAll('button');
+            buttons.forEach(btn => btn.disabled = true);
+            const feedback = document.getElementById('quizFeedback');
+            feedback.classList.remove('hidden');
+
+            totalAnswered++;
+            if (selected === correct) {
+                correctCount++;
+                element.className = "w-full text-left p-5 rounded-2xl border-2 border-green-500 bg-green-50 text-green-700 font-bold";
+                feedback.innerText = "Correct!";
+                feedback.className = "mt-10 p-6 rounded-2xl text-center font-bold bg-green-100 text-green-700";
+            } else {
+                wrongIndices.push(currentIdx);
+                element.className = "w-full text-left p-5 rounded-2xl border-2 border-red-500 bg-red-50 text-red-700 font-bold";
+                feedback.innerText = `Incorrect. Correct answer: ${correct}`;
+                feedback.className = "mt-10 p-6 rounded-2xl text-center font-bold bg-red-100 text-red-700";
+                buttons.forEach(btn => {
+                    if (btn.innerText === correct) btn.className = "w-full text-left p-5 rounded-2xl border-2 border-green-500 bg-green-50 text-green-700 font-bold";
+                });
+            }
+            document.getElementById('quizNextBtn').classList.remove('hidden');
+        }
+
+        function nextItem() {
+            currentIdx++;
+            updateDisplay();
+        }
+
+        function prevItem() {
+            if (currentIdx > 0) {
+                currentIdx--;
+                updateDisplay();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('flashcardView').classList.add('hidden');
+            document.getElementById('quizView').classList.add('hidden');
+            document.getElementById('resultsView').classList.remove('hidden');
+            
+            document.getElementById('progressBar').style.width = `100%`;
+            document.getElementById('percentText').innerText = `100%`;
+
+            const retryBtn = document.getElementById('retryWrongBtn');
+
+            if (currentMode === 'review') {
+                document.getElementById('resultsTitle').innerText = "Review Complete!";
+                document.getElementById('resultsStats').innerText = `You reviewed all ${studyData.length} cards in this deck.`;
+                retryBtn.classList.add('hidden');
+            } else {
+                const stats = `You got ${correctCount} correct out of ${studyData.length}.`;
+                document.getElementById('resultsStats').innerText = stats;
+
+                if (wrongIndices.length > 0) {
+                    retryBtn.classList.remove('hidden');
+                    retryBtn.innerText = `Review ${wrongIndices.length} Incorrect Cards`;
+                } else {
+                    retryBtn.classList.add('hidden');
+                    document.getElementById('resultsTitle').innerText = "Perfect Score!";
+                }
+            }
+        }
+
+        // Keyboard Controls
+        document.addEventListener('keydown', (e) => {
+            const studyInterface = document.getElementById('studyInterface');
+            const resultsView = document.getElementById('resultsView');
+            
+            // Prevent keys from firing if the study session is hidden or we're on the results page
+            if (studyInterface.classList.contains('hidden') || !resultsView.classList.contains('hidden')) return;
+
+            if (e.code === 'Space') {
+                if (currentMode === 'flashcards' || currentMode === 'review') {
+                    e.preventDefault(); // Prevents the page from scrolling down
+                    toggleFlip();
+                }
+            } else if (e.code === 'ArrowRight') {
+                if (currentMode === 'review' || currentMode === 'flashcards') {
+                    // Right arrow navigates to the next card. 
+                    // Note: If you press right arrow in "Test" mode, it skips grading the current card.
+                    nextItem();
+                }
+            } else if (e.code === 'ArrowLeft') {
+                if (currentMode === 'review' || currentMode === 'flashcards') {
+                    prevItem();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
