@@ -1,99 +1,155 @@
 ﻿<!DOCTYPE html>
 <html lang="en-US" dir="ltr">
 <head>
-	<title>LinguaBits</title>
-	<link rel="manifest" href="manifest.json">
-	<meta name="theme-color" content="#0d47a1">
-	<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-	<meta name="generator" content="ActivePresenter 9.3.0"/>
-	<meta name="author" content="efl-manager" />
-	<meta name="description" content=""/>
-	<meta name="copyright" content=" " />
-	<meta name="viewport" content="initial-scale=1.0">
-	<meta name="apple-mobile-web-app-capable" content="yes">
-	<style>
-		html {
-			height: 100%;
-		}
-		body {
-			height: 100%;
-			margin: 0;
-			padding: 0;
-		}
-		.ap-prez-container {
-			position: relative;
-			height: 100%;
-			overflow: hidden;
-			outline: none;
-		}
-	</style>
+    <title>LinguaBits</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0d47a1">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="generator" content="ActivePresenter 9.3.0"/>
+    <meta name="author" content="efl-manager" />
+    <meta name="description" content=""/>
+    <meta name="copyright" content=" " />
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <style>
+        html {
+            height: 100%;
+        }
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        .ap-prez-container {
+            position: relative;
+            height: 100%;
+            overflow: hidden;
+            outline: none;
+        }
+    </style>
 
-	<!-- ✅ ADDED: Backup/restore localStorage before anything else runs -->
-	<script>
-		(function () {
-			const backupKey = '__progress_backup';
-			const watchedKeys = ['rlprez_progress', 'lessonStatus', 'userProgress']; // Adjust if needed
+    <!-- ✅ ADDED: Backup/restore localStorage before anything else runs -->
+    <script>
+        (function () {
+            const backupKey = '__progress_backup';
+            const watchedKeys = ['rlprez_progress', 'lessonStatus', 'userProgress']; // Adjust if needed
 
-			// Restore progress if missing
-			const backup = localStorage.getItem(backupKey);
-			if (backup) {
-				try {
-					const { key, value } = JSON.parse(backup);
-					if (key && value && !localStorage.getItem(key)) {
-						localStorage.setItem(key, value);
-						console.log('✅ Progress restored from backup');
-					}
-				} catch (e) {
-					console.warn('⚠️ Could not parse backup:', e);
-				}
-			}
+            // Restore progress if missing
+            const backup = localStorage.getItem(backupKey);
+            if (backup) {
+                try {
+                    const { key, value } = JSON.parse(backup);
+                    if (key && value && !localStorage.getItem(key)) {
+                        localStorage.setItem(key, value);
+                        console.log('✅ Progress restored from backup');
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Could not parse backup:', e);
+                }
+            }
 
-			// Watch for updates to progress
-			const originalSetItem = localStorage.setItem;
-			localStorage.setItem = function (key, value) {
-				if (watchedKeys.some(k => key.includes(k))) {
-					localStorage.setItem(backupKey, JSON.stringify({ key, value }));
-				}
-				return originalSetItem.apply(this, arguments);
-			};
-		})();
-	</script>
-	<!-- ✅ END ADDITION -->
+            // Watch for updates to progress
+            const originalSetItem = localStorage.setItem;
+            localStorage.setItem = function (key, value) {
+                if (watchedKeys.some(k => key.includes(k))) {
+                    localStorage.setItem(backupKey, JSON.stringify({ key, value }));
+                }
+                return originalSetItem.apply(this, arguments);
+            };
+        })();
+    </script>
+    <!-- ✅ END ADDITION -->
 
-	<link rel="stylesheet" type="text/css" href="player/rlplayer.css" />
-	<script type="text/javascript" src="player/rlplayer.js"></script>
-	<script type="text/javascript" src="player/rlplayer.lang.en-US.js"></script>
+    <!-- ✅ USAGE TRACKER (Google Sheets) -->
+    <script>
+        (function() {
+            // 1. Paste your Google Apps Script Web App URL here
+            const TRACKING_URL = "PASTE_YOUR_WEB_APP_URL_HERE";
+
+            // 2. Generate or retrieve a persistent User ID
+            let userId = localStorage.getItem('linguaBits_userId');
+            if (!userId) {
+                userId = 'user-' + Math.random().toString(36).substr(2, 7);
+                localStorage.setItem('linguaBits_userId', userId);
+            }
+
+            // 3. Determine Access Method (PWA vs Browser)
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+            const accessMethod = isStandalone ? "Homescreen (PWA)" : "Web Browser";
+
+            // 4. Determine Operating System
+            function getOS() {
+                const ua = navigator.userAgent;
+                if (/android/i.test(ua)) return "Android";
+                if (/iPad|iPhone|iPod/.test(ua)) return "iOS";
+                if (/windows/i.test(ua)) return "Windows";
+                if (/mac/i.test(ua)) return "Mac OS";
+                if (/linux/i.test(ua)) return "Linux";
+                return "Unknown";
+            }
+            const os = getOS();
+
+            // 5. Send the payload to Google Sheets
+            function logUsage() {
+                if (TRACKING_URL === "https://script.google.com/macros/s/AKfycbzPkQCAws14kEbo_4gnPUAW3hyICj_Nj4GNumw2nufD4FJGFHbepZqGHOp7yp7o9K9G/exec") {
+                    console.warn("Usage Tracker: Please add your Google Apps Script URL to track usage.");
+                    return;
+                }
+                
+                fetch(TRACKING_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', 
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({
+                        userId: userId,
+                        accessMethod: accessMethod,
+                        os: os
+                    })
+                }).catch(err => console.log('Tracking ping failed (offline)', err));
+            }
+
+            // Log the session as soon as the page loads
+            window.addEventListener('load', () => {
+                logUsage();
+            });
+        })();
+    </script>
+    <!-- ✅ END USAGE TRACKER -->
+
+    <link rel="stylesheet" type="text/css" href="player/rlplayer.css" />
+    <script type="text/javascript" src="player/rlplayer.js"></script>
+    <script type="text/javascript" src="player/rlplayer.lang.en-US.js"></script>
 </head>
 
 <body>
-	<div id="lqMz5QfJ" class="ap-prez-container" lang="en-US" dir="ltr">
-		<script type="text/javascript">
-			AtomiAP.open("rlprez.js", "lqMz5QfJ", {
-				playMode: "Tutorial",
-				preloader: {zIndex: 2,diameter: 60,density: 9,range: 1000,speed: 1,color:'#2090E6',shape:'oval'}
-			});
-		</script>
-	</div>
+    <div id="lqMz5QfJ" class="ap-prez-container" lang="en-US" dir="ltr">
+        <script type="text/javascript">
+            AtomiAP.open("rlprez.js", "lqMz5QfJ", {
+                playMode: "Tutorial",
+                preloader: {zIndex: 2,diameter: 60,density: 9,range: 1000,speed: 1,color:'#2090E6',shape:'oval'}
+            });
+        </script>
+    </div>
 
-	<!-- ✅ Keep service worker and persistent storage setup -->
-	<script>
-		if ('serviceWorker' in navigator) {
-			window.addEventListener('load', () => {
-				navigator.serviceWorker.register('service-worker.js')
-					.then(reg => console.log('Service Worker registered:', reg))
-					.catch(err => console.error('Service Worker registration failed:', err));
-			});
-		}
-		if ('storage' in navigator && 'persist' in navigator.storage) {
-			navigator.storage.persist().then(granted => {
-				if (granted) {
-					console.log('🔒 Test storage granted');
-				} else {
-					console.warn('❗ Persistent storage not granted');
-				}
-			});
-		}
-	</script>
+    <!-- ✅ Keep service worker and persistent storage setup -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(reg => console.log('Service Worker registered:', reg))
+                    .catch(err => console.error('Service Worker registration failed:', err));
+            });
+        }
+        if ('storage' in navigator && 'persist' in navigator.storage) {
+            navigator.storage.persist().then(granted => {
+                if (granted) {
+                    console.log('🔒 Test storage granted');
+                } else {
+                    console.warn('❗ Persistent storage not granted');
+                }
+            });
+        }
+    </script>
 </body>
 </html>
