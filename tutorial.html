@@ -90,22 +90,23 @@
             }
             const os = getOS();
 
-            // 5. Send the payload to Google Sheets
+			// 5. Send the payload to Google Sheets (Using the bulletproof GET method)
             function logUsage() {
                 if (TRACKING_URL === "https://script.google.com/macros/s/AKfycbzPkQCAws14kEbo_4gnPUAW3hyICj_Nj4GNumw2nufD4FJGFHbepZqGHOp7yp7o9K9G/exec") {
                     console.warn("Usage Tracker: Please add your Google Apps Script URL to track usage.");
                     return;
                 }
                 
-                fetch(TRACKING_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', 
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify({
-                        userId: userId,
-                        accessMethod: accessMethod,
-                        os: os
-                    })
+                // Build the exact same URL you pasted into your browser bar!
+                const fullUrl = TRACKING_URL + 
+                    "?userId=" + encodeURIComponent(userId) + 
+                    "&accessMethod=" + encodeURIComponent(accessMethod) + 
+                    "&os=" + encodeURIComponent(os);
+
+                // Send it silently in the background
+                fetch(fullUrl, { 
+                    method: 'GET', 
+                    mode: 'no-cors' 
                 }).catch(err => console.log('Tracking ping failed (offline)', err));
             }
 
