@@ -90,24 +90,22 @@
             }
             const os = getOS();
 
-			// 5. Send the payload to Google Sheets (Using the bulletproof GET method)
+// 5. Send the payload to Google Sheets (Using an Image Beacon)
             function logUsage() {
-                if (TRACKING_URL === "https://script.google.com/macros/s/AKfycbzPkQCAws14kEbo_4gnPUAW3hyICj_Nj4GNumw2nufD4FJGFHbepZqGHOp7yp7o9K9G/exec") {
-                    console.warn("Usage Tracker: Please add your Google Apps Script URL to track usage.");
+                if (!TRACKING_URL || TRACKING_URL.includes("https://script.google.com/macros/s/AKfycbzPkQCAws14kEbo_4gnPUAW3hyICj_Nj4GNumw2nufD4FJGFHbepZqGHOp7yp7o9K9G/exec")) {
+                    console.warn("Usage Tracker: Missing URL.");
                     return;
                 }
                 
-                // Build the exact same URL you pasted into your browser bar!
+                // Build the exact same URL you pasted into your browser bar
                 const fullUrl = TRACKING_URL + 
                     "?userId=" + encodeURIComponent(userId) + 
                     "&accessMethod=" + encodeURIComponent(accessMethod) + 
                     "&os=" + encodeURIComponent(os);
 
-                // Send it silently in the background
-                fetch(fullUrl, { 
-                    method: 'GET', 
-                    mode: 'no-cors' 
-                }).catch(err => console.log('Tracking ping failed (offline)', err));
+                // FIRE AND FORGET: The browser requests the URL to "load an image".
+                // This bypasses CORS and fetch restrictions entirely!
+                new Image().src = fullUrl;
             }
 
             // Log the session as soon as the page loads
