@@ -65,7 +65,7 @@
     <script>
         (function() {
             // 1. Paste your Google Apps Script Web App URL here
-            const TRACKING_URL = "https://script.google.com/macros/s/AKfycbzPkQCAws14kEbo_4gnPUAW3hyICj_Nj4GNumw2nufD4FJGFHbepZqGHOp7yp7o9K9G/exec";
+            const TRACKING_URL = "https://script.google.com/macros/s/AKfycbzPkQCAws14kEbo_4gnPUAW3hyICj_Nj4GNumw2nufD4FJG......";
 
             // 2. Generate or retrieve a persistent User ID
             let userId = localStorage.getItem('linguaBits_userId');
@@ -90,12 +90,9 @@
             }
             const os = getOS();
 
-// 5. Send the payload to Google Sheets (Using an Image Beacon)
+			// 5. Send the payload to Google Sheets (Using an Image Beacon)
             function logUsage() {
-                if (!TRACKING_URL || TRACKING_URL.includes("https://script.google.com/macros/s/AKfycbzPkQCAws14kEbo_4gnPUAW3hyICj_Nj4GNumw2nufD4FJGFHbepZqGHOp7yp7o9K9G/exec")) {
-                    console.warn("Usage Tracker: Missing URL.");
-                    return;
-                }
+                if (!TRACKING_URL) return; // Only abort if it's completely blank
                 
                 // Build the exact same URL you pasted into your browser bar
                 const fullUrl = TRACKING_URL + 
