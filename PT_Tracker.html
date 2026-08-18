@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PT Tracker</title>
+    <style>
+        :root {
+            --bg-color: #f4f4f9;
+            --card-bg: #ffffff;
+            --primary: #007aff;
+            --text-main: #333333;
+            --text-muted: #666666;
+            --border: #dddddd;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            padding-bottom: 40px;
+        }
+        header {
+            background-color: var(--card-bg);
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        button:disabled {
+            background-color: #cccccc;
+        }
+        .summary-btn {
+            background-color: #34c759;
+            width: 100%;
+            padding: 12px;
+        }
+        h2 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        .container {
+            padding: 15px;
+        }
+        .exercise-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .exercise-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .exercise-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+        }
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 5px 0;
+        }
+        .row-label {
+            width: 80px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .checkbox-group {
+            display: flex;
+            gap: 15px;
+        }
+        input[type="checkbox"] {
+            transform: scale(1.8);
+            margin: 0 10px;
+            accent-color: var(--primary);
+        }
+        .rest-day-msg {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: var(--card-bg);
+            width: 90%;
+            max-height: 80vh;
+            border-radius: 12px;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .modal-header h3 {
+            margin: 0;
+        }
+        .close-btn {
+            background: transparent;
+            color: var(--primary);
+            padding: 0;
+            font-size: 16px;
+        }
+        .stat-box {
+            display: flex;
+            justify-content: space-between;
+            background: var(--bg-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .missed-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .missed-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+        }
+        .missed-list li:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="nav-controls">
+        <button onclick="changeDay(-1)">&#8592; Prev</button>
+        <h2 id="date-display">Date</h2>
+        <button onclick="changeDay(1)">Next &#8594;</button>
+    </div>
+    <button class="summary-btn" onclick="openSummary()">View Progress Summary</button>
+</header>
+
+<div class="container" id="exercise-container">
+    <!-- Exercises inject here -->
+</div>
+
+<!-- Summary Modal -->
+<div class="modal-overlay" id="summary-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Progress Summary</h3>
+            <button class="close-btn" onclick="closeSummary()">Close</button>
+        </div>
+        <div class="stat-box">
+            <span>Fully Completed Days:</span>
+            <span id="stat-completed" style="color: #34c759;">0</span>
+        </div>
+        <div class="stat-box">
+            <span>Incomplete Days:</span>
+            <span id="stat-incomplete" style="color: #ff3b30;">0</span>
+        </div>
+        <h4 style="margin-bottom: 10px;">Uncompleted Exercises (Past Days):</h4>
+        <ul class="missed-list" id="missed-list">
+            <!-- Missed items inject here -->
+        </ul>
+    </div>
+</div>
+
+<script>
+    // --- Configuration & Setup ---
+    // Start date is set to Monday, August 17, 2026.
+    const START_DATE = new Date(2026, 7, 17); // Month is 0-indexed (7 = August)
+    
+    // Normalize today's date to midnight for accurate offset calculation
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    // Calculate how many days have passed since start date
+    const timeDiff = today.getTime() - START_DATE.getTime();
+    let currentDayOffset = Math.floor(timeDiff / (1000 * 3600 * 24));
+    
+    // Prevent going before day 0
+    if (currentDayOffset < 0) currentDayOffset = 0;
+    
+    let completions = JSON.parse(localStorage.getItem('ptCompletions')) || {};
+
+    // --- Exercise Database ---
+    const exercises = {
+        quad: { id: 'quad', title: "Quad Set", desc: "10 times, 3 seconds hold, 2 sets, 3 times a day.", sets: 2, timesADay: 3 },
+        heel: { id: 'heel', title: "Supine Heel Slides", desc: "10 times, 3 seconds hold, 2 sets, 3 times a day.", sets: 2, timesADay: 3 },
+        slr: { id: 'slr', title: "Straight Leg Raise", desc: "10 times, 2 sets.", sets: 2, timesADay: 1 },
+        ball: { id: 'ball', title: "Ball Squeeze", desc: "10 times, 3 seconds hold, 2 sets.", sets: 2, timesADay: 1 },
+        bridge: { id: 'bridge', title: "Bridge", desc: "10 times, 2 sets.", sets: 2, timesADay: 1 },
+        bridge_abd: { id: 'bridge_abd', title: "Supine Bridge Hip Abduction", desc: "10 times, 2 sets.", sets: 2, timesADay: 1 },
+        side_abd: { id: 'side_abd', title: "Side Lying Hip Abduction", desc: "10 times, 2 sets.", sets: 2, timesADay: 1 },
+        laq: { id: 'laq', title: "LAQ (Long Arc Quad)", desc: "10 times, 3 seconds hold, 2 sets.", sets: 2, timesADay: 1 },
+        hamstring: { id: 'hamstring', title: "Seated Hamstring Stretch", desc: "2 times, 30 seconds hold.", sets: 2, timesADay: 1 },
+    };
+
+    // --- Scheduling Logic ---
+    function getExercisesForDay(dayOffset) {
+        const dayOfWeek = dayOffset % 7; // 0 = Mon, 1 = Tue, ..., 6 = Sun
+        
+        if (dayOfWeek === 6) return []; // Sunday is rest/makeup
+        
+        let daily = [exercises.quad, exercises.heel];
+        
+        // Group A: Mon (0), Wed (2), Fri (4)
+        if (dayOfWeek === 0 || dayOfWeek === 2 || dayOfWeek === 4) {
+            return [...daily, exercises.slr, exercises.bridge, exercises.side_abd, exercises.hamstring];
+        }
+        // Group B: Tue (1), Thu (3), Sat (5)
+        else {
+            return [...daily, exercises.ball, exercises.bridge_abd, exercises.laq];
+        }
+    }
+
+    // --- UI Rendering ---
+    function updateDateDisplay() {
+        const d = new Date(START_DATE);
+        d.setDate(d.getDate() + currentDayOffset);
+        
+        const options = { weekday: 'long', month: 'short', day: 'numeric' };
+        let dateStr = d.toLocaleDateString('en-US', options);
+        
+        if (currentDayOffset === Math.floor((new Date().setHours(0,0,0,0) - START_DATE.getTime()) / 86400000)) {
+            dateStr = "Today (" + dateStr + ")";
+        }
+        document.getElementById('date-display').innerText = dateStr;
+    }
+
+    function renderDay() {
+        updateDateDisplay();
+        const container = document.getElementById('exercise-container');
+        container.innerHTML = '';
+        
+        const dayExercises = getExercisesForDay(currentDayOffset);
+        
+        if (dayExercises.length === 0) {
+            container.innerHTML = `<div class="rest-day-msg">
+                <strong>Rest Day!</strong><br><br>
+                Use today to rest, or use the "Prev" button at the top to go back and check off any exercises you missed earlier in the week.
+            </div>`;
+            return;
+        }
+
+        // Initialize state for this day if it doesn't exist
+        if (!completions[currentDayOffset]) {
+            completions[currentDayOffset] = {};
+        }
+
+        const rowLabels = ["Morning", "Afternoon", "Evening"];
+
+        dayExercises.forEach(ex => {
+            const totalBoxes = ex.sets * ex.timesADay;
+            
+            // Setup default false values if new
+            if (!completions[currentDayOffset][ex.id] || completions[currentDayOffset][ex.id].length !== totalBoxes) {
+                completions[currentDayOffset][ex.id] = Array(totalBoxes).fill(false);
+            }
+            
+            const state = completions[currentDayOffset][ex.id];
+            
+            let html = `
+                <div class="exercise-card">
+                    <div class="exercise-title">${ex.title}</div>
+                    <div class="exercise-desc">${ex.desc}</div>
+            `;
+            
+            let boxIndex = 0;
+            for (let t = 0; t < ex.timesADay; t++) {
+                let label = ex.timesADay > 1 ? rowLabels[t] : "Sets";
+                html += `<div class="checkbox-row">
+                            <div class="row-label">${label}:</div>
+                            <div class="checkbox-group">`;
+                
+                for (let s = 0; s < ex.sets; s++) {
+                    const checked = state[boxIndex] ? 'checked' : '';
+                    html += `<input type="checkbox" onchange="toggleBox(${currentDayOffset}, '${ex.id}', ${boxIndex}, this.checked)" ${checked}>`;
+                    boxIndex++;
+                }
+                html += `   </div>
+                         </div>`;
+            }
+            
+            html += `</div>`;
+            container.innerHTML += html;
+        });
+        
+        saveData();
+    }
+
+    function toggleBox(dayOffset, exId, index, isChecked) {
+        completions[dayOffset][exId][index] = isChecked;
+        saveData();
+    }
+
+    function saveData() {
+        localStorage.setItem('ptCompletions', JSON.stringify(completions));
+    }
+
+    function changeDay(delta) {
+        currentDayOffset += delta;
+        if (currentDayOffset < 0) currentDayOffset = 0;
+        renderDay();
+    }
+
+    // --- Summary Logic ---
+    function openSummary() {
+        let fullyCompletedDays = 0;
+        let incompleteDays = 0;
+        let missedItemsHTML = '';
+        
+        // Only look at days BEFORE the day currently being viewed in the app, 
+        // OR before "Today" - based on logic requested, we look at days up to currentDayOffset - 1
+        
+        const actualTodayOffset = Math.floor((new Date().setHours(0,0,0,0) - START_DATE.getTime()) / 86400000);
+        // We will evaluate all days from start up to (actualTodayOffset - 1)
+        
+        for (let i = 0; i < actualTodayOffset; i++) {
+            const requiredEx = getExercisesForDay(i);
+            if (requiredEx.length === 0) continue; // Skip Sundays
+            
+            let dayFullyComplete = true;
+            let missedOnThisDay = [];
+            
+            const dayState = completions[i] || {};
+            
+            requiredEx.forEach(ex => {
+                const totalBoxes = ex.sets * ex.timesADay;
+                const state = dayState[ex.id] || Array(totalBoxes).fill(false);
+                
+                const isExComplete = state.every(val => val === true);
+                if (!isExComplete) {
+                    dayFullyComplete = false;
+                    missedOnThisDay.push(ex.title);
+                }
+            });
+            
+            if (dayFullyComplete) {
+                fullyCompletedDays++;
+            } else {
+                incompleteDays++;
+                
+                // Format the date for the list
+                const d = new Date(START_DATE);
+                d.setDate(d.getDate() + i);
+                const dateStr = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                
+                missedOnThisDay.forEach(title => {
+                    missedItemsHTML += `<li><strong>${dateStr}</strong>: ${title}</li>`;
+                });
+            }
+        }
+        
+        document.getElementById('stat-completed').innerText = fullyCompletedDays;
+        document.getElementById('stat-incomplete').innerText = incompleteDays;
+        
+        const listEl = document.getElementById('missed-list');
+        if (missedItemsHTML === '') {
+            listEl.innerHTML = '<li style="color: #34c759; text-align: center;">You are all caught up on past days! Great job!</li>';
+        } else {
+            listEl.innerHTML = missedItemsHTML;
+        }
+        
+        document.getElementById('summary-modal').style.display = 'flex';
+    }
+
+    function closeSummary() {
+        document.getElementById('summary-modal').style.display = 'none';
+    }
+
+    // Initialize the app on load
+    renderDay();
+
+</script>
+</body>
+</html>
