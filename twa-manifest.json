@@ -19,8 +19,8 @@
     "path": "C:\\Users\\dredf\\Documents\\App Builder\\keystore\\test.keystore",
     "alias": "test"
   },
-  "appVersionName": "3",
-  "appVersionCode": 3,
+  "appVersionName": "4",
+  "appVersionCode": 4,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://kiiwegiuu.github.io/manifest.json",
@@ -41,5 +41,6 @@
   "protocolHandlers": [],
   "fileHandlers": [],
   "launchHandlerClientMode": "",
-  "appVersion": "3"
+  "displayOverride": [],
+  "appVersion": "4"
 }

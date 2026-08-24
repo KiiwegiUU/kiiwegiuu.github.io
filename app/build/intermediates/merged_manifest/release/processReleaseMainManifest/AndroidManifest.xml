@@ -23,12 +23,12 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.kiiwegiuu.tma.tamakegeriyo"
-    android:versionCode="3"
-    android:versionName="3" >
+    android:versionCode="4"
+    android:versionName="4" >
 
     <uses-sdk
         android:minSdkVersion="21"
-        android:targetSdkVersion="35" />
+        android:targetSdkVersion="36" />
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
@@ -68,10 +68,20 @@
             android:name="twa_generator"
             android:value="@string/generatorApp" />
 
-        <activity android:name="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity" >
+        <activity
+            android:name="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity"
+            android:enabled="true"
+            android:excludeFromRecents="true"
+            android:exported="false" >
             <meta-data
                 android:name="android.support.customtabs.trusted.MANAGE_SPACE_URL"
                 android:value="@string/launchUrl" />
+
+            <intent-filter>
+                <action android:name="android.intent.action.APPLICATION_PREFERENCES" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
         <activity
             android:name="org.kiiwegiuu.tma.tamakegeriyo.LauncherActivity"

@@ -4837,12 +4837,12 @@
                 {
                     "source": "C:\\Users\\dredf\\OneDrive\\Documents\\GitHub\\kiiwegiuu.github.io\\app\\src\\main\\res\\values\\strings.xml",
                     "from": {
-                        "startLines": "25",
+                        "startLines": "31",
                         "startColumns": "2",
-                        "startOffsets": "986",
-                        "endLines": "34",
+                        "startOffsets": "1145",
+                        "endLines": "40",
                         "endColumns": "11",
-                        "endOffsets": "1242"
+                        "endOffsets": "1401"
                     },
                     "to": {
                         "startLines": "318",
