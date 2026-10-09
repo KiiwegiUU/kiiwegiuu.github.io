@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PT Tracker">
+    <title>Dave's PT Tracker</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f2f2f7; /* iOS system gray */
+            -webkit-tap-highlight-color: transparent;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        .ios-checkbox input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkmark-circle {
+            position: relative;
+            height: 30px;
+            width: 30px;
+            background-color: transparent;
+            border: 2px solid #c7c7cc;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .ios-checkbox input:checked ~ .checkmark-circle {
+            background-color: #34c759;
+            border-color: #34c759;
+        }
+
+        .checkmark-circle:after {
+            content: "";
+            position: absolute;
+            display: none;
+            left: 10px;
+            top: 6px;
+            width: 7px;
+            height: 13px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .ios-checkbox input:checked ~ .checkmark-circle:after {
+            display: block;
+        }
+
+        .exercise-text {
+            transition: color 0.2s ease;
+        }
+        
+        .ios-checkbox input:checked ~ .exercise-content .exercise-text {
+            color: #8e8e93;
+            text-decoration: line-through;
+        }
+        
+        .ios-checkbox input:checked ~ .exercise-content .instruction-text {
+            opacity: 0.5;
+        }
+
+        .segmented-control {
+            background-color: #e3e3e8;
+            border-radius: 8px;
+            padding: 2px;
+            display: flex;
+            margin: 0 16px 16px 16px;
+        }
+
+        .segment-btn {
+            flex: 1;
+            text-align: center;
+            padding: 8px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #000;
+            border-radius: 6px;
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+
+        .segment-btn.active {
+            background-color: #ffffff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
+        }
+    </style>
+</head>
+<body class="text-gray-900 h-screen flex flex-col">
+
+    <header class="bg-[#f2f2f7] pt-6 pb-2 sticky top-0 z-10 backdrop-blur-md bg-opacity-90 shadow-sm border-b border-gray-200">
+        <div class="flex justify-between items-center px-4 mb-4">
+            <button id="prevBtn" class="p-2 text-blue-500 hover:text-blue-700 active:opacity-50 rounded-full bg-blue-50">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+            
+            <div class="flex flex-col items-center justify-center">
+                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Active Date</span>
+                <div id="dateDisplay" class="text-lg font-bold tracking-tight text-center min-w-[160px]">
+                    <!-- Date inserted by JS -->
+                </div>
+            </div>
+
+            <button id="nextBtn" class="p-2 text-blue-500 hover:text-blue-700 active:opacity-50 rounded-full bg-blue-50">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Routine Selector -->
+        <div class="segmented-control" id="routineTabs">
+            <button class="segment-btn active" data-day="1">Day 1 Routine</button>
+            <button class="segment-btn" data-day="2">Day 2 Routine</button>
+            <button class="segment-btn" data-day="3">Day 3 Routine</button>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto px-4 pb-8 pt-4">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+            <ul id="exerciseList" class="divide-y divide-gray-100">
+                <!-- Javascript will inject list here -->
+            </ul>
+        </div>
+        <p class="text-center text-xs text-gray-400 mt-6 px-4 leading-relaxed">
+            Progress is saved locally on your device specifically for the selected date.
+        </p>
+    </main>
+
+    <script>
+        
+        // Full distinct arrays for each day to ensure complete separation of display logic
+        const day1Routines = [
+            { category: "Warmup", name: "8 min bike warmup", instruction: "8 minutes", query: "exercise bike" },
+            { category: "Floor", name: "Clamshells", instruction: "3 sets of 10 each leg", query: "clamshells" },
+            { category: "Floor", name: "Straight leg raises", instruction: "3 sets of 10 each leg", query: "straight leg raises" },
+            { category: "Floor", name: "Side lying hip abduction", instruction: "3 sets of 10 each leg", query: "side lying hip abduction" },
+            { category: "Bridges", name: "Glute bridge", instruction: "3 sets of 10", query: "glute bridge" },
+            { category: "Bridges", name: "Supine bridge hip adduction", instruction: "3 sets of 10", query: "supine bridge hip adduction" },
+            { category: "Arms/Legs", name: "Hip Abduction 1/2 Squat Pallof Press", instruction: "3 sets of 10", query: "pallof press" },
+            { category: "Arms/Legs", name: "Stride position row", instruction: "3 sets of 10", query: "stride position row" },
+            { category: "Movement", name: "Monster walks", instruction: "10 there, 10 back x 3", query: "monster walks" },
+            { category: "Up/Down", name: "Squat and balance on teeter-totter board", instruction: "3 x 30 sec", query: "balance board squat" },
+            { category: "Up/Down", name: "Lateral step ups", instruction: "3 sets of 10", query: "lateral step ups" },
+            { category: "Up/Down", name: "Squats", instruction: "3 sets of 10", query: "bodyweight squats" },
+            { category: "Cooldown", name: "Seated hamstring stretch", instruction: "2 x 30 sec", query: "seated hamstring stretch" }
+        ];
+
+        const day2Routines = [
+            { category: "Warmup", name: "8 min bike warmup", instruction: "8 minutes", query: "exercise bike" },
+            { category: "Floor", name: "Clamshells", instruction: "3 sets of 10 each leg", query: "clamshells" },
+            { category: "Floor", name: "Straight leg raises", instruction: "3 sets of 10 each leg", query: "straight leg raises" },
+            { category: "Floor", name: "Side lying hip abduction", instruction: "3 sets of 10 each leg", query: "side lying hip abduction" },
+            { category: "Bridges", name: "Stability glute bridge with hamstring curl", instruction: "3 sets of 10", query: "stability ball hamstring curl" },
+            { category: "Bridges", name: "Glute bridges with feet on foam roller", instruction: "3 sets of 10", query: "foam roller glute bridge" },
+            { category: "Arms/Legs", name: "Stride position perpendicular overhead march", instruction: "Overhead elastic march - 3 sets of 10", query: "overhead march" },
+            { category: "Arms/Legs", name: "Stride position fasten seatbelt", instruction: "3 sets of 10", query: "woodchop" },
+            { category: "Movement", name: "Monster walks", instruction: "10 there, 10 back x 3", query: "monster walks" },
+            { category: "Up/Down", name: "Squat and balance on teeter-totter board", instruction: "3 x 30 sec", query: "balance board squat" },
+            { category: "Up/Down", name: "Step down tap lowered heel", instruction: "3 sets of 10", query: "eccentric step down" },
+            { category: "Up/Down", name: "On incline ankle at 120 deg step down", instruction: "3 sets of 10", query: "slant board step down" },
+            { category: "Cooldown", name: "Seated hamstring stretch", instruction: "2 x 30 sec", query: "seated hamstring stretch" }
+        ];
+
+        const day3Routines = [
+            { category: "Warmup", name: "8 min bike warmup", instruction: "8 minutes", query: "exercise bike" },
+            { category: "Floor", name: "Clamshells", instruction: "3 sets of 10 each leg", query: "clamshells" },
+            { category: "Floor", name: "Straight leg raises", instruction: "3 sets of 10 each leg", query: "straight leg raises" },
+            { category: "Floor", name: "Side lying hip abduction", instruction: "3 sets of 10 each leg", query: "side lying hip abduction" },
+            { category: "Bridges", name: "Stability ball bridge with band around knees", instruction: "3 sets of 10", query: "stability ball glute bridge" },
+            { category: "Bridges", name: "Glute bridge", instruction: "3 sets of 10", query: "glute bridge" },
+            { category: "Arms/Legs", name: "Hip Abduction 1/2 Squat Pallof Press", instruction: "3 sets of 10", query: "pallof press" },
+            { category: "Arms/Legs", name: "Stride position row", instruction: "3 sets of 10", query: "stride position row" },
+            { category: "Movement", name: "Monster walks", instruction: "10 there, 10 back x 3", query: "monster walks" },
+            { category: "Up/Down", name: "Squat and balance on teeter-totter board", instruction: "3 x 30 sec", query: "balance board squat" },
+            { category: "Up/Down", name: "Same incline feet together bend knees", instruction: "3 sets of 10", query: "slant board squat" },
+            { category: "Up/Down", name: "Squats", instruction: "3 sets of 10", query: "bodyweight squats" },
+            { category: "Cooldown", name: "Seated hamstring stretch", instruction: "2 x 30 sec", query: "seated hamstring stretch" }
+        ];
+
+        let currentDate = new Date(); // Defaults to today
+        let currentDayTab = 1; // 1, 2, or 3
+
+        const dateDisplay = document.getElementById('dateDisplay');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const exerciseList = document.getElementById('exerciseList');
+        const segmentBtns = document.querySelectorAll('.segment-btn');
+
+        // Formats date for display: "Fri, Oct 9, 2026"
+        function getFormattedDate(date) {
+            const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        // Returns "YYYY-MM-DD" used as part of the unique storage key
+        function getDateString(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // Main local storage key combining prefix and date string
+        function getStorageKey() {
+            return `pt_tracker_state_${getDateString(currentDate)}`;
+        }
+
+        // Retrieve saved state object for the *current date*
+        function getDayState() {
+            const stateStr = localStorage.getItem(getStorageKey());
+            return stateStr ? JSON.parse(stateStr) : {};
+        }
+
+        // Update isolated state property and save back to local storage
+        function setExerciseState(tabIndex, exerciseIndex, isChecked) {
+            const state = getDayState();
+            // Create a perfectly isolated key. Example: "Day1_Index0"
+            const itemKey = `Day${tabIndex}_Index${exerciseIndex}`;
+            state[itemKey] = isChecked;
+            localStorage.setItem(getStorageKey(), JSON.stringify(state));
+        }
+
+        // Check if an isolated exercise is checked in the saved date state
+        function isExerciseChecked(tabIndex, exerciseIndex) {
+            const state = getDayState();
+            const itemKey = `Day${tabIndex}_Index${exerciseIndex}`;
+            return state[itemKey] === true;
+        }
+
+        function updateDateUI() {
+            const today = new Date();
+            const isToday = (currentDate.getDate() === today.getDate() && 
+                             currentDate.getMonth() === today.getMonth() && 
+                             currentDate.getFullYear() === today.getFullYear());
+            
+            let dateText = getFormattedDate(currentDate);
+            if(isToday) {
+                dateText = `<span class="text-blue-600">Today,</span> ` + dateText.substring(dateText.indexOf(',') + 1);
+            }
+            dateDisplay.innerHTML = dateText;
+        }
+
+        function handleTabSwitch(e) {
+            segmentBtns.forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+            currentDayTab = parseInt(e.target.getAttribute('data-day'));
+            renderExercises();
+        }
+
+        function renderExercises() {
+            exerciseList.innerHTML = '';
+            
+            let currentRoutine = [];
+            if (currentDayTab === 1) currentRoutine = day1Routines;
+            else if (currentDayTab === 2) currentRoutine = day2Routines;
+            else if (currentDayTab === 3) currentRoutine = day3Routines;
+
+            let currentCategory = "";
+
+            currentRoutine.forEach((exercise, index) => {
+                // Render category headers when category changes
+                if (exercise.category !== currentCategory) {
+                    const catHeader = document.createElement('li');
+                    catHeader.className = "bg-gray-50 px-4 py-2 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100";
+                    catHeader.textContent = exercise.category;
+                    exerciseList.appendChild(catHeader);
+                    currentCategory = exercise.category;
+                }
+
+                const li = document.createElement('li');
+                li.className = "flex items-stretch min-h-[72px] border-b border-gray-100 last:border-0 bg-white hover:bg-gray-50 transition-colors";
+                
+                // Read isolated state based on routine AND index
+                const isChecked = isExerciseChecked(currentDayTab, index);
+                const checkedAttr = isChecked ? 'checked' : '';
+                const searchUrl = `https://www.rehabhero.ca/search?q=${encodeURIComponent(exercise.query)}`;
+
+                li.innerHTML = `
+                    <label class="ios-checkbox flex-1 flex items-center pl-4 py-3 cursor-pointer select-none">
+                        <input type="checkbox" data-index="${index}" ${checkedAttr}>
+                        <div class="checkmark-circle shadow-sm"></div>
+                        <div class="exercise-content ml-4 pr-2 flex-1">
+                            <p class="exercise-text text-[16px] font-semibold text-gray-900 leading-tight mb-1">${exercise.name}</p>
+                            <p class="instruction-text text-[14px] text-gray-500">${exercise.instruction}</p>
+                        </div>
+                    </label>
+                    <a href="${searchUrl}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center w-16 border-l border-gray-100 active:bg-gray-100 transition-colors group" aria-label="Search exercise">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400 group-hover:text-blue-500 group-active:text-blue-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </a>
+                `;
+
+                const checkbox = li.querySelector('input[type="checkbox"]');
+                checkbox.addEventListener('change', (e) => {
+                    // Save state dynamically isolated to specific Tab and Index for this Date
+                    setExerciseState(currentDayTab, index, e.target.checked);
+                });
+
+                exerciseList.appendChild(li);
+            });
+        }
+
+        prevBtn.addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() - 1);
+            updateView();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() + 1);
+            updateView();
+        });
+
+        segmentBtns.forEach(btn => {
+            btn.addEventListener('click', handleTabSwitch);
+        });
+
+        function updateView() {
+            updateDateUI();
+            renderExercises();
+        }
+
+        // Initialize App
+        updateView();
+
+    </script>
+</body>
+</html>
