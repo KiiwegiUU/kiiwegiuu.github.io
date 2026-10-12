@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Modern Paris Parking Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #f8fafc; /* Slate 50 */
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* Screen Container */
+        .kiosk-screen {
+            background-color: #1e293b; /* Slate 800 */
+            width: 100%;
+            max-width: 1024px; /* iPad Pro landscape width */
+            height: 100%;
+            max-height: 768px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Screen Transitions */
+        .screen-view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            transform: translateX(20px);
+        }
+
+        .screen-view.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(0);
+            z-index: 10;
+        }
+
+        .screen-view.exit {
+            transform: translateX(-20px);
+        }
+
+        /* Modern Keys */
+        .key-btn {
+            background-color: #334155;
+            color: white;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: background-color 0.1s, transform 0.1s;
+            cursor: pointer;
+        }
+
+        .key-btn:active {
+            background-color: #475569;
+            transform: scale(0.95);
+        }
+
+        .key-action {
+            background-color: #10b981; /* Emerald 500 */
+            color: white;
+        }
+        .key-action:active { background-color: #059669; }
+        
+        .key-action:disabled {
+            background-color: #334155;
+            color: #64748b;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .key-delete {
+            background-color: #ef4444; /* Red 500 */
+        }
+        .key-delete:active { background-color: #dc2626; }
+
+        /* NFC Pulse */
+        @keyframes ripple {
+            0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.3), 0 0 0 20px rgba(56, 189, 248, 0.3), 0 0 0 40px rgba(56, 189, 248, 0.3); }
+            100% { box-shadow: 0 0 0 20px rgba(56, 189, 248, 0.3), 0 0 0 40px rgba(56, 189, 248, 0.3), 0 0 0 60px rgba(56, 189, 248, 0); }
+        }
+        .nfc-target {
+            animation: ripple 2s linear infinite;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            box-shadow:  20px 20px 60px #131a25, -20px -20px 60px #293851;
+        }
+
+        /* Ticket Animation */
+        @keyframes print {
+            0% { transform: translateY(-100%); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        .ticket-container {
+            overflow: hidden;
+            position: relative;
+            padding-top: 20px;
+        }
+        .ticket {
+            background-color: white;
+            color: #1e293b;
+            border-radius: 8px 8px 0 0;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            animation: print 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            position: relative;
+        }
+        .ticket::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background: radial-gradient(circle, transparent, transparent 50%, white 50%, white);
+            background-size: 20px 20px;
+            background-position: -10px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="kiosk-screen">
+        
+        <!-- Top Status Bar -->
+        <div class="w-full bg-slate-900/50 backdrop-blur px-8 py-4 flex justify-between items-center z-20 absolute top-0">
+            <div class="flex items-center gap-3">
+                <div class="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"></div>
+                <span class="text-sm font-semibold tracking-wider text-slate-300">STATIONNEMENT PARIS</span>
+            </div>
+            <div class="text-sm font-mono text-slate-400" id="clock">10:06</div>
+        </div>
+
+        <!-- SCREEN 1: License Plate -->
+        <div id="screen-1" class="screen-view active pt-20 pb-8 px-8 flex flex-col justify-between">
+            <div class="text-center mt-6">
+                <h1 class="text-3xl font-light text-slate-200 mb-6">Saisissez votre plaque d'immatriculation</h1>
+                
+                <!-- Input Display -->
+                <div class="flex justify-center mb-8">
+                    <div class="bg-slate-900 border-2 border-slate-600 rounded-2xl h-24 w-full max-w-lg flex items-center justify-center relative">
+                        <div class="absolute left-0 top-0 bottom-0 w-12 bg-blue-600 rounded-l-xl flex flex-col items-center justify-center">
+                            <span class="text-white text-xs font-bold">F</span>
+                        </div>
+                        <span id="plate-display" class="text-5xl font-mono tracking-[0.2em] text-white pl-12 uppercase animate-pulse">_</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Keyboard Layout -->
+            <div class="w-full max-w-4xl mx-auto flex flex-col gap-3">
+                <!-- Numbers -->
+                <div class="grid grid-cols-10 gap-3 h-16">
+                    <div class="key-btn" onclick="addChar('1')">1</div>
+                    <div class="key-btn" onclick="addChar('2')">2</div>
+                    <div class="key-btn" onclick="addChar('3')">3</div>
+                    <div class="key-btn" onclick="addChar('4')">4</div>
+                    <div class="key-btn" onclick="addChar('5')">5</div>
+                    <div class="key-btn" onclick="addChar('6')">6</div>
+                    <div class="key-btn" onclick="addChar('7')">7</div>
+                    <div class="key-btn" onclick="addChar('8')">8</div>
+                    <div class="key-btn" onclick="addChar('9')">9</div>
+                    <div class="key-btn" onclick="addChar('0')">0</div>
+                </div>
+                <!-- Row 1 -->
+                <div class="grid grid-cols-10 gap-3 h-16">
+                    <div class="key-btn" onclick="addChar('A')">A</div>
+                    <div class="key-btn" onclick="addChar('Z')">Z</div>
+                    <div class="key-btn" onclick="addChar('E')">E</div>
+                    <div class="key-btn" onclick="addChar('R')">R</div>
+                    <div class="key-btn" onclick="addChar('T')">T</div>
+                    <div class="key-btn" onclick="addChar('Y')">Y</div>
+                    <div class="key-btn" onclick="addChar('U')">U</div>
+                    <div class="key-btn" onclick="addChar('I')">I</div>
+                    <div class="key-btn" onclick="addChar('O')">O</div>
+                    <div class="key-btn" onclick="addChar('P')">P</div>
+                </div>
+                <!-- Row 2 -->
+                <div class="grid grid-cols-10 gap-3 h-16 px-6">
+                    <div class="key-btn" onclick="addChar('Q')">Q</div>
+                    <div class="key-btn" onclick="addChar('S')">S</div>
+                    <div class="key-btn" onclick="addChar('D')">D</div>
+                    <div class="key-btn" onclick="addChar('F')">F</div>
+                    <div class="key-btn" onclick="addChar('G')">G</div>
+                    <div class="key-btn" onclick="addChar('H')">H</div>
+                    <div class="key-btn" onclick="addChar('J')">J</div>
+                    <div class="key-btn" onclick="addChar('K')">K</div>
+                    <div class="key-btn" onclick="addChar('L')">L</div>
+                    <div class="key-btn" onclick="addChar('M')">M</div>
+                </div>
+                <!-- Row 3 -->
+                <div class="grid grid-cols-10 gap-3 h-16">
+                    <div class="col-span-1"></div>
+                    <div class="key-btn" onclick="addChar('W')">W</div>
+                    <div class="key-btn" onclick="addChar('X')">X</div>
+                    <div class="key-btn" onclick="addChar('C')">C</div>
+                    <div class="key-btn" onclick="addChar('V')">V</div>
+                    <div class="key-btn" onclick="addChar('B')">B</div>
+                    <div class="key-btn" onclick="addChar('N')">N</div>
+                    <div class="key-btn" onclick="addChar('-')">-</div>
+                    <!-- Actions -->
+                    <div class="key-btn key-delete col-span-1 flex justify-center items-center" onclick="delChar()">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z"></path></svg>
+                    </div>
+                    <button id="btn-valider-plate" class="key-btn key-action col-span-1 font-bold text-2xl shadow-[0_0_15px_rgba(16,185,129,0.4)]" onclick="goToScreen2()" disabled>V</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: Tariff -->
+        <div id="screen-2" class="screen-view pt-24 pb-12 px-12 flex flex-col items-center justify-between">
+            <div class="text-center w-full">
+                <div class="bg-slate-700/50 inline-block px-6 py-2 rounded-full mb-6">
+                    <span class="text-slate-300 font-mono text-lg" id="display-plate-header">AB-123-CD</span>
+                </div>
+                <h1 class="text-3xl font-light text-slate-200 mb-2">Tarif: 4,00€/h</h1>
+                <p class="text-slate-400">Utilisez + pour ajuster la durée du stationnement.</p>
+            </div>
+
+            <!-- Big Adjuster -->
+            <div class="flex items-center justify-center gap-12 w-full mt-4">
+                <button class="w-24 h-24 rounded-full bg-slate-700 flex items-center justify-center text-5xl hover:bg-slate-600 active:scale-95 transition-all shadow-lg" onclick="adjustTariff(-30)">-</button>
+                
+                <div class="flex flex-col items-center justify-center bg-slate-900 rounded-3xl p-8 w-80 shadow-inner border border-slate-700/50">
+                    <div class="text-6xl font-bold text-white mb-2" id="tariff-cost">0,00€</div>
+                    <div class="text-2xl text-sky-400 font-medium" id="tariff-time">0h00</div>
+                </div>
+
+                <button class="w-24 h-24 rounded-full bg-slate-700 flex items-center justify-center text-5xl hover:bg-slate-600 active:scale-95 transition-all shadow-lg" onclick="adjustTariff(30)">+</button>
+            </div>
+
+            <!-- Validation Button -->
+            <div class="w-full max-w-md mx-auto mt-8">
+                <button id="btn-valider-tariff" class="w-full py-6 rounded-2xl key-action text-3xl font-bold flex items-center justify-center gap-4 transition-all shadow-[0_10px_25px_rgba(16,185,129,0.3)]" onclick="goToScreen3()" disabled>
+                    <span class="text-4xl">V</span> <span class="font-normal text-2xl">Valider et Payer</span>
+                </button>
+                <div class="mt-6 text-center">
+                    <button class="text-slate-500 hover:text-slate-300 underline underline-offset-4 text-lg" onclick="goToScreen1()">Retour</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: Payment -->
+        <div id="screen-3" class="screen-view pt-24 pb-12 px-12 flex flex-col items-center justify-center gap-12">
+            <div class="text-center w-full max-w-2xl">
+                <h1 class="text-4xl font-light text-slate-200 mb-4">Total: <span id="payment-total" class="font-bold text-white">8,00€</span> (<span id="payment-time" class="text-sky-400 font-medium">2h00</span>)</h1>
+                <p class="text-xl text-slate-400">Présentez votre carte de paiement sur le lecteur ci-dessous.</p>
+            </div>
+
+            <!-- Interactive NFC Reader -->
+            <div class="relative w-64 h-64 flex items-center justify-center cursor-pointer group" onclick="simulatePayment()">
+                <div class="nfc-target absolute inset-0"></div>
+                <div class="relative z-10 w-40 h-40 rounded-full bg-slate-800 border-4 border-slate-600 flex items-center justify-center group-hover:bg-slate-700 transition-colors shadow-2xl">
+                    <svg class="w-20 h-20 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12h18" />
+                    </svg>
+                </div>
+            </div>
+            
+            <div id="payment-status" class="h-8 text-xl font-medium text-emerald-400 opacity-0 transition-opacity">
+                Traitement en cours...
+            </div>
+            
+            <button class="absolute bottom-8 right-8 px-6 py-3 rounded-lg bg-slate-800 text-slate-400 hover:text-white" onclick="resetApp()">Annuler</button>
+        </div>
+
+        <!-- SCREEN 4: Success -->
+        <div id="screen-4" class="screen-view pt-24 pb-12 px-12 flex flex-col items-center justify-center">
+            
+            <div class="flex items-center gap-6 mb-12">
+                <div class="w-16 h-16 rounded-full bg-emerald-500 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.5)]">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <h1 class="text-4xl font-semibold text-white">Paiement accepté.</h1>
+            </div>
+
+            <p class="text-2xl text-slate-300 mb-12 font-light">Retirez votre ticket ci-dessous.</p>
+
+            <!-- Ticket Dispenser -->
+            <div class="w-full max-w-sm border-t-8 border-slate-900 ticket-container relative">
+                <div class="absolute top-0 w-full h-4 bg-slate-900/50 shadow-inner z-20"></div>
+                
+                <!-- Ticket Graphic -->
+                <div class="ticket flex flex-col w-64 mx-auto z-10 font-mono">
+                    <div class="text-center border-b-2 border-slate-200 pb-3 mb-3">
+                        <h2 class="font-bold text-lg">VILLE DE PARIS</h2>
+                        <p class="text-xs text-slate-500">Reçu de stationnement</p>
+                    </div>
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="text-slate-500">Plaque:</span>
+                        <span class="font-bold" id="receipt-plate"></span>
+                    </div>
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="text-slate-500">Fin val.:</span>
+                        <span class="font-bold" id="receipt-time"></span>
+                    </div>
+                    <div class="flex justify-between text-sm mt-4 pt-2 border-t border-slate-200 border-dashed">
+                        <span class="text-slate-500">Montant payé:</span>
+                        <span class="font-bold text-lg" id="receipt-cost"></span>
+                    </div>
+                </div>
+            </div>
+
+            <button class="mt-16 px-8 py-4 rounded-xl bg-slate-700 text-white font-medium hover:bg-slate-600 shadow-lg" onclick="resetApp()">Terminer</button>
+
+        </div>
+    </div>
+
+    <script>
+        // App State
+        let plate = "";
+        let durationMins = 0;
+        let costEuros = 0;
+        const COST_PER_30_MIN = 2.0;
+
+        // Elements
+        const plateDisplay = document.getElementById('plate-display');
+        const btnValiderPlate = document.getElementById('btn-valider-plate');
+        const btnValiderTariff = document.getElementById('btn-valider-tariff');
+        
+        // Setup Clock
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // View Router
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen-view').forEach(screen => {
+                if(screen.classList.contains('active')) {
+                    screen.classList.remove('active');
+                    screen.classList.add('exit');
+                    setTimeout(() => screen.classList.remove('exit'), 400);
+                }
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // --- Screen 1 Logic ---
+        function addChar(char) {
+            if (plate.length < 9) {
+                plate += char;
+                updatePlateUI();
+            }
+        }
+
+        function delChar() {
+            if (plate.length > 0) {
+                plate = plate.slice(0, -1);
+                updatePlateUI();
+            }
+        }
+
+        function updatePlateUI() {
+            if (plate.length === 0) {
+                plateDisplay.textContent = "_";
+                plateDisplay.classList.add('animate-pulse');
+                btnValiderPlate.disabled = true;
+            } else {
+                plateDisplay.textContent = plate;
+                plateDisplay.classList.remove('animate-pulse');
+                btnValiderPlate.disabled = false;
+            }
+        }
+
+        function goToScreen2() {
+            if(plate.length > 0) {
+                document.getElementById('display-plate-header').textContent = plate;
+                switchScreen('screen-2');
+            }
+        }
+
+        function goToScreen1() {
+            switchScreen('screen-1');
+        }
+
+        // --- Screen 2 Logic ---
+        function adjustTariff(mins) {
+            const newDuration = durationMins + mins;
+            if (newDuration >= 0 && newDuration <= 600) { // Max 10 hours
+                durationMins = newDuration;
+                costEuros = (durationMins / 30) * COST_PER_30_MIN;
+                updateTariffUI();
+            }
+        }
+
+        function formatDuration(mins) {
+            const h = Math.floor(mins / 60);
+            const m = mins % 60;
+            return `${h}h${m === 0 ? '00' : m}`;
+        }
+
+        function formatCost(euros) {
+            return euros.toFixed(2).replace('.', ',') + '€';
+        }
+
+        function updateTariffUI() {
+            document.getElementById('tariff-cost').textContent = formatCost(costEuros);
+            document.getElementById('tariff-time').textContent = formatDuration(durationMins);
+            
+            btnValiderTariff.disabled = (durationMins === 0);
+        }
+
+        function goToScreen3() {
+            if(durationMins > 0) {
+                document.getElementById('payment-total').textContent = formatCost(costEuros);
+                document.getElementById('payment-time').textContent = formatDuration(durationMins);
+                switchScreen('screen-3');
+            }
+        }
+
+        // --- Screen 3 & 4 Logic ---
+        let isProcessing = false;
+        
+        function simulatePayment() {
+            if (isProcessing) return;
+            isProcessing = true;
+            
+            const statusEl = document.getElementById('payment-status');
+            statusEl.classList.remove('opacity-0');
+            
+            // Simulate 1.5s network delay
+            setTimeout(() => {
+                isProcessing = false;
+                statusEl.classList.add('opacity-0');
+                
+                // Populate Receipt data
+                document.getElementById('receipt-plate').textContent = plate;
+                document.getElementById('receipt-cost').textContent = formatCost(costEuros);
+                
+                // Calculate end time for ticket
+                const endTime = new Date();
+                endTime.setMinutes(endTime.getMinutes() + durationMins);
+                document.getElementById('receipt-time').textContent = endTime.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+                
+                // Trigger reflow for ticket animation
+                const ticket = document.querySelector('.ticket');
+                ticket.style.animation = 'none';
+                ticket.offsetHeight; /* trigger reflow */
+                ticket.style.animation = null;
+
+                switchScreen('screen-4');
+            }, 1500);
+        }
+
+        // --- Reset ---
+        function resetApp() {
+            plate = "";
+            durationMins = 0;
+            costEuros = 0;
+            updatePlateUI();
+            updateTariffUI();
+            switchScreen('screen-1');
+        }
+
+    </script>
+</body>
+</html>
