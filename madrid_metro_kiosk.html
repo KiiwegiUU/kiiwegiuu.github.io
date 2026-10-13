@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Madrid Metro Kiosk</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --pink-line: #ec4899;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background-color: #000000;
+            color: #f8fafc;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        /* Fluid full-screen container */
+        .kiosk-container {
+            width: 100%;
+            min-height: 100vh;
+            background-color: #0f172a;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Map Background Pattern */
+        .map-bg {
+            position: absolute;
+            inset: 0;
+            opacity: 0.10;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(236, 72, 153, 0.4), transparent 30%),
+                radial-gradient(circle at 85% 30%, rgba(56, 189, 248, 0.4), transparent 30%),
+                linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            transform: scale(0.98) translateY(10px);
+            z-index: 10;
+            min-height: 100vh;
+        }
+
+        .screen.active {
+            position: relative;
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1) translateY(0);
+            z-index: 20;
+        }
+
+        /* Keyboard Grid setup for responsive keys */
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            gap: 1%;
+            margin-bottom: 1vh;
+            width: 100%;
+        }
+        
+        .keyboard-key {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(1rem, 4vw, 1.75rem);
+            font-weight: 500;
+            flex: 1;
+            height: clamp(3rem, 8vh, 5rem);
+            transition: all 0.1s;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .keyboard-key:active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0.95);
+        }
+        .keyboard-key.wide {
+            flex: 2;
+        }
+        .keyboard-key.spacer {
+            flex: 0.5;
+            background: transparent;
+            border: none;
+            pointer-events: none;
+        }
+
+        @keyframes drawLine {
+            from { height: 0; }
+            to { height: 100%; }
+        }
+        .route-line {
+            width: 8px;
+            background-color: var(--pink-line);
+            border-radius: 4px;
+            position: absolute;
+            left: 1.25rem;
+            top: 2rem;
+            bottom: 2rem;
+            transform-origin: top;
+            animation: drawLine 1.5s ease-out forwards;
+        }
+        
+        /* Custom Scrollbar for Timeline */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(236, 72, 153, 0.5);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(236, 72, 153, 0.8);
+        }
+
+        /* Utility to ensure text doesn't overflow unexpectedly */
+        .text-balance {
+            text-wrap: balance;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="kiosk-container">
+        <div class="map-bg"></div>
+
+        <!-- Header: Clock & Languages -->
+        <div class="absolute top-0 left-0 w-full p-4 sm:p-6 flex justify-between items-start z-30 pointer-events-none">
+            <div class="glass px-4 py-2 rounded-full pointer-events-auto">
+                <span class="text-sm sm:text-base font-mono tracking-widest text-slate-300 font-semibold" id="clock">12:45</span>
+            </div>
+            
+            <div class="flex gap-2 sm:gap-4 pointer-events-auto">
+                <button onclick="setLanguage('es')" id="btn-es" class="glass w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-2xl sm:text-3xl transition-transform active:scale-95 border-2 border-transparent">
+                    🇪🇸
+                </button>
+                <button onclick="setLanguage('en')" id="btn-en" class="glass w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-2xl sm:text-3xl transition-transform active:scale-95 border-2 border-transparent">
+                    🇬🇧
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 1: Home -->
+        <div id="screen-home" class="screen active p-6 sm:p-12 flex flex-col justify-center items-center">
+            
+            <div class="flex flex-col items-center mb-10 w-full max-w-2xl z-20">
+                <div class="w-20 h-20 sm:w-28 sm:h-28 bg-blue-600 rounded-3xl flex items-center justify-center shadow-[0_0_40px_rgba(37,99,235,0.4)] mb-6 sm:mb-8 transform rotate-3">
+                    <svg class="w-10 h-10 sm:w-14 sm:h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path></svg>
+                </div>
+                <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold text-center leading-tight mb-4 text-balance" id="ui-home-title">
+                    ¿A dónde vas?
+                </h1>
+                <p class="text-slate-400 text-lg sm:text-xl md:text-2xl" id="ui-home-subtitle">Toca para buscar tu destino</p>
+            </div>
+
+            <div class="z-20 w-full max-w-2xl mt-4">
+                <label class="block text-base sm:text-lg font-medium text-slate-400 mb-3 ml-2" id="ui-search-label">Destino / Estación de destino</label>
+                <!-- Fake Input Field to prevent native keyboard -->
+                <div onclick="goToSearch()" class="w-full glass rounded-2xl h-16 sm:h-24 flex items-center px-6 cursor-pointer hover:bg-white/10 transition-colors group shadow-lg">
+                    <svg class="w-6 h-6 sm:w-8 sm:h-8 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <span class="ml-4 text-xl sm:text-2xl text-slate-500" id="ui-search-placeholder">Buscar estación...</span>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- SCREEN 2: Search & Keyboard -->
+        <div id="screen-search" class="screen pt-24 sm:pt-32 px-4 sm:px-8 flex flex-col h-full bg-slate-900/95 z-20">
+            
+            <div class="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6 max-w-4xl mx-auto w-full">
+                <button onclick="goHome()" class="w-12 h-12 sm:w-16 sm:h-16 glass rounded-full flex items-center justify-center active:bg-white/10 shrink-0">
+                    <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <div class="flex-1 glass rounded-2xl h-14 sm:h-20 flex items-center px-4 sm:px-6 border-blue-500/50 border overflow-hidden">
+                    <!-- Fake Input Display -->
+                    <div id="search-input-display" class="text-2xl sm:text-4xl font-medium w-full text-white tracking-wide truncate">
+                        <span class="animate-pulse opacity-50">|</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suggestions Area -->
+            <div class="flex-1 relative mb-4 max-w-4xl mx-auto w-full">
+                <div id="suggestion-box" class="absolute top-0 left-0 w-full glass rounded-2xl overflow-hidden opacity-0 transform translate-y-4 transition-all duration-300 pointer-events-none">
+                    <div onclick="goToRoute()" class="p-4 sm:p-6 border-b border-white/10 flex items-center justify-between cursor-pointer active:bg-white/20">
+                        <div class="flex items-center gap-4 sm:gap-6">
+                            <div class="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-xl sm:text-2xl shadow-[0_0_15px_rgba(236,72,153,0.5)] shrink-0">8</div>
+                            <div>
+                                <h3 class="text-xl sm:text-3xl font-bold">Aeropuerto T1-T2-T3</h3>
+                                <p class="text-slate-400 mt-1 flex items-center gap-2 text-sm sm:text-lg">
+                                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"></path></svg>
+                                    <span id="ui-sugg-line">Línea 8</span>
+                                </p>
+                            </div>
+                        </div>
+                        <svg class="w-6 h-6 sm:w-10 sm:h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom On-Screen Keyboard -->
+            <div class="w-full max-w-5xl mx-auto pb-4 sm:pb-8 mt-auto">
+                <div class="bg-slate-800/80 rounded-3xl p-3 sm:p-5 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] backdrop-blur-md">
+                    <!-- Row 1 -->
+                    <div class="keyboard-row">
+                        <div class="keyboard-key" onclick="typeChar('Q')">Q</div>
+                        <div class="keyboard-key" onclick="typeChar('W')">W</div>
+                        <div class="keyboard-key" onclick="typeChar('E')">E</div>
+                        <div class="keyboard-key" onclick="typeChar('R')">R</div>
+                        <div class="keyboard-key" onclick="typeChar('T')">T</div>
+                        <div class="keyboard-key" onclick="typeChar('Y')">Y</div>
+                        <div class="keyboard-key" onclick="typeChar('U')">U</div>
+                        <div class="keyboard-key" onclick="typeChar('I')">I</div>
+                        <div class="keyboard-key" onclick="typeChar('O')">O</div>
+                        <div class="keyboard-key" onclick="typeChar('P')">P</div>
+                    </div>
+                    <!-- Row 2 -->
+                    <div class="keyboard-row w-[95%] mx-auto">
+                        <div class="keyboard-key" onclick="typeChar('A')">A</div>
+                        <div class="keyboard-key" onclick="typeChar('S')">S</div>
+                        <div class="keyboard-key" onclick="typeChar('D')">D</div>
+                        <div class="keyboard-key" onclick="typeChar('F')">F</div>
+                        <div class="keyboard-key" onclick="typeChar('G')">G</div>
+                        <div class="keyboard-key" onclick="typeChar('H')">H</div>
+                        <div class="keyboard-key" onclick="typeChar('J')">J</div>
+                        <div class="keyboard-key" onclick="typeChar('K')">K</div>
+                        <div class="keyboard-key" onclick="typeChar('L')">L</div>
+                        <div class="keyboard-key" onclick="typeChar('Ñ')">Ñ</div>
+                    </div>
+                    <!-- Row 3 -->
+                    <div class="keyboard-row">
+                        <div class="keyboard-key spacer"></div>
+                        <div class="keyboard-key" onclick="typeChar('Z')">Z</div>
+                        <div class="keyboard-key" onclick="typeChar('X')">X</div>
+                        <div class="keyboard-key" onclick="typeChar('C')">C</div>
+                        <div class="keyboard-key" onclick="typeChar('V')">V</div>
+                        <div class="keyboard-key" onclick="typeChar('B')">B</div>
+                        <div class="keyboard-key" onclick="typeChar('N')">N</div>
+                        <div class="keyboard-key" onclick="typeChar('M')">M</div>
+                        <div class="keyboard-key wide bg-red-500/20 text-red-400" onclick="delChar()">⌫</div>
+                    </div>
+                    <!-- Row 4 (Space) -->
+                    <div class="keyboard-row w-[60%] mx-auto mt-2 sm:mt-4">
+                        <div class="keyboard-key wide" onclick="typeChar(' ')" id="ui-keyboard-space">ESPACIO</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: Route Summary -->
+        <div id="screen-route" class="screen pt-20 sm:pt-28 px-4 sm:px-8 pb-8 flex flex-col bg-slate-900/95 z-30">
+            
+            <div class="max-w-4xl mx-auto w-full relative flex-1 flex flex-col">
+                <button onclick="goHome()" class="absolute -top-4 sm:top-0 left-0 w-12 h-12 sm:w-16 sm:h-16 glass rounded-full flex items-center justify-center active:bg-white/10 z-40">
+                    <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+
+                <div class="text-center mt-12 sm:mt-4 mb-8 sm:mb-12 relative z-20 px-4">
+                    <h2 class="text-3xl sm:text-5xl font-bold mb-4 sm:mb-6">Aeropuerto T1-T2-T3</h2>
+                    
+                    <div class="inline-flex items-center gap-3 sm:gap-4 glass px-4 sm:px-8 py-3 sm:py-4 rounded-full border border-pink-500/30 bg-pink-500/10 max-w-full">
+                        <div class="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-pink-500 flex items-center justify-center shadow-[0_0_20px_rgba(236,72,153,0.6)] shrink-0">
+                            <svg class="w-5 h-5 sm:w-7 sm:h-7 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
+                        </div>
+                        <span class="text-lg sm:text-2xl font-medium text-pink-400 truncate" id="ui-route-direct">Línea 8 Rosa: Destino - Nuevos Ministerios</span>
+                    </div>
+                </div>
+
+                <!-- Visual Route Timeline -->
+                <div class="flex-1 relative glass rounded-3xl p-6 sm:p-10 mb-12 flex flex-col shadow-2xl bg-white/5">
+                    <div class="relative pl-12 sm:pl-16 py-2">
+                        <!-- Line connecting stops -->
+                        <div class="absolute left-4 sm:left-6 top-4 bottom-4 w-1 sm:w-1.5 bg-pink-500 rounded-full opacity-80"></div>
+                        
+                        <!-- Start Point -->
+                        <div class="relative z-10 flex items-center mb-10 sm:mb-12">
+                            <div class="absolute left-[-2.7rem] sm:left-[-3.35rem] w-6 h-6 sm:w-8 sm:h-8 rounded-full border-[4px] sm:border-[5px] border-slate-900 bg-white"></div>
+                            <div>
+                                <h4 class="text-xl sm:text-2xl font-bold" id="ui-route-here">Usted está aquí</h4>
+                                <p class="text-slate-400 text-sm sm:text-base mt-1" id="ui-route-curr-station">Estación Actual</p>
+                            </div>
+                        </div>
+
+                        <!-- Intermediate Stops -->
+                        <div class="relative z-10 flex items-center mb-10 sm:mb-12">
+                            <div class="absolute left-[-2.3rem] sm:left-[-2.95rem] w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-300 border-[3px] border-slate-900"></div>
+                            <span class="text-lg sm:text-xl text-slate-300 font-medium">Feria de Madrid</span>
+                        </div>
+                        <div class="relative z-10 flex items-center mb-10 sm:mb-12">
+                            <div class="absolute left-[-2.3rem] sm:left-[-2.95rem] w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-300 border-[3px] border-slate-900"></div>
+                            <span class="text-lg sm:text-xl text-slate-300 font-medium">Mar de Cristal</span>
+                        </div>
+                        <div class="relative z-10 flex items-center mb-10 sm:mb-12">
+                            <div class="absolute left-[-2.3rem] sm:left-[-2.95rem] w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-300 border-[3px] border-slate-900"></div>
+                            <span class="text-lg sm:text-xl text-slate-300 font-medium">Pinar del Rey</span>
+                        </div>
+                        <div class="relative z-10 flex items-center mb-10 sm:mb-12">
+                            <div class="absolute left-[-2.3rem] sm:left-[-2.95rem] w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-300 border-[3px] border-slate-900"></div>
+                            <span class="text-lg sm:text-xl text-slate-300 font-medium">Colombia</span>
+                        </div>
+
+                        <!-- Aeropuerto (Destination) -->
+                        <div class="relative z-10 flex items-center mb-10 sm:mb-12">
+                            <div class="absolute left-[-2.95rem] sm:left-[-3.65rem] w-10 h-10 sm:w-12 sm:h-12 rounded-full border-[4px] sm:border-[6px] border-slate-900 bg-pink-500 flex items-center justify-center">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
+                            </div>
+                            <div class="glass px-5 py-3 rounded-2xl bg-pink-500/20 border-pink-500/40 w-full sm:w-auto">
+                                <h4 class="text-xl sm:text-3xl font-bold text-pink-400">Aeropuerto T1-T2-T3</h4>
+                                <p class="text-pink-300/80 text-sm sm:text-lg mt-1" id="ui-route-arrival">Llegada</p>
+                            </div>
+                        </div>
+
+                        <!-- End of Line -->
+                        <div class="relative z-10 flex items-center opacity-50">
+                            <div class="absolute left-[-2.3rem] sm:left-[-2.95rem] w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-500 border-[3px] border-slate-900"></div>
+                            <span class="text-lg sm:text-xl text-slate-400 font-medium">Nuevos Ministerios</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // State
+        let currentLang = 'es';
+        let searchQuery = "";
+        
+        // Translation Dictionary (Complete coverage of dynamic UI elements)
+        const dict = {
+            'es': {
+                'ui-home-title': '¿A dónde vas?',
+                'ui-home-subtitle': 'Toca para buscar tu destino',
+                'ui-search-label': 'Destino / Estación de destino',
+                'ui-search-placeholder': 'Buscar estación...',
+                'ui-keyboard-space': 'ESPACIO',
+                'ui-sugg-line': 'Línea 8',
+                'ui-route-direct': 'Línea 8 Rosa: Destino - Nuevos Ministerios',
+                'ui-route-here': 'Usted está aquí',
+                'ui-route-curr-station': 'Estación Actual',
+                'ui-route-arrival': 'Llegada'
+            },
+            'en': {
+                'ui-home-title': 'Where are you going?',
+                'ui-home-subtitle': 'Tap to search for your destination',
+                'ui-search-label': 'Destination',
+                'ui-search-placeholder': 'Search station...',
+                'ui-keyboard-space': 'SPACE',
+                'ui-sugg-line': 'Line 8',
+                'ui-route-direct': 'Pink Line 8: Destination - Nuevos Ministerios',
+                'ui-route-here': 'You are here',
+                'ui-route-curr-station': 'Current Station',
+                'ui-route-arrival': 'Arrival'
+            }
+        };
+
+        const screens = document.querySelectorAll('.screen');
+        const searchInputDisplay = document.getElementById('search-input-display');
+        const suggestionBox = document.getElementById('suggestion-box');
+        
+        // Setup Clock
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Language Management
+        function setLanguage(lang) {
+            currentLang = lang;
+            
+            // Update Active Flag Button styling
+            document.getElementById('btn-es').style.borderColor = 'transparent';
+            document.getElementById('btn-es').style.backgroundColor = 'rgba(255,255,255,0.05)';
+            document.getElementById('btn-en').style.borderColor = 'transparent';
+            document.getElementById('btn-en').style.backgroundColor = 'rgba(255,255,255,0.05)';
+            
+            const activeBtn = document.getElementById(`btn-${lang}`);
+            activeBtn.style.borderColor = 'rgba(255,255,255,0.4)';
+            activeBtn.style.backgroundColor = 'rgba(255,255,255,0.15)';
+
+            // Update all translated strings
+            for (const key in dict[lang]) {
+                const el = document.getElementById(key);
+                if (el) {
+                    el.textContent = dict[lang][key];
+                }
+            }
+            
+            // Update fake input placeholder if empty
+            updateSearchUI();
+        }
+
+        // Init language
+        setLanguage('es');
+
+        // Navigation
+        function switchScreen(screenId) {
+            screens.forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function goHome() {
+            searchQuery = "";
+            updateSearchUI();
+            suggestionBox.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+            suggestionBox.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+            switchScreen('screen-home');
+        }
+
+        function goToSearch() {
+            switchScreen('screen-search');
+        }
+
+        function goToRoute() {
+            // Re-trigger line animation by cloning element
+            const line = document.querySelector('.route-line');
+            if(line) {
+                const newLine = line.cloneNode(true);
+                line.parentNode.replaceChild(newLine, line);
+            }
+            switchScreen('screen-route');
+        }
+
+        // Custom Keyboard Logic
+        function typeChar(char) {
+            searchQuery += char;
+            updateSearchUI();
+            checkSuggestions();
+        }
+
+        function delChar() {
+            searchQuery = searchQuery.slice(0, -1);
+            updateSearchUI();
+            checkSuggestions();
+        }
+
+        function updateSearchUI() {
+            if (searchQuery.length === 0) {
+                // Show empty state / placeholder
+                searchInputDisplay.innerHTML = '<span class="animate-pulse opacity-50">|</span>';
+            } else {
+                searchInputDisplay.innerHTML = searchQuery + '<span class="animate-pulse opacity-50 ml-1">|</span>';
+            }
+        }
+
+        function checkSuggestions() {
+            // Dropdown triggers when user types anything to keep mock simple
+            if (searchQuery.length > 0) {
+                suggestionBox.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+                suggestionBox.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+            } else {
+                suggestionBox.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                suggestionBox.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+            }
+        }
+
+    </script>
+</body>
+</html>
