@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Automated Customs Terminal</title>
+    <style>
+        :root {
+            /* Deep institutional dark theme */
+            --bg-color: #0f172a;
+            --header-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-color: #3b82f6;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            /* Prevent text selection and zoom on iPad */
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Styles */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 3rem;
+            background-color: var(--header-bg);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 50;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        header.hidden {
+            opacity: 0;
+            transform: translateY(-100%);
+            pointer-events: none;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+            letter-spacing: 1px;
+        }
+
+        .logo-area svg {
+            width: 32px;
+            height: 32px;
+            stroke: var(--accent-color);
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .header-lang-switcher {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .h-lang-btn {
+            background: transparent;
+            border: 2px solid var(--text-muted);
+            color: var(--text-muted);
+            padding: 0.5rem 1rem;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .h-lang-btn.active {
+            border-color: var(--text-color);
+            color: var(--text-color);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Main Screen Container */
+        main {
+            flex: 1;
+            position: relative;
+            margin-top: 80px; /* Offset for header */
+            height: calc(100% - 80px);
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        .screen.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Full page centering for Screen 1 (no header) */
+        #screen-1 {
+            margin-top: -80px; 
+            height: 100vh;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 500;
+            line-height: 1.4;
+            max-width: 80%;
+            margin-bottom: 2rem;
+            letter-spacing: -0.5px;
+        }
+
+        .icon-container {
+            margin-bottom: 3rem;
+        }
+
+        .icon-container svg {
+            width: 140px;
+            height: 140px;
+            stroke: var(--text-color);
+            stroke-width: 1.5;
+            fill: none;
+        }
+
+        /* Screen 1 Large Language Buttons */
+        .start-lang-grid {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .start-lang-btn {
+            background-color: var(--header-bg);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            font-size: 1.75rem;
+            padding: 2rem 4rem;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .start-lang-btn:active {
+            transform: scale(0.97);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* SVG Animations */
+        .animated-icon {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+        }
+
+        .screen.active .animated-icon {
+            animation: drawPath 0.8s ease-out forwards;
+        }
+
+        @keyframes drawPath {
+            to { stroke-dashoffset: 0; }
+        }
+
+        .success-color {
+            stroke: var(--success-color) !important;
+        }
+
+        .error-color {
+            stroke: var(--error-color) !important;
+            color: var(--error-color);
+        }
+
+        /* Stealth Buttons */
+        .stealth-zone {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .stealth-btn {
+            width: 70px;
+            height: 70px;
+            background-color: rgba(255, 255, 255, 0.03); /* Extremely faint */
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            outline: none;
+            transition: background-color 0.1s;
+        }
+
+        .stealth-btn:active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Header -->
+    <header id="app-header" class="hidden">
+        <div class="logo-area">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <span id="txt-logo-title">Border Control</span>
+        </div>
+        <div class="header-lang-switcher">
+            <button class="h-lang-btn" id="btn-fr" onclick="switchHeaderLang('fr')">FR</button>
+            <button class="h-lang-btn active" id="btn-en" onclick="switchHeaderLang('en')">EN</button>
+            <button class="h-lang-btn" id="btn-es" onclick="switchHeaderLang('es')">ES</button>
+        </div>
+    </header>
+
+    <main>
+        <!-- Screen 1: Language Selection -->
+        <div id="screen-1" class="screen active">
+            <div class="icon-container">
+                <svg viewBox="0 0 24 24" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+            </div>
+            <div class="start-lang-grid">
+                <button class="start-lang-btn" onclick="startApp('fr')">Français</button>
+                <button class="start-lang-btn" onclick="startApp('en')">English</button>
+                <button class="start-lang-btn" onclick="startApp('es')">Español</button>
+            </div>
+        </div>
+
+        <!-- Screen 2: Passport Scan -->
+        <div id="screen-2" class="screen">
+            <div class="icon-container">
+                <svg viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="16" rx="2" ry="2"></rect>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                    <line x1="7" y1="15" x2="7.01" y2="15" stroke-width="3" stroke-linecap="round"></line>
+                    <line x1="11" y1="15" x2="17" y2="15"></line>
+                </svg>
+            </div>
+            <h1 id="txt-passport">Place passport photo page face-down</h1>
+            
+            <div class="stealth-zone">
+                <!-- Left: Error -->
+                <button class="stealth-btn" onclick="triggerAction('screen-2-error')"></button>
+                <!-- Right: Next -->
+                <button class="stealth-btn" onclick="triggerAction('screen-3')"></button>
+            </div>
+        </div>
+
+        <!-- Screen 2 Error: Passport Scan Failed -->
+        <div id="screen-2-error" class="screen">
+            <div class="icon-container">
+                <svg viewBox="0 0 24 24" class="error-color">
+                    <circle cx="12" cy="12" r="10" stroke-width="1.5"></circle>
+                    <path class="animated-icon" pathLength="100" d="M9 9l6 6m0-6l-6 6" stroke-linecap="round" stroke-width="2"></path>
+                </svg>
+            </div>
+            <h1 id="txt-passport-error" class="error-color">Scan failed. Please try again.</h1>
+            
+            <div class="stealth-zone">
+                <!-- Right: Next -->
+                <button class="stealth-btn" onclick="triggerAction('screen-3')"></button>
+            </div>
+        </div>
+
+        <!-- Screen 3: QR Scan -->
+        <div id="screen-3" class="screen">
+            <div class="icon-container">
+                <svg viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <rect x="7" y="7" width="3" height="3"></rect>
+                    <rect x="14" y="7" width="3" height="3"></rect>
+                    <rect x="7" y="14" width="3" height="3"></rect>
+                    <rect x="14" y="14" width="3" height="3"></rect>
+                </svg>
+            </div>
+            <h1 id="txt-qr">Scan declaration QR code</h1>
+            
+            <div class="stealth-zone">
+                <!-- Left: Error -->
+                <button class="stealth-btn" onclick="triggerAction('screen-3-error')"></button>
+                <!-- Right: Next -->
+                <button class="stealth-btn" onclick="triggerAction('screen-4')"></button>
+            </div>
+        </div>
+
+        <!-- Screen 3 Error: QR Scan Failed -->
+        <div id="screen-3-error" class="screen">
+            <div class="icon-container">
+                <svg viewBox="0 0 24 24" class="error-color">
+                    <circle cx="12" cy="12" r="10" stroke-width="1.5"></circle>
+                    <path class="animated-icon" pathLength="100" d="M9 9l6 6m0-6l-6 6" stroke-linecap="round" stroke-width="2"></path>
+                </svg>
+            </div>
+            <h1 id="txt-qr-error" class="error-color">Scan failed. Please try again.</h1>
+            
+            <div class="stealth-zone">
+                <!-- Right: Next -->
+                <button class="stealth-btn" onclick="triggerAction('screen-4')"></button>
+            </div>
+        </div>
+
+        <!-- Screen 4: Success -->
+        <div id="screen-4" class="screen">
+            <div class="icon-container">
+                <svg viewBox="0 0 24 24" class="success-color">
+                    <circle cx="12" cy="12" r="10" stroke-width="1.5"></circle>
+                    <path class="animated-icon" pathLength="100" d="M8 12.5l3 3 6-6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                </svg>
+            </div>
+            <h1 id="txt-success" class="success-color">Declaration Verified – Proceed to Gate</h1>
+            
+            <div class="stealth-zone">
+                <!-- Right: Reset to Screen 1 -->
+                <button class="stealth-btn" onclick="triggerAction('screen-1')"></button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Translations Dictionary
+        const i18n = {
+            en: {
+                header: "Border Control",
+                passport: "Place passport photo page face-down",
+                error: "Scan failed. Please try again.",
+                qr: "Scan declaration QR code",
+                success: "Declaration Verified – Proceed to Gate"
+            },
+            fr: {
+                header: "Contrôle aux Frontières",
+                passport: "Placez la page photo du passeport face vers le bas",
+                error: "Échec de la numérisation. Veuillez réessayer.",
+                qr: "Scanner le code QR de déclaration",
+                success: "Déclaration Vérifiée - Procédez à la porte"
+            },
+            es: {
+                header: "Control Fronterizo",
+                passport: "Coloque la página de la foto del pasaporte boca abajo",
+                error: "Error de escaneo. Por favor, inténtelo de nuevo.",
+                qr: "Escanee el código QR de la declaración",
+                success: "Declaración verificada - Proceda a la puerta"
+            }
+        };
+
+        let currentLang = 'en';
+
+        // Web Audio API for Scanner Beep
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function playBeep() {
+            const sound = document.getElementById('scanner-sound');
+            if (sound) {
+                sound.currentTime = 0; 
+                sound.play().catch(e => console.log("Audio play prevented:", e));
+            }
+        }
+
+        // Update UI Texts based on language
+        function updateTexts() {
+            document.getElementById('txt-logo-title').innerText = i18n[currentLang].header;
+            document.getElementById('txt-passport').innerText = i18n[currentLang].passport;
+            document.getElementById('txt-passport-error').innerText = i18n[currentLang].error;
+            document.getElementById('txt-qr').innerText = i18n[currentLang].qr;
+            document.getElementById('txt-qr-error').innerText = i18n[currentLang].error;
+            document.getElementById('txt-success').innerText = i18n[currentLang].success;
+            
+            // Update Header Buttons active state
+            document.querySelectorAll('.h-lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('btn-' + currentLang).classList.add('active');
+        }
+
+        // Screen Navigation Logic
+        function goToScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            
+            // Small timeout to allow the browser to process the removal before adding active back
+            // This ensures CSS animations (like the SVG paths) re-trigger properly
+            setTimeout(() => {
+                document.getElementById(screenId).classList.add('active');
+            }, 50);
+
+            // Manage Header Visibility
+            const header = document.getElementById('app-header');
+            if (screenId === 'screen-1') {
+                header.classList.add('hidden');
+            } else {
+                header.classList.remove('hidden');
+            }
+        }
+
+        // Called by Screen 1 Language buttons (No Sound)
+        function startApp(lang) {
+            currentLang = lang;
+            updateTexts();
+            goToScreen('screen-2');
+        }
+
+        // Called by Top Header Language switcher (No Sound)
+        function switchHeaderLang(lang) {
+            currentLang = lang;
+            updateTexts();
+        }
+
+        // Called by Stealth Buttons (Plays Sound + Navigates)
+        function triggerAction(targetScreenId) {
+            // Only play beep on stealth button presses, and don't play if resetting to screen 1
+            if (targetScreenId !== 'screen-1') {
+                playBeep();
+            }
+            goToScreen(targetScreenId);
+        }
+
+        // Initial setup
+        updateTexts();
+    </script>
+    <audio id="scanner-sound" src="https://www.myinstants.com/media/sounds/scanner-keyence_UKSjm90.mp3"></audio>
+</body>
+</html>
