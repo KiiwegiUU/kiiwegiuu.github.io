@@ -1,0 +1,2403 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>PF 6-Workout Linear Cycle Tracker</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif']
+          },
+          colors: {
+            pf: {
+              bg: '#090c14',
+              card: '#131826',
+              cardAlt: '#1a2133',
+              border: '#28324c',
+              purple: '#8b5cf6',
+              purpleDark: '#6d28d9',
+              gold: '#fbbf24',
+              goldDark: '#d97706'
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    /* Prevent iOS Safari auto-zoom on input focus (must be >= 16px) */
+    input, select, textarea {
+      font-size: 16px !important;
+    }
+    body {
+      background-color: #090c14;
+      color: #f1f5f9;
+      -webkit-tap-highlight-color: transparent;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    /* Hide horizontal scrollbar on cycle pill strip while keeping touch scroll */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    @keyframes activeGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.45); }
+      50% { box-shadow: 0 0 0 5px rgba(251, 191, 36, 0); }
+    }
+    .now-pulse {
+      animation: activeGlow 2.4s infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen font-sans antialiased selection:bg-purple-600 selection:text-white">
+
+  <!-- Sticky Header: Brand + Cycle Browser Bar + Unlocked W1-W6 Tabs -->
+  <header class="sticky top-0 z-30 bg-[#090c14]/95 backdrop-blur-md border-b border-pf-border">
+    <div class="max-w-xl mx-auto px-3.5 pt-3 pb-3 space-y-2.5">
+
+      <!-- Top Title Row -->
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-800 border border-purple-400/40 flex items-center justify-center shadow-md shrink-0">
+            <span class="text-pf-gold font-extrabold text-sm tracking-tight">PF</span>
+          </div>
+          <div class="min-w-0">
+            <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-white truncate">
+              PF 6-Workout Linear Cycle
+            </h1>
+            <p id="headerStatusSub" class="text-[11px] text-slate-400 truncate">
+              Active: Cycle 1 • Workout 1
+            </p>
+          </div>
+        </div>
+
+        <!-- Quick Rest Timer Toggle Button -->
+        <button
+          id="headerTimerBtn"
+          type="button"
+          class="min-h-[40px] px-3 py-1.5 rounded-xl bg-pf-cardAlt hover:bg-slate-800 active:scale-95 transition border border-pf-border text-xs font-bold text-slate-200 flex items-center gap-1.5 shrink-0"
+        >
+          <svg class="w-4 h-4 text-pf-gold" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="13" r="8" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4l2.5 2.5M9 3h6" />
+          </svg>
+          <span id="headerTimerLabel">Timer</span>
+        </button>
+      </div>
+
+      <!-- Cycle Browser Strip (Past Cycles + Active Cycle + Future Cycle +1 Preview) -->
+      <div
+        id="cycleBrowserBar"
+        class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5"
+        role="tablist"
+        aria-label="Cycle Browser"
+      >
+        <!-- Populated dynamically -->
+      </div>
+
+      <!-- Unlocked W1 - W6 Workout Tab Strip -->
+      <div
+        id="workoutTabStrip"
+        class="grid grid-cols-6 gap-1.5"
+        role="tablist"
+        aria-label="Workouts 1 through 6"
+      >
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+
+    <!-- Sticky Context Banner (Appears ONLY when viewing any workout/cycle other than Active) -->
+    <div id="awayFromActiveBanner" class="hidden bg-amber-500/15 border-t border-amber-400/30">
+      <div class="max-w-xl mx-auto px-3.5 py-2 flex items-center justify-between gap-2">
+        <p id="awayBannerText" class="text-xs font-medium text-amber-100 leading-snug">
+          Viewing Workout 3 (Preview) • Currently on Cycle 1, Workout 1
+        </p>
+        <button
+          id="jumpToActiveBtn"
+          type="button"
+          class="min-h-[36px] px-3 py-1.5 rounded-xl bg-pf-gold text-slate-950 font-extrabold text-xs shrink-0 shadow active:scale-95 transition"
+        >
+          Jump to Active
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workout Content -->
+  <main class="max-w-xl mx-auto px-3.5 pt-4 pb-40 space-y-4">
+
+    <!-- Collapsible Shoulder & Knee Guardrails Banner -->
+    <section aria-label="Shoulder and Knee Guardrails">
+      <button
+        id="guardrailsToggleBtn"
+        type="button"
+        class="w-full min-h-[46px] px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-purple-950/70 via-pf-card to-amber-950/30 border border-purple-500/35 flex items-center justify-between text-left transition active:scale-[0.99]"
+      >
+        <div class="flex items-center gap-2.5">
+          <span class="w-6 h-6 rounded-lg bg-pf-gold/20 border border-pf-gold/40 flex items-center justify-center text-pf-gold text-xs font-extrabold shrink-0">
+            PT
+          </span>
+          <div>
+            <span class="text-xs font-extrabold uppercase tracking-wider text-pf-gold block">
+              Shoulder &amp; Knee Guardrails
+            </span>
+            <span class="text-[11px] text-slate-300">
+              Tap for pin stops, neutral grips &amp; closed-chain rules
+            </span>
+          </div>
+        </div>
+        <svg id="guardrailsChevron" class="w-5 h-5 text-slate-400 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      <div id="guardrailsPanel" class="hidden mt-2 p-4 rounded-2xl bg-pf-card border border-pf-border space-y-3 text-xs leading-relaxed text-slate-200 shadow-lg">
+        <div class="flex items-start gap-2.5">
+          <span class="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 font-bold uppercase tracking-wider text-[10px] shrink-0 mt-0.5">
+            Bicep Tendon
+          </span>
+          <p>
+            <strong class="text-white">Pin Chest &amp; Fly forward</strong> so elbows NEVER pass behind your ribs. Use <strong class="text-white">Neutral (thumbs-up / palms-in)</strong> grips, and stop all front/scaption raises strictly at <strong class="text-white">90° shoulder height</strong>.
+          </p>
+        </div>
+        <div class="border-t border-pf-border/70 pt-2.5 flex items-start gap-2.5">
+          <span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-bold uppercase tracking-wider text-[10px] shrink-0 mt-0.5">
+            Knee / Quad
+          </span>
+          <p>
+            <strong class="text-white">Closed-chain knee angles only</strong> (no open-chain leg extension shear). Keep Leg Press feet mid-to-high with safety stop at <strong class="text-white">60°–75° knee bend</strong>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Viewed Workout Hero Card -->
+    <section id="workoutHeroCard" class="p-4 rounded-2xl bg-gradient-to-br from-pf-cardAlt to-pf-card border border-pf-border shadow-lg space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div id="workoutContextBadges" class="flex flex-wrap items-center gap-1.5">
+          <!-- Badges rendered dynamically -->
+        </div>
+        <span class="text-xs font-medium text-slate-400">~70–85 mins</span>
+      </div>
+
+      <h2 id="workoutTitle" class="text-lg sm:text-xl font-extrabold text-white leading-snug">
+        Quad/Knee Foundation + Horizontal Back &amp; Core
+      </h2>
+
+      <!-- Progress Bar for Viewed Session -->
+      <div>
+        <div class="flex items-center justify-between text-xs mb-1.5">
+          <span id="progressCaption" class="text-slate-400 font-medium">Session Checkmarks</span>
+          <span id="progressCountText" class="font-bold text-slate-200">0 / 0 done</span>
+        </div>
+        <div class="w-full h-2 rounded-full bg-[#090c14] overflow-hidden border border-pf-border/70">
+          <div id="progressFillBar" class="h-full bg-gradient-to-r from-purple-500 to-pf-gold transition-all duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Warm-Up Block -->
+    <section id="warmupSection"></section>
+
+    <!-- Exercises List -->
+    <section id="exercisesSection" class="space-y-4" aria-label="Exercises"></section>
+
+    <!-- Cool-Down Block -->
+    <section id="cooldownSection"></section>
+
+    <!-- Dynamic Bottom Action / Queue Status Card -->
+    <section id="workoutFooterAction"></section>
+
+    <!-- Settings, Undo, Backup & Reset Section -->
+    <section class="pt-4 border-t border-pf-border/60 space-y-3" aria-label="Settings and Data Management">
+      <button
+        id="toggleSettingsBtn"
+        type="button"
+        class="w-full min-h-[48px] px-4 py-3 rounded-2xl bg-pf-card hover:bg-pf-cardAlt border border-pf-border flex items-center justify-between text-left transition"
+      >
+        <div class="flex items-center gap-2.5">
+          <svg class="w-5 h-5 text-purple-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+          <div>
+            <span class="text-sm font-bold text-white block">Settings, Undo &amp; Data Backup</span>
+            <span class="text-xs text-slate-400">Undo completed workout, JSON backup/restore &amp; reset</span>
+          </div>
+        </div>
+        <svg id="settingsChevron" class="w-5 h-5 text-slate-400 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      <div id="settingsDrawer" class="hidden p-4 rounded-2xl bg-pf-card border border-pf-border space-y-4">
+        <!-- Auto Rest Timer Switch -->
+        <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-pf-cardAlt border border-pf-border">
+          <div>
+            <p class="text-xs sm:text-sm font-bold text-white">Auto-Start Rest Timer on Set Check</p>
+            <p class="text-[11px] text-slate-400">Starts rest timer &amp; plays gentle beep at 0:00</p>
+          </div>
+          <button
+            id="autoTimerToggle"
+            type="button"
+            class="w-14 h-8 rounded-full p-1 transition-colors duration-200 bg-purple-600 flex items-center shrink-0"
+            aria-label="Toggle Auto Rest Timer"
+          >
+            <span id="autoTimerKnob" class="w-6 h-6 rounded-full bg-white shadow transform transition-transform duration-200 translate-x-6"></span>
+          </button>
+        </div>
+
+        <!-- Undo Last Completed Workout -->
+        <div class="p-3.5 rounded-xl bg-pf-cardAlt border border-pf-border space-y-2">
+          <p class="text-xs font-extrabold uppercase tracking-wider text-amber-300">Queue Safeguard</p>
+          <p id="undoDescription" class="text-xs text-slate-400">
+            No completed workouts to undo yet.
+          </p>
+          <button
+            id="undoWorkoutBtn"
+            type="button"
+            class="w-full min-h-[44px] px-4 py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/40 text-amber-200 font-bold text-xs transition disabled:opacity-40 disabled:pointer-events-none"
+          >
+            Undo Last Completed Workout
+          </button>
+        </div>
+
+        <!-- Export / Import JSON Backup -->
+        <div class="p-3.5 rounded-xl bg-pf-cardAlt border border-pf-border space-y-2.5">
+          <p class="text-xs font-extrabold uppercase tracking-wider text-purple-300">Offline Backup (JSON)</p>
+          <p class="text-xs text-slate-400">
+            Save a copy of your cycle history, weights, and seat pins to iPhone Files, or restore from a file.
+          </p>
+          <div class="grid grid-cols-2 gap-2">
+            <button
+              id="exportJsonBtn"
+              type="button"
+              class="min-h-[44px] px-3 py-2 rounded-xl bg-purple-600/25 hover:bg-purple-600/35 border border-purple-400/40 text-purple-100 font-bold text-xs transition"
+            >
+              Export JSON Backup
+            </button>
+            <label class="min-h-[44px] px-3 py-2 rounded-xl bg-pf-card hover:bg-slate-800 border border-pf-border text-slate-200 font-bold text-xs transition flex items-center justify-center cursor-pointer text-center">
+              <span>Import JSON Backup</span>
+              <input id="importJsonInput" type="file" accept=".json,application/json" class="hidden" />
+            </label>
+          </div>
+        </div>
+
+        <!-- Two-Step Reset All Data -->
+        <div class="p-3.5 rounded-xl bg-rose-950/20 border border-rose-500/30 space-y-2.5">
+          <p class="text-xs font-extrabold uppercase tracking-wider text-rose-300">Danger Zone</p>
+          <p class="text-xs text-slate-400">
+            Erase all cycle history, saved weights, seat pins, and start fresh at Cycle 1, Workout 1.
+          </p>
+          <button
+            id="resetStep1Btn"
+            type="button"
+            class="w-full min-h-[44px] px-4 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-rose-200 font-bold text-xs transition"
+          >
+            Reset All Data...
+          </button>
+
+          <div id="resetConfirmBox" class="hidden p-3 rounded-xl bg-[#090c14] border border-rose-500/50 space-y-2.5">
+            <p class="text-xs font-bold text-rose-200">
+              Are you sure? This deletes all saved weights and past cycles permanently.
+            </p>
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                id="cancelResetBtn"
+                type="button"
+                class="min-h-[42px] rounded-xl bg-pf-cardAlt border border-pf-border text-xs font-bold text-slate-300"
+              >
+                Cancel
+              </button>
+              <button
+                id="confirmResetAllBtn"
+                type="button"
+                class="min-h-[42px] rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-extrabold text-white"
+              >
+                Yes, Erase Everything
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Floating Bottom Rest Timer Bar -->
+  <div
+    id="restTimerBar"
+    class="fixed bottom-3 inset-x-3 max-w-xl mx-auto z-40 hidden rounded-2xl bg-[#151b2c]/95 backdrop-blur-md border border-purple-500/50 shadow-2xl p-3"
+  >
+    <div class="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
+      <div class="flex items-center gap-2.5">
+        <div class="px-3 h-11 rounded-xl bg-purple-600/20 border border-purple-400/40 flex items-center justify-center shrink-0">
+          <span id="timerReadout" class="text-base font-extrabold tabular-nums text-pf-gold">01:30</span>
+        </div>
+        <div>
+          <p id="timerCaption" class="text-xs font-bold text-white">Rest Timer</p>
+          <div class="flex flex-wrap items-center gap-1.5 mt-1">
+            <button type="button" data-timer-sec="60" class="timer-preset-btn min-h-[34px] px-2.5 py-1 rounded-lg text-xs font-bold bg-pf-card border border-pf-border text-slate-200 active:scale-95">60s</button>
+            <button type="button" data-timer-sec="90" class="timer-preset-btn min-h-[34px] px-2.5 py-1 rounded-lg text-xs font-bold bg-pf-card border border-pf-border text-slate-200 active:scale-95">90s</button>
+            <button type="button" data-timer-sec="120" class="timer-preset-btn min-h-[34px] px-2.5 py-1 rounded-lg text-xs font-bold bg-pf-card border border-pf-border text-slate-200 active:scale-95">120s</button>
+            <button type="button" id="timerPlus30Btn" class="min-h-[34px] px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-600/30 border border-purple-400/40 text-purple-200 active:scale-95">+30s</button>
+            <button type="button" id="timerStopBtn" class="min-h-[34px] px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-600/25 border border-rose-400/40 text-rose-200 active:scale-95">Stop</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="w-full h-1.5 rounded-full bg-[#090c14] overflow-hidden mt-2.5">
+      <div id="timerProgressBar" class="h-full bg-gradient-to-r from-pf-gold to-purple-500 transition-all duration-300" style="width: 100%"></div>
+    </div>
+  </div>
+
+  <!-- Complete Active Workout Confirmation Modal -->
+  <div id="completeModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+    <div class="w-full max-w-sm rounded-3xl bg-pf-card border border-pf-border p-5 shadow-2xl space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-purple-600/20 border border-purple-400/40 flex items-center justify-center text-pf-gold font-extrabold text-lg shrink-0">
+          ✓
+        </div>
+        <div>
+          <h3 id="completeModalTitle" class="text-base font-extrabold text-white">Complete Workout 1?</h3>
+          <p id="completeModalDesc" class="text-xs text-slate-400 mt-0.5">
+            Marks Workout 1 done and advances your active spot to Workout 2.
+          </p>
+        </div>
+      </div>
+
+      <div id="uncheckedWarningBox" class="hidden p-3 rounded-xl bg-amber-500/10 border border-amber-400/30 text-xs text-amber-200 leading-relaxed">
+        Note: Some sets in this workout aren't checked off yet. You can still complete &amp; advance if you modified today's session.
+      </div>
+
+      <div class="grid grid-cols-2 gap-2.5 pt-1">
+        <button
+          id="cancelCompleteModalBtn"
+          type="button"
+          class="min-h-[48px] rounded-xl bg-pf-cardAlt border border-pf-border text-sm font-bold text-slate-300 active:scale-95 transition"
+        >
+          Keep Lifting
+        </button>
+        <button
+          id="confirmCompleteModalBtn"
+          type="button"
+          class="min-h-[48px] rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-sm font-extrabold text-white shadow-lg active:scale-95 transition"
+        >
+          Yes, Advance
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Status Notification -->
+  <div
+    id="toastBanner"
+    class="fixed top-4 inset-x-4 max-w-md mx-auto z-50 hidden rounded-2xl bg-emerald-950/95 border border-emerald-400/50 text-emerald-100 px-4 py-3 shadow-2xl flex items-center gap-3"
+    role="status"
+  >
+    <span class="w-7 h-7 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300 font-bold shrink-0">✓</span>
+    <p id="toastText" class="text-xs sm:text-sm font-semibold leading-snug"></p>
+  </div>
+
+  <!-- Main Application Script -->
+  <script>
+    (function () {
+      'use strict';
+
+      const STORAGE_KEY = 'pf_linear_6cycle_tracker_v2';
+      const LEGACY_KEY_V1 = 'pf_linear_6cycle_tracker_v1';
+
+      /**
+       * Complete 6-Workout Planet Fitness Curriculum & PT Guardrails
+       */
+      const WORKOUTS = [
+        {
+          number: 1,
+          shortTag: 'Quad/Back',
+          title: 'Quad/Knee Foundation + Horizontal Back & Core',
+          warmup: '8 min Stationary Bike',
+          cooldown: 'Seated Hamstring & Quad Stretches',
+          exercises: [
+            {
+              id: 'w1_leg_press',
+              name: 'Seated Leg Press Machine',
+              sets: 4,
+              targetReps: '8–10',
+              prescription: '4 sets × 8–10',
+              restSec: 120,
+              cue: 'Feet mid-to-high on sled; set safety stop to 60°–75° knee bend.',
+              query: 'Seated Leg Press Machine high foot placement knee friendly'
+            },
+            {
+              id: 'w1_hip_abd',
+              name: 'Hip Abduction Machine',
+              sets: 3,
+              targetReps: '12–15',
+              prescription: '3 sets × 12–15',
+              restSec: 60,
+              cue: 'Sit tall, controlled return.',
+              query: 'Seated Hip Abduction Machine form'
+            },
+            {
+              id: 'w1_leg_curl',
+              name: 'Seated Leg Curl Machine',
+              sets: 3,
+              targetReps: '10–12',
+              prescription: '3 sets × 10–12',
+              restSec: 90,
+              cue: 'Snug lap pad, 2-sec eccentric lower.',
+              query: 'Seated Leg Curl Machine form'
+            },
+            {
+              id: 'w1_row',
+              name: 'Chest-Supported Seated Row Machine',
+              sets: 4,
+              targetReps: '8–10',
+              prescription: '4 sets × 8–10',
+              restSec: 90,
+              cue: 'Neutral grip; shoulders down & back first.',
+              query: 'Chest Supported Seated Row Machine neutral grip'
+            },
+            {
+              id: 'w1_pulldown',
+              name: 'Lat Pulldown Machine',
+              sets: 3,
+              targetReps: '10–12',
+              prescription: '3 sets × 10–12',
+              restSec: 90,
+              cue: 'Medium overhand grip to collarbone, proud chest.',
+              query: 'Lat Pulldown to collarbone posture'
+            },
+            {
+              id: 'w1_quad_lockout',
+              name: 'Quad Lockout (Dual Option)',
+              sets: 3,
+              targetReps: '12–15',
+              prescription: '3 sets × 12–15',
+              restSec: 60,
+              isDualOption: true,
+              options: {
+                A: {
+                  storageKey: 'w1_quad_lockout_optA',
+                  label: 'Option A: TKE (Cable/Band)',
+                  name: 'Cable/Band Terminal Knee Extension (TKE)',
+                  prescription: '3 sets × 12–15 / leg',
+                  targetReps: '12–15/leg',
+                  cue: 'Flexible nylon handle or band behind knee crease; 20–25° bend to full quad squeeze.',
+                  query: 'Terminal Knee Extension TKE cable band'
+                },
+                B: {
+                  storageKey: 'w1_quad_lockout_optB',
+                  label: 'Option B: Short-Arc Press',
+                  name: 'Short-Arc Seated Leg Press',
+                  prescription: '3 sets × 12–15',
+                  targetReps: '12–15',
+                  cue: 'Top 20–25° knee bend ONLY (pain-free zone), 2-sec quad lock at top.',
+                  query: 'Short Arc Seated Leg Press terminal quad lockout'
+                }
+              }
+            },
+            {
+              id: 'w1_pallof',
+              name: 'Cable Pallof Press',
+              sets: 3,
+              targetReps: '10–12/side',
+              prescription: '3 sets × 10–12 / side',
+              restSec: 60,
+              cue: 'Anti-rotation core hold in front of sternum.',
+              query: 'Cable Pallof Press core anti rotation'
+            }
+          ]
+        },
+        {
+          number: 2,
+          shortTag: 'Shoulders',
+          title: 'Anterior/Lateral Shoulders + Chest & Triceps',
+          warmup: '8 min Treadmill/Arm Bike + Cable External Rotations (2×15/side, towel under elbow) & Rope Face Pulls (2×15)',
+          cooldown: 'Gentle Doorway Pec Stretch (elbows below shoulder) + Thoracic Extension',
+          exercises: [
+            {
+              id: 'w2_sh_press',
+              name: 'Seated Shoulder Press Machine',
+              sets: 4,
+              targetReps: '8–10',
+              prescription: '4 sets × 8–10',
+              restSec: 120,
+              cue: 'Neutral (palms-in) handles ONLY; stop at chin/jaw level.',
+              query: 'Seated Shoulder Press Machine neutral grip'
+            },
+            {
+              id: 'w2_front_raise',
+              name: 'Cable Rope Front Raise',
+              sets: 3,
+              targetReps: '12',
+              prescription: '3 sets × 12',
+              restSec: 60,
+              cue: 'Thumbs-up grip; stop strictly at shoulder height (90°), 2-sec lower.',
+              query: 'Cable Rope Front Raise thumbs up neutral grip'
+            },
+            {
+              id: 'w2_chest_press',
+              name: 'Seated Chest Press Machine',
+              sets: 3,
+              targetReps: '8–10',
+              prescription: '3 sets × 8–10',
+              restSec: 90,
+              cue: 'Pin start position forward so elbows start even with ribs, never behind torso.',
+              query: 'Seated Chest Press Machine shoulder safe setup'
+            },
+            {
+              id: 'w2_lat_raise',
+              name: 'Lateral Raise Machine',
+              sets: 3,
+              targetReps: '12–15',
+              prescription: '3 sets × 12–15',
+              restSec: 60,
+              cue: 'Chest up, shoulder blades set gently back.',
+              query: 'Lateral Raise Machine Planet Fitness form'
+            },
+            {
+              id: 'w2_rear_delt',
+              name: 'Pec Fly / Rear Delt Machine — Rear Delt Setting',
+              sets: 3,
+              targetReps: '12–15',
+              prescription: '3 sets × 12–15',
+              restSec: 60,
+              cue: 'Upper-back posture counterweight.',
+              query: 'Rear Delt Machine reverse fly form'
+            },
+            {
+              id: 'w2_tri_push',
+              name: 'Cable Rope Tricep Pushdown',
+              sets: 3,
+              targetReps: '10–12',
+              prescription: '3 sets × 10–12',
+              restSec: 60,
+              cue: 'Pin elbows to ribs so front shoulder stays quiet.',
+              query: 'Cable Rope Tricep Pushdown strict form'
+            }
+          ]
+        },
+        {
+          number: 3,
+          shortTag: 'Glute/Back',
+          title: 'Posterior Chain / Glute-Knee + Vertical Back & Core',
+          warmup: '8 min Stationary Bike',
+          cooldown: 'Seated Hamstring & Hip Stretches',
+          exercises: [
+            {
+              id: 'w3_box_squat',
+              name: 'Smith Machine Box/Bench Squat',
+              sets: 4,
+              targetReps: '8–10',
+              prescription: '4 sets × 8–10',
+              restSec: 120,
+              cue: 'Roll flat bench under bar; step feet 4–6" forward so shins stay vertical.',
+              query: 'Smith Machine Box Squat vertical shin'
+            },
+            {
+              id: 'w3_glute_kick',
+              name: 'Glute Kickback Machine (or Smith Hip Thrust)',
+              sets: 3,
+              targetReps: '10–12',
+              prescription: '3 sets × 10–12',
+              restSec: 90,
+              cue: 'Full glute squeeze at lockout, neutral spine.',
+              query: 'Glute Kickback Machine Planet Fitness'
+            },
+            {
+              id: 'w3_hip_add',
+              name: 'Hip Adduction Machine',
+              sets: 3,
+              targetReps: '12–15',
+              prescription: '3 sets × 12–15',
+              restSec: 60,
+              cue: 'Smooth inner-thigh control for knee stability.',
+              query: 'Seated Hip Adduction Machine form'
+            },
+            {
+              id: 'w3_pullup',
+              name: 'Assisted Pull-Up (Neutral Grip) or Wide Pulldown',
+              sets: 4,
+              targetReps: '8–10',
+              prescription: '4 sets × 8–10',
+              restSec: 120,
+              cue: 'Keep active shoulders at top (avoid aggressive dead-hang).',
+              query: 'Assisted Pull Up Machine neutral grip'
+            },
+            {
+              id: 'w3_sa_row',
+              name: 'Single-Arm Cable Row (or DB Row)',
+              sets: 3,
+              targetReps: '10–12/side',
+              prescription: '3 sets × 10–12 / side',
+              restSec: 60,
+              cue: 'Drive elbow to hip, keep shoulder away from ear.',
+              query: 'Single Arm Cable Row form'
+            },
+            {
+              id: 'w3_calf',
+              name: 'Seated Calf Press Machine',
+              sets: 3,
+              targetReps: '12–15',
+              prescription: '3 sets × 12–15',
+              restSec: 60,
+              cue: 'Pause 1 sec at stretch and top for landing shock absorption.',
+              query: 'Seated Calf Press Machine Planet Fitness'
+            },
+            {
+              id: 'w3_crunch',
+              name: 'Abdominal Crunch Machine',
+              sets: 3,
+              targetReps: '12–15',
+              prescription: '3 sets × 12–15',
+              restSec: 60,
+              cue: 'Controlled rib-to-pelvis curl.',
+              query: 'Abdominal Crunch Machine Planet Fitness'
+            }
+          ]
+        },
+        {
+          number: 4,
+          shortTag: 'Incline/Push',
+          title: 'Heavy Upper Push (Incline & Scaption) + Tendon-Safe Arms',
+          warmup: 'PT Shoulder Drills / Light Cable Y-Raises (2×12)',
+          cooldown: 'Gentle Pec & Thoracic Mobility',
+          exercises: [
+            {
+              id: 'w4_inc_smith',
+              name: 'Smith Machine Incline Press — 30° Bench',
+              sets: 4,
+              targetReps: '8–10',
+              prescription: '4 sets × 8–10',
+              restSec: 120,
+              cue: 'Stop bar 1–2" above upper chest so elbows stay in front of torso.',
+              query: 'Smith Machine 30 Degree Incline Press shoulder safe'
+            },
+            {
+              id: 'w4_scaption',
+              name: 'Dumbbell Scaption Raise — 30° V-Angle',
+              sets: 3,
+              targetReps: '10–12',
+              prescription: '3 sets × 10–12',
+              restSec: 60,
+              cue: 'Thumbs up, raise in natural scapular plane up to 90° max.',
+              query: 'Dumbbell Scaption Raise thumbs up'
+            },
+            {
+              id: 'w4_pec_fly',
+              name: 'Pec Fly Machine',
+              sets: 3,
+              targetReps: '10–12',
+              prescription: '3 sets × 10–12',
+              restSec: 90,
+              cue: 'Pin arms 1–2 clicks forward of deep stretch; squeeze in front of sternum.',
+              query: 'Pec Fly Machine shoulder friendly setup'
+            },
+            {
+              id: 'w4_sa_lat',
+              name: 'Single-Arm Cable Lateral Raise',
+              sets: 3,
+              targetReps: '12–15/side',
+              prescription: '3 sets × 12–15 / side',
+              restSec: 60,
+              cue: 'Smooth cable tension, zero body swing.',
+              query: 'Single Arm Cable Lateral Raise form'
+            },
+            {
+              id: 'w4_tri_press',
+              name: 'Tricep Press Machine',
+              sets: 3,
+              targetReps: '10–12',
+              prescription: '3 sets × 10–12',
+              restSec: 60,
+              cue: 'Set seat low enough that shoulders never shrug into ears.',
+              query: 'Seated Tricep Press Machine Planet Fitness'
+            },
+            {
+              id: 'w4_hammer_curl',
+              name: 'Cable Rope Hammer Curl',
+              sets: 3,
+              targetReps: '12',
+              prescription: '3 sets × 12',
+              restSec: 60,
+              cue: 'Thumbs up, elbows glued to sides (never let elbows drift behind back).',
+              query: 'Cable Rope Hammer Curl form'
+            }
+          ]
+        },
+        {
+          number: 5,
+          shortTag: '1-Leg/Back',
+          title: 'Single-Leg Knee Symmetry + Back Thickness & Core',
+          warmup: '8 min Stationary Bike',
+          cooldown: 'Seated Hamstring & Quad Stretches',
+          exercises: [
+            {
+              id: 'w5_sl_press',
+              name: 'Single-Leg Seated Leg Press',
+              sets: 3,
+              targetReps: '10/leg',
+              prescription: '3 sets × 10 / leg',
+              restSec: 90,
+              cue: 'Mid-high foot placement; 60°–75° knee bend safety stop.',
+              query: 'Single Leg Seated Leg Press knee rehab'
+            },
+            {
+              id: 'w5_leg_curl',
+              name: 'Seated or Prone Leg Curl Machine',
+              sets: 4,
+              targetReps: '8–10',
+              prescription: '4 sets × 8–10',
+              restSec: 90,
+              cue: 'Heavier hamstring stabilization day.',
+              query: 'Seated Leg Curl hamstring stability'
+            },
+            {
+              id: 'w5_step_up',
+              name: 'Controlled Lateral Step-Ups — 4–6" Aerobic Step',
+              sets: 3,
+              targetReps: '10/leg',
+              prescription: '3 sets × 10 / leg',
+              restSec: 60,
+              cue: 'Pain-free knee angle (<30° if needed), drive smoothly through top heel.',
+              query: 'Controlled Lateral Step Up physical therapy'
+            },
+            {
+              id: 'w5_v_row',
+              name: 'Cable Seated Row — Close V-Grip',
+              sets: 4,
+              targetReps: '8–10',
+              prescription: '4 sets × 8–10',
+              restSec: 90,
+              cue: 'Sit tall, pull shoulder blades back without rounding forward.',
+              query: 'Seated Cable Row close grip posture'
+            },
+            {
+              id: 'w5_sa_pull',
+              name: 'Straight-Arm Cable Lat Pulldown',
+              sets: 3,
+              targetReps: '12',
+              prescription: '3 sets × 12',
+              restSec: 60,
+              cue: 'Straight elbows; hits lats & serratus with zero bicep tendon load.',
+              query: 'Straight Arm Cable Pulldown form'
+            },
+            {
+              id: 'w5_back_ext',
+              name: 'Back Extension Machine',
+              sets: 3,
+              targetReps: '12',
+              prescription: '3 sets × 12',
+              restSec: 60,
+              cue: 'Smooth posterior chain hinge.',
+              query: 'Back Extension Machine Planet Fitness'
+            },
+            {
+              id: 'w5_capt_chair',
+              name: 'Captain\'s Chair Knee/Leg Raises (or Torso Rotation)',
+              sets: 3,
+              targetReps: '12–15',
+              prescription: '3 sets × 12–15',
+              restSec: 60,
+              cue: 'Press shoulders actively DOWN on forearm pads.',
+              query: 'Captains Chair Knee Raises active shoulders'
+            }
+          ]
+        },
+        {
+          number: 6,
+          shortTag: 'Hi-Inc/Rear',
+          title: 'High-Incline Shoulders + Hypertrophy Push & Rear Delts',
+          warmup: 'Cable Rope Face Pulls w/ External Rotation (3×15 to field-goal position)',
+          cooldown: 'Thoracic Extension & Gentle Stretch',
+          exercises: [
+            {
+              id: 'w6_hi_inc',
+              name: 'High-Incline Smith or Neutral DB Press — 45°–60° Bench',
+              sets: 4,
+              targetReps: '8–10',
+              prescription: '4 sets × 8–10',
+              restSec: 120,
+              cue: 'Gives bicep tendon room in groove vs steep 90° press.',
+              query: 'High Incline Neutral Grip Dumbbell Press shoulder friendly'
+            },
+            {
+              id: 'w6_db_front',
+              name: 'Alternating DB Front Raise — Neutral Grip',
+              sets: 3,
+              targetReps: '10/arm',
+              prescription: '3 sets × 10 / arm',
+              restSec: 60,
+              cue: 'Thumbs up, stop at 90°, controlled 3-second lower.',
+              query: 'Alternating Neutral Grip Dumbbell Front Raise'
+            },
+            {
+              id: 'w6_chest_hyp',
+              name: 'Seated Chest Press Machine — Hypertrophy',
+              sets: 3,
+              targetReps: '10–12',
+              prescription: '3 sets × 10–12',
+              restSec: 90,
+              cue: 'Smooth constant tension, elbows never behind ribs.',
+              query: 'Seated Chest Press Machine controlled tempo'
+            },
+            {
+              id: 'w6_rear_delt',
+              name: 'Rear Delt Fly Machine',
+              sets: 4,
+              targetReps: '12–15',
+              prescription: '4 sets × 12–15',
+              restSec: 60,
+              cue: '4 full sets to reinforce shoulders-up-and-back posture.',
+              query: 'Rear Delt Fly Machine posture'
+            },
+            {
+              id: 'w6_lat_raise',
+              name: 'Lateral Raise Machine',
+              sets: 3,
+              targetReps: '12–15',
+              prescription: '3 sets × 12–15',
+              restSec: 60,
+              cue: '1-sec pause near top.',
+              query: 'Lateral Raise Machine pause at top'
+            },
+            {
+              id: 'w6_arms',
+              name: 'Tricep Extension Machine + Optional Standing Curl',
+              sets: 3,
+              targetReps: '12',
+              prescription: '3 sets × 12',
+              restSec: 60,
+              cue: 'On curls, keep elbows slightly in front of ribs (stand against wall/pillar if needed).',
+              query: 'Tricep Extension Machine Planet Fitness'
+            }
+          ]
+        }
+      ];
+
+      /**
+       * Helper: Create blank progress map for Workouts 1..6 in an active cycle
+       */
+      function createBlankCycleWorkoutsProgress() {
+        const map = {};
+        for (let w = 1; w <= 6; w++) {
+          map[w] = {
+            completed: false,
+            completedAt: null,
+            warmupDone: false,
+            cooldownDone: false,
+            setsDone: {}, // { [exerciseId]: boolean[] }
+            completedSnapshot: null // Stores exact weights/sets at completion moment
+          };
+        }
+        return map;
+      }
+
+      /**
+       * Default persistent state
+       */
+      function createDefaultState() {
+        return {
+          activeCycle: 1,
+          activeWorkout: 1, // 1..6
+          quadOption: 'A', // 'A' or 'B' for Workout 1 Exercise 6
+          prefs: {
+            guardrailsOpen: false,
+            autoTimer: true,
+            settingsOpen: false
+          },
+          // Persistent across ALL cycles! Keyed by exercise.id (or dual option storageKey)
+          exercises: {},
+          // Current active cycle's checkmarks & per-workout completion status
+          currentCycleWorkouts: createBlankCycleWorkoutsProgress(),
+          // Completed past cycles archive: [{ cycleNumber, completedAt, workouts: { 1: snapshot, ... 6: snapshot } }]
+          cycleHistory: [],
+          // Stack of full prior snapshots so "Undo Last Completed Workout" works across cycle rollovers
+          undoStack: []
+        };
+      }
+
+      /**
+       * Load state (and migrate v1 data if user already entered weights in previous version)
+       */
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            const def = createDefaultState();
+            return {
+              ...def,
+              ...parsed,
+              activeCycle: Math.max(1, Number(parsed.activeCycle) || 1),
+              activeWorkout: Math.min(6, Math.max(1, Number(parsed.activeWorkout) || 1)),
+              prefs: { ...def.prefs, ...(parsed.prefs || {}) },
+              exercises: parsed.exercises || {},
+              currentCycleWorkouts: {
+                ...createBlankCycleWorkoutsProgress(),
+                ...(parsed.currentCycleWorkouts || {})
+              },
+              cycleHistory: Array.isArray(parsed.cycleHistory) ? parsed.cycleHistory : [],
+              undoStack: Array.isArray(parsed.undoStack) ? parsed.undoStack.slice(-8) : []
+            };
+          }
+
+          // Check for v1 migration
+          const v1Raw = localStorage.getItem(LEGACY_KEY_V1);
+          if (v1Raw) {
+            const v1 = JSON.parse(v1Raw);
+            const migrated = createDefaultState();
+            migrated.activeCycle = Math.max(1, Number(v1.cycle) || 1);
+            migrated.activeWorkout = Math.min(6, Math.max(1, Number(v1.activeWorkout) || 1));
+            if (v1.prefs && v1.prefs.quadOption) migrated.quadOption = v1.prefs.quadOption;
+            if (v1.logs && typeof v1.logs === 'object') {
+              Object.keys(v1.logs).forEach((k) => {
+                const old = v1.logs[k] || {};
+                migrated.exercises[k] = {
+                  seatPin: old.seat || '',
+                  sets: Array(4).fill(null).map(() => ({
+                    weight: old.weight || '',
+                    reps: old.reps || ''
+                  })),
+                  notes: old.notes || ''
+                };
+              });
+            }
+            for (let w = 1; w < migrated.activeWorkout; w++) {
+              migrated.currentCycleWorkouts[w].completed = true;
+              migrated.currentCycleWorkouts[w].completedAt = 'Earlier this cycle';
+            }
+            return migrated;
+          }
+        } catch (err) {
+          console.error('Failed to load state:', err);
+        }
+        return createDefaultState();
+      }
+
+      let state = loadState();
+
+      /**
+       * Runtime View Navigation State (ALWAYS initializes to Active Cycle + Active Workout on page load!)
+       */
+      let viewState = {
+        mode: 'active', // 'past' | 'active' | 'future'
+        cycleNumber: state.activeCycle,
+        workoutNumber: state.activeWorkout
+      };
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (err) {
+          console.error('Failed to save state:', err);
+        }
+      }
+
+      function escapeHtml(str) {
+        return String(str == null ? '' : str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      /**
+       * Resolve an exercise's active config & storageKey (handles Dual Option on W1 Ex 6)
+       */
+      function resolveExerciseConfig(ex, quadOptOverride) {
+        if (!ex.isDualOption) {
+          return {
+            storageKey: ex.id,
+            name: ex.name,
+            prescription: ex.prescription,
+            targetReps: ex.targetReps,
+            cue: ex.cue,
+            query: ex.query,
+            setsCount: ex.sets
+          };
+        }
+        const optKey = (quadOptOverride || state.quadOption) === 'B' ? 'B' : 'A';
+        const opt = ex.options[optKey];
+        return {
+          storageKey: opt.storageKey,
+          name: opt.name,
+          prescription: opt.prescription,
+          targetReps: opt.targetReps,
+          cue: opt.cue,
+          query: opt.query,
+          setsCount: ex.sets,
+          selectedOption: optKey
+        };
+      }
+
+      /**
+       * Ensure persistent exercise record exists with exact set count
+       */
+      function getPersistentExerciseRecord(storageKey, setsCount) {
+        if (!state.exercises[storageKey]) {
+          state.exercises[storageKey] = {
+            seatPin: '',
+            sets: Array.from({ length: setsCount }, () => ({ weight: '', reps: '' })),
+            notes: ''
+          };
+        }
+        const rec = state.exercises[storageKey];
+        if (!Array.isArray(rec.sets)) {
+          rec.sets = [];
+        }
+        while (rec.sets.length < setsCount) {
+          const prev = rec.sets[rec.sets.length - 1] || { weight: '', reps: '' };
+          rec.sets.push({ weight: prev.weight || '', reps: prev.reps || '' });
+        }
+        if (rec.sets.length > setsCount) {
+          rec.sets = rec.sets.slice(0, setsCount);
+        }
+        return rec;
+      }
+
+      /**
+       * Ensure set checkmarks array exists for an exercise in the current cycle
+       */
+      function getActiveCycleSetChecks(workoutNum, exId, setsCount) {
+        const wProg = state.currentCycleWorkouts[workoutNum];
+        if (!wProg.setsDone[exId] || wProg.setsDone[exId].length !== setsCount) {
+          wProg.setsDone[exId] = Array(setsCount).fill(false);
+        }
+        return wProg.setsDone[exId];
+      }
+
+      /**
+       * Look up "Last Cycle: [weight] lbs × [reps]" summary for a given storageKey & cycle context
+       */
+      function getLastCycleBadgeText(storageKey, referenceCycleNumber) {
+        const prevCycleNum = referenceCycleNumber - 1;
+        if (prevCycleNum < 1) return null;
+
+        // If looking at Future Preview (activeCycle + 1), "Last Cycle" is current live weights!
+        if (viewState.mode === 'future') {
+          const liveRec = state.exercises[storageKey];
+          return formatSetsSummary(liveRec, 'Current Cycle');
+        }
+
+        const histCycle = state.cycleHistory.find((c) => c.cycleNumber === prevCycleNum);
+        if (!histCycle || !histCycle.exercisesSnapshot) return null;
+        const prevRec = histCycle.exercisesSnapshot[storageKey];
+        return formatSetsSummary(prevRec, `Last Cycle (C${prevCycleNum})`);
+      }
+
+      function formatSetsSummary(rec, prefixLabel) {
+        if (!rec || !Array.isArray(rec.sets)) return null;
+        const populated = rec.sets.filter((s) => (s.weight && String(s.weight).trim() !== '') || (s.reps && String(s.reps).trim() !== ''));
+        if (populated.length === 0) return null;
+
+        // Pick top working set (first populated or heaviest numeric)
+        let best = populated[0];
+        populated.forEach((s) => {
+          if (parseFloat(s.weight) > parseFloat(best.weight || '0')) {
+            best = s;
+          }
+        });
+
+        const w = String(best.weight || '').trim();
+        const r = String(best.reps || '').trim();
+        if (!w && !r) return null;
+        if (w && r) return `${prefixLabel}: ${w} lbs × ${r}`;
+        if (w) return `${prefixLabel}: ${w} lbs`;
+        return `${prefixLabel}: ${r} reps`;
+      }
+
+      /**
+       * Build deep snapshot of a workout when marked complete
+       */
+      function createWorkoutSnapshot(workoutNum, timestampStr) {
+        const wDef = WORKOUTS[workoutNum - 1];
+        const wProg = state.currentCycleWorkouts[workoutNum];
+        const exSnap = {};
+
+        wDef.exercises.forEach((ex) => {
+          if (ex.isDualOption) {
+            ['A', 'B'].forEach((optKey) => {
+              const sk = ex.options[optKey].storageKey;
+              exSnap[sk] = JSON.parse(JSON.stringify(getPersistentExerciseRecord(sk, ex.sets)));
+            });
+          } else {
+            exSnap[ex.id] = JSON.parse(JSON.stringify(getPersistentExerciseRecord(ex.id, ex.sets)));
+          }
+        });
+
+        return {
+          workoutNumber: workoutNum,
+          completedAt: timestampStr,
+          quadOptionUsed: state.quadOption,
+          warmupDone: Boolean(wProg.warmupDone),
+          cooldownDone: Boolean(wProg.cooldownDone),
+          setsDone: JSON.parse(JSON.stringify(wProg.setsDone || {})),
+          exercises: exSnap
+        };
+      }
+
+      /**
+       * Subtle Web Audio API Finish Chime (Zero external audio files, iOS Safari safe)
+       */
+      let audioCtx = null;
+      function playTimerFinishBeep() {
+        try {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContextClass) return;
+          if (!audioCtx) {
+            audioCtx = new AudioContextClass();
+          }
+          if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+          }
+          const now = audioCtx.currentTime;
+          [587.33, 880].forEach((freq, idx) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.16);
+            gain.gain.setValueAtTime(0.001, now + idx * 0.16);
+            gain.gain.exponentialRampToValueAtTime(0.14, now + idx * 0.16 + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.16 + 0.22);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now + idx * 0.16);
+            osc.stop(now + idx * 0.16 + 0.24);
+          });
+        } catch (e) {
+          // Ignore audio errors if blocked by silent mode
+        }
+      }
+
+      /**
+       * Rest Timer Logic
+       */
+      let timerInterval = null;
+      let timerTotalSec = 90;
+      let timerRemainingSec = 0;
+
+      function formatMMSS(sec) {
+        const s = Math.max(0, Math.floor(sec));
+        const m = Math.floor(s / 60);
+        const r = s % 60;
+        return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
+      }
+
+      function startRestTimer(seconds, label) {
+        // Unlock audio context on user tap
+        try {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass && !audioCtx) audioCtx = new AudioContextClass();
+          if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        } catch (e) {}
+
+        clearInterval(timerInterval);
+        timerTotalSec = seconds;
+        timerRemainingSec = seconds;
+
+        document.getElementById('restTimerBar').classList.remove('hidden');
+        document.getElementById('timerCaption').textContent = label || `Rest Timer (${seconds}s)`;
+        updateTimerUI();
+
+        timerInterval = setInterval(() => {
+          timerRemainingSec -= 1;
+          if (timerRemainingSec <= 0) {
+            timerRemainingSec = 0;
+            clearInterval(timerInterval);
+            timerInterval = null;
+            document.getElementById('timerCaption').textContent = 'Rest Finished — Ready for Next Set!';
+            playTimerFinishBeep();
+          }
+          updateTimerUI();
+        }, 1000);
+      }
+
+      function updateTimerUI() {
+        const formatted = formatMMSS(timerRemainingSec);
+        document.getElementById('timerReadout').textContent = formatted;
+        document.getElementById('headerTimerLabel').textContent = timerInterval ? formatted : 'Timer';
+        const pct = timerTotalSec > 0 ? Math.max(0, (timerRemainingSec / timerTotalSec) * 100) : 0;
+        document.getElementById('timerProgressBar').style.width = `${pct}%`;
+      }
+
+      function stopRestTimer() {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        timerRemainingSec = 0;
+        document.getElementById('restTimerBar').classList.add('hidden');
+        document.getElementById('headerTimerLabel').textContent = 'Timer';
+      }
+
+      /**
+       * Toast Notification
+       */
+      let toastTimer = null;
+      function showToast(message) {
+        const el = document.getElementById('toastBanner');
+        document.getElementById('toastText').textContent = message;
+        el.classList.remove('hidden');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          el.classList.add('hidden');
+        }, 4200);
+      }
+
+      /**
+       * Render Cycle Browser Strip (Past Cycles + Current Cycle + Future Preview)
+       */
+      function renderHeaderAndNavigation() {
+        document.getElementById('headerStatusSub').textContent =
+          `Current Spot: Cycle ${state.activeCycle} • Workout ${state.activeWorkout}`;
+
+        const cycleBar = document.getElementById('cycleBrowserBar');
+        const pills = [];
+
+        // Past Cycles
+        state.cycleHistory.forEach((hist) => {
+          const isSelected = viewState.mode === 'past' && viewState.cycleNumber === hist.cycleNumber;
+          pills.push(`
+            <button
+              type="button"
+              data-cycle-mode="past"
+              data-cycle-num="${hist.cycleNumber}"
+              class="min-h-[34px] px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap border transition shrink-0 ${
+                isSelected
+                  ? 'bg-emerald-600 text-white border-emerald-400 shadow'
+                  : 'bg-pf-card text-emerald-300 border-emerald-500/30 hover:bg-pf-cardAlt'
+              }"
+            >
+              Cycle ${hist.cycleNumber} ✓
+            </button>
+          `);
+        });
+
+        // Active Cycle
+        const isCurrentSelected = viewState.mode === 'active';
+        pills.push(`
+          <button
+            type="button"
+            data-cycle-mode="active"
+            data-cycle-num="${state.activeCycle}"
+            class="min-h-[34px] px-3 py-1 rounded-full text-xs font-extrabold whitespace-nowrap border transition shrink-0 ${
+              isCurrentSelected
+                ? 'bg-purple-600 text-white border-pf-gold shadow'
+                : 'bg-pf-cardAlt text-purple-200 border-purple-500/40 hover:bg-slate-800'
+            }"
+          >
+            Cycle ${state.activeCycle} (Current)
+          </button>
+        `);
+
+        // Future Cycle +1 Preview
+        const isFutureSelected = viewState.mode === 'future';
+        pills.push(`
+          <button
+            type="button"
+            data-cycle-mode="future"
+            data-cycle-num="${state.activeCycle + 1}"
+            class="min-h-[34px] px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap border transition shrink-0 ${
+              isFutureSelected
+                ? 'bg-indigo-600 text-white border-indigo-300 shadow'
+                : 'bg-pf-card text-slate-300 border-pf-border hover:bg-pf-cardAlt'
+            }"
+          >
+            Cycle ${state.activeCycle + 1} (Preview)
+          </button>
+        `);
+
+        cycleBar.innerHTML = pills.join('');
+
+        // Render Unlocked W1-W6 Tabs
+        const tabStrip = document.getElementById('workoutTabStrip');
+        tabStrip.innerHTML = WORKOUTS.map((w) => {
+          const isViewingThis = viewState.workoutNumber === w.number;
+
+          if (viewState.mode === 'active') {
+            const wProg = state.currentCycleWorkouts[w.number];
+            const isActiveSpot = w.number === state.activeWorkout;
+            const isCompleted = Boolean(wProg && wProg.completed);
+
+            let badgeHtml = `<span class="text-[9px] text-slate-400 font-semibold truncate">${escapeHtml(w.shortTag)}</span>`;
+            let boxClasses = 'bg-pf-card border border-pf-border text-slate-200 hover:bg-pf-cardAlt';
+
+            if (isActiveSpot) {
+              badgeHtml = `<span class="px-1.5 py-0.2 rounded bg-pf-gold text-slate-950 font-extrabold text-[9px] uppercase tracking-tight">NOW</span>`;
+              boxClasses = isViewingThis
+                ? 'bg-gradient-to-b from-purple-600 to-indigo-700 border-2 border-pf-gold text-white now-pulse shadow-md'
+                : 'bg-pf-cardAlt border-2 border-pf-gold/80 text-white';
+            } else if (isCompleted) {
+              badgeHtml = `<span class="text-[10px] font-extrabold text-emerald-400">✓ Done</span>`;
+              boxClasses = isViewingThis
+                ? 'bg-emerald-900/60 border-2 border-emerald-400 text-white'
+                : 'bg-emerald-950/40 border border-emerald-500/40 text-emerald-200';
+            } else if (isViewingThis) {
+              boxClasses = 'bg-purple-900/60 border-2 border-purple-400 text-white';
+            }
+
+            return `
+              <button
+                type="button"
+                data-workout-tab="${w.number}"
+                class="min-h-[52px] rounded-xl px-1 py-1.5 flex flex-col items-center justify-center gap-0.5 transition active:scale-95 ${boxClasses}"
+              >
+                <span class="text-xs font-extrabold">W${w.number}</span>
+                ${badgeHtml}
+              </button>
+            `;
+          }
+
+          if (viewState.mode === 'past') {
+            return `
+              <button
+                type="button"
+                data-workout-tab="${w.number}"
+                class="min-h-[52px] rounded-xl px-1 py-1.5 flex flex-col items-center justify-center gap-0.5 transition active:scale-95 ${
+                  isViewingThis
+                    ? 'bg-emerald-800/60 border-2 border-emerald-300 text-white'
+                    : 'bg-pf-card border border-emerald-500/30 text-emerald-200 hover:bg-pf-cardAlt'
+                }"
+              >
+                <span class="text-xs font-extrabold">W${w.number}</span>
+                <span class="text-[10px] font-bold text-emerald-400">✓ Log</span>
+              </button>
+            `;
+          }
+
+          // Future Preview mode
+          return `
+            <button
+              type="button"
+              data-workout-tab="${w.number}"
+              class="min-h-[52px] rounded-xl px-1 py-1.5 flex flex-col items-center justify-center gap-0.5 transition active:scale-95 ${
+                isViewingThis
+                  ? 'bg-indigo-700/70 border-2 border-indigo-300 text-white'
+                  : 'bg-pf-card border border-pf-border text-slate-300 hover:bg-pf-cardAlt'
+              }"
+            >
+              <span class="text-xs font-extrabold">W${w.number}</span>
+              <span class="text-[9px] text-indigo-300 font-semibold">Next</span>
+            </button>
+          `;
+        }).join('');
+
+        // Sticky Away-From-Active Context Banner
+        const isOnExactActive =
+          viewState.mode === 'active' && viewState.workoutNumber === state.activeWorkout;
+        const awayBanner = document.getElementById('awayFromActiveBanner');
+
+        if (isOnExactActive) {
+          awayBanner.classList.add('hidden');
+        } else {
+          awayBanner.classList.remove('hidden');
+          let viewingDesc = '';
+          if (viewState.mode === 'past') {
+            viewingDesc = `Viewing Cycle ${viewState.cycleNumber} History (Workout ${viewState.workoutNumber})`;
+          } else if (viewState.mode === 'future') {
+            viewingDesc = `Viewing Cycle ${viewState.cycleNumber} Preview (Workout ${viewState.workoutNumber})`;
+          } else {
+            const wProg = state.currentCycleWorkouts[viewState.workoutNumber];
+            const subState = wProg && wProg.completed ? 'Completed' : 'Preview';
+            viewingDesc = `Viewing Workout ${viewState.workoutNumber} — ${subState}`;
+          }
+          document.getElementById('awayBannerText').textContent =
+            `${viewingDesc} • You are currently on Cycle ${state.activeCycle}, Workout ${state.activeWorkout}`;
+          document.getElementById('jumpToActiveBtn').textContent =
+            `Jump to Active (W${state.activeWorkout})`;
+        }
+      }
+
+      /**
+       * Render Guardrails & Settings Drawer Toggle States
+       */
+      function renderPanelsState() {
+        const gPanel = document.getElementById('guardrailsPanel');
+        const gChev = document.getElementById('guardrailsChevron');
+        if (state.prefs.guardrailsOpen) {
+          gPanel.classList.remove('hidden');
+          gChev.classList.add('rotate-180');
+        } else {
+          gPanel.classList.add('hidden');
+          gChev.classList.remove('rotate-180');
+        }
+
+        const sDrawer = document.getElementById('settingsDrawer');
+        const sChev = document.getElementById('settingsChevron');
+        if (state.prefs.settingsOpen) {
+          sDrawer.classList.remove('hidden');
+          sChev.classList.add('rotate-180');
+        } else {
+          sDrawer.classList.add('hidden');
+          sChev.classList.remove('rotate-180');
+        }
+
+        // Auto-timer switch
+        const sw = document.getElementById('autoTimerToggle');
+        const knob = document.getElementById('autoTimerKnob');
+        if (state.prefs.autoTimer) {
+          sw.classList.remove('bg-slate-700');
+          sw.classList.add('bg-purple-600');
+          knob.classList.add('translate-x-6');
+        } else {
+          sw.classList.add('bg-slate-700');
+          sw.classList.remove('bg-purple-600');
+          knob.classList.remove('translate-x-6');
+        }
+
+        // Undo button state
+        const undoBtn = document.getElementById('undoWorkoutBtn');
+        const undoDesc = document.getElementById('undoDescription');
+        if (state.undoStack.length > 0) {
+          const top = state.undoStack[state.undoStack.length - 1];
+          undoBtn.disabled = false;
+          undoDesc.textContent = `Ready to undo: Reverts back to Cycle ${top.activeCycle}, Workout ${top.activeWorkout}.`;
+        } else {
+          undoBtn.disabled = true;
+          undoDesc.textContent = 'No recent workout completions to undo yet.';
+        }
+      }
+
+      /**
+       * Update Session Progress Bar for Currently Viewed Workout
+       */
+      function updateViewedProgressUI() {
+        const wNum = viewState.workoutNumber;
+        const wDef = WORKOUTS[wNum - 1];
+
+        if (viewState.mode === 'future') {
+          let totalSets = 2;
+          wDef.exercises.forEach((ex) => { totalSets += ex.sets; });
+          document.getElementById('progressCaption').textContent = `Cycle ${viewState.cycleNumber} Preview (Unchecked for Next Cycle)`;
+          document.getElementById('progressCountText').textContent = `0 / ${totalSets} done`;
+          document.getElementById('progressFillBar').style.width = '0%';
+          return;
+        }
+
+        if (viewState.mode === 'past') {
+          const histCycle = state.cycleHistory.find((c) => c.cycleNumber === viewState.cycleNumber);
+          const wSnap = histCycle && histCycle.workouts ? histCycle.workouts[wNum] : null;
+          let total = 2;
+          let done = wSnap ? (wSnap.warmupDone ? 1 : 0) + (wSnap.cooldownDone ? 1 : 0) : 0;
+          wDef.exercises.forEach((ex) => {
+            total += ex.sets;
+            const arr = wSnap && wSnap.setsDone ? wSnap.setsDone[ex.id] : null;
+            if (Array.isArray(arr)) done += arr.filter(Boolean).length;
+          });
+          const pct = total > 0 ? Math.round((done / total) * 100) : 100;
+          document.getElementById('progressCaption').textContent =
+            wSnap && wSnap.completedAt ? `Completed ${wSnap.completedAt}` : `Archived Cycle ${viewState.cycleNumber}`;
+          document.getElementById('progressCountText').textContent = `${done} / ${total} logged`;
+          document.getElementById('progressFillBar').style.width = `${pct}%`;
+          return;
+        }
+
+        // Active Cycle
+        const wProg = state.currentCycleWorkouts[wNum];
+        let total = 2;
+        let done = (wProg.warmupDone ? 1 : 0) + (wProg.cooldownDone ? 1 : 0);
+        wDef.exercises.forEach((ex) => {
+          const checks = getActiveCycleSetChecks(wNum, ex.id, ex.sets);
+          total += ex.sets;
+          done += checks.filter(Boolean).length;
+        });
+        const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+        document.getElementById('progressCaption').textContent =
+          wNum === state.activeWorkout ? 'Active Session Progress' : `Workout ${wNum} Checkmarks`;
+        document.getElementById('progressCountText').textContent = `${done} / ${total} done (${pct}%)`;
+        document.getElementById('progressFillBar').style.width = `${pct}%`;
+      }
+
+      /**
+       * Build Warm-up or Cool-down Card HTML
+       */
+      function buildBookendHtml(kind, text, isDone, isReadOnly) {
+        const isWarmup = kind === 'warmup';
+        const title = isWarmup ? 'Warm-Up & Activation' : 'Cool-Down & Mobility';
+        const borderCls = isDone ? 'border-emerald-500/50 bg-emerald-950/20' : 'border-pf-border bg-pf-card';
+
+        if (isReadOnly) {
+          return `
+            <div class="p-4 rounded-2xl border ${borderCls} flex items-start gap-3.5 opacity-90">
+              <div class="w-7 h-7 rounded-xl mt-0.5 flex items-center justify-center border ${
+                isDone ? 'bg-emerald-500 border-emerald-400 text-slate-950 font-extrabold' : 'bg-[#090c14] border-slate-700 text-slate-600'
+              } shrink-0">
+                ${isDone ? '✓' : '•'}
+              </div>
+              <div class="min-w-0 flex-1">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider ${isWarmup ? 'text-pf-gold' : 'text-purple-300'}">
+                  ${escapeHtml(title)}
+                </span>
+                <p class="text-sm font-medium text-slate-200 mt-1 leading-snug">${escapeHtml(text)}</p>
+              </div>
+            </div>
+          `;
+        }
+
+        return `
+          <button
+            type="button"
+            data-bookend-toggle="${kind}"
+            class="w-full p-4 rounded-2xl border ${borderCls} text-left flex items-start gap-3.5 transition active:scale-[0.99]"
+          >
+            <div class="w-7 h-7 rounded-xl mt-0.5 flex items-center justify-center border ${
+              isDone ? 'bg-emerald-500 border-emerald-400 text-slate-950 font-extrabold' : 'bg-[#090c14] border-slate-600 text-transparent'
+            } shrink-0">
+              ✓
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider ${isWarmup ? 'text-pf-gold' : 'text-purple-300'}">
+                  ${escapeHtml(title)}
+                </span>
+                <span class="text-[11px] font-semibold ${isDone ? 'text-emerald-400' : 'text-slate-400'}">
+                  ${isDone ? 'Completed' : 'Tap to check'}
+                </span>
+              </div>
+              <p class="text-sm font-medium text-slate-100 mt-1 leading-snug ${isDone ? 'line-through opacity-75' : ''}">
+                ${escapeHtml(text)}
+              </p>
+            </div>
+          </button>
+        `;
+      }
+
+      /**
+       * Render Main Viewed Workout (Past Read-Only Archive, Active Cycle Interactive, or Future Preview)
+       */
+      function renderWorkoutView() {
+        const wNum = viewState.workoutNumber;
+        const wDef = WORKOUTS[wNum - 1];
+        const isPast = viewState.mode === 'past';
+        const isFuture = viewState.mode === 'future';
+        const isReadOnly = isPast || isFuture;
+
+        const histCycle = isPast
+          ? state.cycleHistory.find((c) => c.cycleNumber === viewState.cycleNumber)
+          : null;
+        const pastWorkoutSnap = histCycle && histCycle.workouts ? histCycle.workouts[wNum] : null;
+        const activeWProg = state.currentCycleWorkouts[wNum];
+        const isExactActiveWorkout = viewState.mode === 'active' && wNum === state.activeWorkout;
+
+        // Context Badges in Hero Card
+        const badgesEl = document.getElementById('workoutContextBadges');
+        const badges = [
+          `<span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-purple-600 text-white">WORKOUT ${wNum} OF 6</span>`
+        ];
+
+        if (isExactActiveWorkout) {
+          badges.push(
+            `<span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-pf-gold text-slate-950">ACTIVE NOW • CYCLE ${state.activeCycle}</span>`
+          );
+        } else if (viewState.mode === 'active' && activeWProg.completed) {
+          badges.push(
+            `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">✓ Completed (${escapeHtml(activeWProg.completedAt || 'This Cycle')})</span>`
+          );
+        } else if (viewState.mode === 'active') {
+          badges.push(
+            `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-200 border border-indigo-400/30">Upcoming in Cycle ${state.activeCycle} (Editable)</span>`
+          );
+        } else if (isPast) {
+          badges.push(
+            `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">Cycle ${viewState.cycleNumber} Archive • ${escapeHtml((pastWorkoutSnap && pastWorkoutSnap.completedAt) || 'Completed')}</span>`
+          );
+        } else if (isFuture) {
+          badges.push(
+            `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-200 border border-indigo-400/30">Cycle ${viewState.cycleNumber} Carry-Over Preview</span>`
+          );
+        }
+
+        badgesEl.innerHTML = badges.join('');
+        document.getElementById('workoutTitle').textContent = wDef.title;
+
+        // Warmup & Cooldown states
+        const warmupChecked = isPast
+          ? Boolean(pastWorkoutSnap && pastWorkoutSnap.warmupDone)
+          : isFuture
+          ? false
+          : Boolean(activeWProg.warmupDone);
+        const cooldownChecked = isPast
+          ? Boolean(pastWorkoutSnap && pastWorkoutSnap.cooldownDone)
+          : isFuture
+          ? false
+          : Boolean(activeWProg.cooldownDone);
+
+        document.getElementById('warmupSection').innerHTML = buildBookendHtml(
+          'warmup',
+          wDef.warmup,
+          warmupChecked,
+          isReadOnly
+        );
+        document.getElementById('cooldownSection').innerHTML = buildBookendHtml(
+          'cooldown',
+          wDef.cooldown,
+          cooldownChecked,
+          isReadOnly
+        );
+
+        // Render Exercise Cards
+        const exSection = document.getElementById('exercisesSection');
+        exSection.innerHTML = wDef.exercises.map((ex, idx) => {
+          const quadOptForView =
+            isPast && pastWorkoutSnap && pastWorkoutSnap.quadOptionUsed
+              ? pastWorkoutSnap.quadOptionUsed
+              : state.quadOption;
+
+          const resolved = resolveExerciseConfig(ex, quadOptForView);
+          const storageKey = resolved.storageKey;
+
+          // Determine data record (Past snapshot vs Live persistent record)
+          let rec;
+          if (isPast && pastWorkoutSnap && pastWorkoutSnap.exercises && pastWorkoutSnap.exercises[storageKey]) {
+            rec = pastWorkoutSnap.exercises[storageKey];
+          } else if (isPast && histCycle && histCycle.exercisesSnapshot && histCycle.exercisesSnapshot[storageKey]) {
+            rec = histCycle.exercisesSnapshot[storageKey];
+          } else {
+            rec = getPersistentExerciseRecord(storageKey, resolved.setsCount);
+          }
+
+          // Determine set completion checks
+          let setChecks;
+          if (isPast) {
+            const snapArr = pastWorkoutSnap && pastWorkoutSnap.setsDone ? pastWorkoutSnap.setsDone[ex.id] : null;
+            setChecks = Array.isArray(snapArr) && snapArr.length === resolved.setsCount
+              ? snapArr
+              : Array(resolved.setsCount).fill(true);
+          } else if (isFuture) {
+            setChecks = Array(resolved.setsCount).fill(false);
+          } else {
+            setChecks = getActiveCycleSetChecks(wNum, ex.id, resolved.setsCount);
+          }
+
+          const allSetsDone = !isFuture && setChecks.every(Boolean);
+          const lastCycleBadge = getLastCycleBadgeText(storageKey, viewState.cycleNumber);
+
+          const rehabHeroUrl = `https://www.google.com/search?q=${encodeURIComponent('site:rehabhero.ca ' + resolved.query)}`;
+          const ytFormUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(resolved.query + ' proper form')}`;
+
+          return `
+            <article class="rounded-2xl border ${
+              allSetsDone ? 'border-emerald-500/45 bg-pf-card/95' : 'border-pf-border bg-pf-card'
+            } p-4 shadow-md space-y-3.5 transition">
+
+              <!-- Exercise Title & Last Cycle Badge -->
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex items-start gap-2.5 min-w-0">
+                  <span class="w-7 h-7 rounded-lg ${
+                    allSetsDone ? 'bg-emerald-500 text-slate-950' : 'bg-purple-600/25 text-purple-300 border border-purple-500/30'
+                  } font-extrabold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                    ${allSetsDone ? '✓' : idx + 1}
+                  </span>
+                  <div class="min-w-0">
+                    <h3 class="text-base font-bold text-white leading-snug">
+                      ${escapeHtml(resolved.name)}
+                    </h3>
+                    <div class="flex flex-wrap items-center gap-1.5 mt-1">
+                      <span class="px-2 py-0.5 rounded-md bg-pf-gold/15 text-pf-gold font-bold text-xs">
+                        ${escapeHtml(resolved.prescription)}
+                      </span>
+                      <span class="text-xs text-slate-400">Rest ${ex.restSec}s</span>
+                      ${
+                        lastCycleBadge
+                          ? `<span class="px-2 py-0.5 rounded-md bg-purple-500/20 border border-purple-400/30 text-purple-200 font-semibold text-[11px]">
+                              ${escapeHtml(lastCycleBadge)}
+                            </span>`
+                          : ''
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              ${
+                ex.isDualOption
+                  ? `
+                  <!-- Dual Option A / Option B Selector -->
+                  <div class="p-1 rounded-xl bg-[#090c14] border border-pf-border grid grid-cols-2 gap-1">
+                    <button
+                      type="button"
+                      ${isPast ? 'disabled' : 'data-quad-switch="A"'}
+                      class="min-h-[42px] px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${
+                        resolved.selectedOption === 'A'
+                          ? 'bg-purple-600 text-white shadow'
+                          : 'text-slate-400 hover:text-slate-200'
+                      } ${isPast ? 'cursor-default' : ''}"
+                    >
+                      Option A: Cable/Band TKE
+                    </button>
+                    <button
+                      type="button"
+                      ${isPast ? 'disabled' : 'data-quad-switch="B"'}
+                      class="min-h-[42px] px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${
+                        resolved.selectedOption === 'B'
+                          ? 'bg-purple-600 text-white shadow'
+                          : 'text-slate-400 hover:text-slate-200'
+                      } ${isPast ? 'cursor-default' : ''}"
+                    >
+                      Option B: Short-Arc Press
+                    </button>
+                  </div>
+                `
+                  : ''
+              }
+
+              <!-- PT Form Cue + Form Check Links -->
+              <div class="p-3 rounded-xl bg-[#090c14]/85 border border-pf-border/80 space-y-2">
+                <p class="text-xs text-slate-200 leading-relaxed">
+                  <strong class="text-purple-300 font-bold">Cue:</strong> ${escapeHtml(resolved.cue)}
+                </p>
+                <div class="flex flex-wrap items-center gap-2">
+                  <a
+                    href="${rehabHeroUrl}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-pf-cardAlt hover:bg-slate-800 border border-pf-border text-[11px] font-semibold text-purple-300 transition"
+                  >
+                    <span>Form Check (RehabHero)</span>
+                    <span>↗</span>
+                  </a>
+                  <a
+                    href="${ytFormUrl}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-pf-cardAlt hover:bg-slate-800 border border-pf-border text-[11px] font-semibold text-slate-300 transition"
+                  >
+                    <span>YouTube Demo</span>
+                    <span>↗</span>
+                  </a>
+                </div>
+              </div>
+
+              <!-- Seat / Pin # + Copy Set 1 Helper -->
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2 flex-1">
+                  <label class="text-xs font-semibold text-slate-400 whitespace-nowrap" for="pin_${storageKey}_${wNum}">
+                    Seat / Pin #:
+                  </label>
+                  <input
+                    id="pin_${storageKey}_${wNum}"
+                    type="text"
+                    ${isReadOnly ? 'readonly' : ''}
+                    data-ex-key="${storageKey}"
+                    data-ex-field="seatPin"
+                    value="${escapeHtml(rec.seatPin || '')}"
+                    placeholder="e.g. Seat 4 / Pin 2"
+                    class="w-full min-h-[42px] px-3 py-1.5 rounded-xl bg-[#090c14] border border-pf-border focus:border-purple-500 focus:outline-none text-white placeholder-slate-600 ${
+                      isReadOnly ? 'opacity-75' : ''
+                    }"
+                  />
+                </div>
+                ${
+                  !isReadOnly
+                    ? `<button
+                        type="button"
+                        data-copy-set1="${storageKey}"
+                        data-sets-count="${resolved.setsCount}"
+                        class="min-h-[42px] px-2.5 py-1.5 rounded-xl bg-pf-cardAlt hover:bg-slate-800 border border-pf-border text-[11px] font-bold text-purple-300 shrink-0 active:scale-95 transition"
+                        title="Copy Set 1 weight & reps to all sets below"
+                      >
+                        Copy Set 1 ↓
+                      </button>`
+                    : ''
+                }
+              </div>
+
+              <!-- Per-Set Weight, Reps & Checkmark Rows -->
+              <div class="space-y-2">
+                ${Array.from({ length: resolved.setsCount }).map((_, setIdx) => {
+                  const setObj = (rec.sets && rec.sets[setIdx]) ? rec.sets[setIdx] : { weight: '', reps: '' };
+                  const isSetDone = Boolean(setChecks[setIdx]);
+
+                  return `
+                    <div class="grid grid-cols-12 gap-2 items-center">
+                      <div class="col-span-2">
+                        <span class="text-xs font-bold text-slate-400 block text-center">S${setIdx + 1}</span>
+                      </div>
+                      <div class="col-span-4">
+                        <input
+                          type="text"
+                          inputmode="decimal"
+                          aria-label="Set ${setIdx + 1} Weight in lbs"
+                          ${isReadOnly ? 'readonly' : ''}
+                          data-ex-key="${storageKey}"
+                          data-set-input-idx="${setIdx}"
+                          data-set-prop="weight"
+                          value="${escapeHtml(setObj.weight || '')}"
+                          placeholder="lbs"
+                          class="w-full min-h-[44px] px-2.5 py-1.5 rounded-xl bg-[#090c14] border border-pf-border focus:border-purple-500 focus:outline-none text-white font-semibold placeholder-slate-600 text-center ${
+                            isReadOnly ? 'opacity-75' : ''
+                          }"
+                        />
+                      </div>
+                      <div class="col-span-3">
+                        <input
+                          type="text"
+                          aria-label="Set ${setIdx + 1} Reps"
+                          ${isReadOnly ? 'readonly' : ''}
+                          data-ex-key="${storageKey}"
+                          data-set-input-idx="${setIdx}"
+                          data-set-prop="reps"
+                          value="${escapeHtml(setObj.reps || '')}"
+                          placeholder="${escapeHtml(resolved.targetReps)}"
+                          class="w-full min-h-[44px] px-2 py-1.5 rounded-xl bg-[#090c14] border border-pf-border focus:border-purple-500 focus:outline-none text-white placeholder-slate-600 text-center ${
+                            isReadOnly ? 'opacity-75' : ''
+                          }"
+                        />
+                      </div>
+                      <div class="col-span-3">
+                        ${
+                          isReadOnly
+                            ? `<div class="min-h-[44px] rounded-xl border flex items-center justify-center text-xs font-bold ${
+                                isSetDone
+                                  ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
+                                  : 'bg-[#090c14] border-pf-border text-slate-500'
+                              }">
+                                ${isSetDone ? '✓ Done' : '—'}
+                              </div>`
+                            : `<button
+                                type="button"
+                                data-check-ex="${ex.id}"
+                                data-check-set="${setIdx}"
+                                data-rest="${ex.restSec}"
+                                class="w-full min-h-[44px] rounded-xl border font-bold text-xs flex items-center justify-center gap-1 transition active:scale-95 ${
+                                  isSetDone
+                                    ? 'bg-emerald-500/25 border-emerald-400 text-emerald-200 shadow-inner'
+                                    : 'bg-pf-cardAlt border-pf-border text-slate-300 hover:border-purple-400/50'
+                                }"
+                              >
+                                <span>${isSetDone ? '✓' : '○'}</span>
+                                <span>Done</span>
+                              </button>`
+                        }
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+
+              <!-- Exercise Notes -->
+              <div>
+                <input
+                  type="text"
+                  aria-label="Exercise Notes"
+                  ${isReadOnly ? 'readonly' : ''}
+                  data-ex-key="${storageKey}"
+                  data-ex-field="notes"
+                  value="${escapeHtml(rec.notes || '')}"
+                  placeholder="Notes (e.g. smooth knee angle, add +5 lbs next cycle)"
+                  class="w-full min-h-[42px] px-3 py-1.5 rounded-xl bg-[#090c14]/70 border border-pf-border/80 focus:border-purple-500 focus:outline-none text-slate-200 placeholder-slate-600 ${
+                    isReadOnly ? 'opacity-75' : ''
+                  }"
+                />
+              </div>
+            </article>
+          `;
+        }).join('');
+
+        // Render Dynamic Footer Action Card (ONLY show "Complete Workout & Advance Queue" on the Active Workout!)
+        const footerEl = document.getElementById('workoutFooterAction');
+        if (isExactActiveWorkout) {
+          const nextHint =
+            wNum === 6
+              ? `Rolls over to Cycle ${state.activeCycle + 1}, Workout 1 (all weights & pins stay saved!)`
+              : `Next in queue: Workout ${wNum + 1}`;
+          const btnLabel =
+            wNum === 6
+              ? `Complete Workout 6 & Start Cycle ${state.activeCycle + 1}`
+              : `Complete Workout ${wNum} & Advance Queue`;
+
+          footerEl.innerHTML = `
+            <div class="p-4 rounded-2xl bg-pf-card border-2 border-purple-500/50 shadow-xl space-y-3">
+              <div class="flex items-center justify-between gap-2 text-xs">
+                <span class="text-slate-300 font-semibold">Active Session: Workout ${wNum}</span>
+                <span class="text-pf-gold font-bold text-right">${escapeHtml(nextHint)}</span>
+              </div>
+              <button
+                id="completeActiveWorkoutBtn"
+                type="button"
+                class="w-full min-h-[54px] px-5 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 active:scale-[0.99] transition text-white font-extrabold text-base shadow-lg flex items-center justify-center gap-2 border border-purple-400/30"
+              >
+                <span>${escapeHtml(btnLabel)}</span>
+                <svg class="w-5 h-5 text-pf-gold shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </button>
+              <p class="text-[11px] text-center text-slate-400">
+                Seat/Pin #, weights, reps, and notes automatically carry over into every future cycle.
+              </p>
+            </div>
+          `;
+        } else {
+          let statusTitle = '';
+          let statusDetail = '';
+          if (viewState.mode === 'active' && activeWProg.completed) {
+            statusTitle = `✓ Completed on ${activeWProg.completedAt || 'this cycle'}`;
+            statusDetail = `You are currently on Cycle ${state.activeCycle}, Workout ${state.activeWorkout}. Any edits to weights or pins here will still carry forward.`;
+          } else if (viewState.mode === 'active') {
+            statusTitle = `Up ahead in queue — Active workout is W${state.activeWorkout}`;
+            statusDetail = `Feel free to pre-enter seat pins, weights, or notes for Workout ${wNum}. Complete W${state.activeWorkout} first when you're ready to advance the queue.`;
+          } else if (isPast) {
+            statusTitle = `Read-Only Cycle ${viewState.cycleNumber} Archive (${(pastWorkoutSnap && pastWorkoutSnap.completedAt) || 'Completed'})`;
+            statusDetail = `Historical snapshot of Workout ${wNum}. Your live tracker is on Cycle ${state.activeCycle}, Workout ${state.activeWorkout}.`;
+          } else {
+            statusTitle = `Future Cycle ${viewState.cycleNumber} Preview`;
+            statusDetail = `Previewing how your carried-over weights & pins will look in Cycle ${viewState.cycleNumber} once all checkmarks reset.`;
+          }
+
+          footerEl.innerHTML = `
+            <div class="p-4 rounded-2xl bg-pf-cardAlt border border-pf-border space-y-3 text-center">
+              <p class="text-sm font-extrabold text-pf-gold">${escapeHtml(statusTitle)}</p>
+              <p class="text-xs text-slate-300 leading-relaxed">${escapeHtml(statusDetail)}</p>
+              <button
+                type="button"
+                data-jump-active="true"
+                class="w-full min-h-[48px] px-4 py-2.5 rounded-xl bg-pf-gold text-slate-950 font-extrabold text-sm shadow active:scale-95 transition"
+              >
+                Return to Active Workout (Cycle ${state.activeCycle}, W${state.activeWorkout})
+              </button>
+            </div>
+          `;
+        }
+
+        updateViewedProgressUI();
+      }
+
+      function renderAll() {
+        renderHeaderAndNavigation();
+        renderPanelsState();
+        renderWorkoutView();
+      }
+
+      /**
+       * Jump directly to Active Cycle & Active Workout
+       */
+      function jumpToActive() {
+        viewState.mode = 'active';
+        viewState.cycleNumber = state.activeCycle;
+        viewState.workoutNumber = state.activeWorkout;
+        renderAll();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      /**
+       * Complete Active Workout & Advance Queue (or Roll Over Cycle 6 -> Cycle N+1)
+       */
+      function openCompleteModal() {
+        if (viewState.mode !== 'active' || viewState.workoutNumber !== state.activeWorkout) return;
+
+        const wNum = state.activeWorkout;
+        const wDef = WORKOUTS[wNum - 1];
+        const hasUnchecked = wDef.exercises.some((ex) => {
+          const checks = getActiveCycleSetChecks(wNum, ex.id, ex.sets);
+          return checks.some((c) => !c);
+        });
+
+        const warnBox = document.getElementById('uncheckedWarningBox');
+        if (hasUnchecked) warnBox.classList.remove('hidden');
+        else warnBox.classList.add('hidden');
+
+        const titleEl = document.getElementById('completeModalTitle');
+        const descEl = document.getElementById('completeModalDesc');
+        if (wNum === 6) {
+          titleEl.textContent = `Complete Workout 6 & Finish Cycle ${state.activeCycle}?`;
+          descEl.textContent = `Archives Cycle ${state.activeCycle} in Past Cycles and starts Cycle ${state.activeCycle + 1} at Workout 1 with all your weights & seat pins pre-loaded!`;
+        } else {
+          titleEl.textContent = `Complete Workout ${wNum}?`;
+          descEl.textContent = `Marks Workout ${wNum} completed and moves your active spot to Workout ${wNum + 1}. (You can still view W${wNum} anytime.)`;
+        }
+
+        const modal = document.getElementById('completeModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+
+      function closeCompleteModal() {
+        const modal = document.getElementById('completeModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      function confirmCompleteActiveWorkout() {
+        const completedW = state.activeWorkout;
+        const completedCycle = state.activeCycle;
+
+        // Push full snapshot onto undoStack BEFORE mutating (supports seamless undo across cycle rollover!)
+        const undoSnapshot = {
+          activeCycle: state.activeCycle,
+          activeWorkout: state.activeWorkout,
+          currentCycleWorkouts: JSON.parse(JSON.stringify(state.currentCycleWorkouts)),
+          cycleHistory: JSON.parse(JSON.stringify(state.cycleHistory))
+        };
+        state.undoStack.push(undoSnapshot);
+        if (state.undoStack.length > 8) state.undoStack.shift();
+
+        const timestampStr = new Date().toLocaleString(undefined, {
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit'
+        });
+
+        // Mark workout completed & capture snapshot
+        const wProg = state.currentCycleWorkouts[completedW];
+        wProg.completed = true;
+        wProg.completedAt = timestampStr;
+        wProg.completedSnapshot = createWorkoutSnapshot(completedW, timestampStr);
+
+        stopRestTimer();
+
+        if (completedW >= 6) {
+          // Archive entire completed cycle into cycleHistory
+          const archivedWorkouts = {};
+          for (let w = 1; w <= 6; w++) {
+            const wp = state.currentCycleWorkouts[w];
+            archivedWorkouts[w] = wp.completedSnapshot || createWorkoutSnapshot(w, wp.completedAt || timestampStr);
+          }
+
+          state.cycleHistory.push({
+            cycleNumber: completedCycle,
+            completedAt: timestampStr,
+            workouts: archivedWorkouts,
+            exercisesSnapshot: JSON.parse(JSON.stringify(state.exercises))
+          });
+
+          // Roll over to Cycle N+1, Workout 1 — ONLY checkmarks reset; state.exercises stays 100% intact!
+          state.activeCycle = completedCycle + 1;
+          state.activeWorkout = 1;
+          state.currentCycleWorkouts = createBlankCycleWorkoutsProgress();
+
+          viewState.mode = 'active';
+          viewState.cycleNumber = state.activeCycle;
+          viewState.workoutNumber = 1;
+
+          saveState();
+          closeCompleteModal();
+          renderAll();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          showToast(`Cycle ${completedCycle} archived! Welcome to Cycle ${state.activeCycle}, Workout 1 — all weights & pins carried over.`);
+        } else {
+          state.activeWorkout = completedW + 1;
+          viewState.mode = 'active';
+          viewState.cycleNumber = state.activeCycle;
+          viewState.workoutNumber = state.activeWorkout;
+
+          saveState();
+          closeCompleteModal();
+          renderAll();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          showToast(`Workout ${completedW} marked complete! Now on Workout ${state.activeWorkout}.`);
+        }
+      }
+
+      /**
+       * Undo Last Completed Workout (even across cycle rollover)
+       */
+      function undoLastCompletedWorkout() {
+        if (state.undoStack.length === 0) return;
+        const prev = state.undoStack.pop();
+        state.activeCycle = prev.activeCycle;
+        state.activeWorkout = prev.activeWorkout;
+        state.currentCycleWorkouts = prev.currentCycleWorkouts;
+        state.cycleHistory = prev.cycleHistory;
+
+        viewState.mode = 'active';
+        viewState.cycleNumber = state.activeCycle;
+        viewState.workoutNumber = state.activeWorkout;
+
+        saveState();
+        renderAll();
+        showToast(`Undone! Active spot restored to Cycle ${state.activeCycle}, Workout ${state.activeWorkout}.`);
+      }
+
+      /**
+       * Bind DOM Events
+       */
+      function bindEvents() {
+        // Delegated Click Handler
+        document.addEventListener('click', (e) => {
+          // Cycle Browser Bar pills
+          const cycleBtn = e.target.closest('[data-cycle-mode]');
+          if (cycleBtn) {
+            const mode = cycleBtn.getAttribute('data-cycle-mode');
+            const cNum = Number(cycleBtn.getAttribute('data-cycle-num'));
+            viewState.mode = mode;
+            viewState.cycleNumber = cNum;
+            if (mode === 'active') {
+              viewState.workoutNumber = state.activeWorkout;
+            } else {
+              viewState.workoutNumber = 1;
+            }
+            renderAll();
+            return;
+          }
+
+          // Workout Tabs W1..W6 (Unlocked!)
+          const wTab = e.target.closest('[data-workout-tab]');
+          if (wTab) {
+            viewState.workoutNumber = Number(wTab.getAttribute('data-workout-tab')) || 1;
+            renderAll();
+            return;
+          }
+
+          // Jump to Active buttons
+          if (e.target.closest('#jumpToActiveBtn') || e.target.closest('[data-jump-active]')) {
+            jumpToActive();
+            return;
+          }
+
+          // Warmup / Cooldown checkable cards
+          const bookendBtn = e.target.closest('[data-bookend-toggle]');
+          if (bookendBtn && viewState.mode === 'active') {
+            const kind = bookendBtn.getAttribute('data-bookend-toggle');
+            const wProg = state.currentCycleWorkouts[viewState.workoutNumber];
+            if (kind === 'warmup') wProg.warmupDone = !wProg.warmupDone;
+            else wProg.cooldownDone = !wProg.cooldownDone;
+            saveState();
+            renderWorkoutView();
+            return;
+          }
+
+          // Dual Option A/B switch on Workout 1 Exercise 6
+          const quadBtn = e.target.closest('[data-quad-switch]');
+          if (quadBtn && viewState.mode !== 'past') {
+            const opt = quadBtn.getAttribute('data-quad-switch');
+            if (opt === 'A' || opt === 'B') {
+              state.quadOption = opt;
+              saveState();
+              renderWorkoutView();
+            }
+            return;
+          }
+
+          // Copy Set 1 weight & reps down to remaining sets
+          const copyBtn = e.target.closest('[data-copy-set1]');
+          if (copyBtn && viewState.mode === 'active') {
+            const storageKey = copyBtn.getAttribute('data-copy-set1');
+            const setsCount = Number(copyBtn.getAttribute('data-sets-count')) || 3;
+            const rec = getPersistentExerciseRecord(storageKey, setsCount);
+            const first = rec.sets[0] || { weight: '', reps: '' };
+            for (let i = 1; i < setsCount; i++) {
+              rec.sets[i] = { weight: first.weight || '', reps: first.reps || '' };
+            }
+            saveState();
+            renderWorkoutView();
+            showToast('Copied Set 1 weight & reps across all sets.');
+            return;
+          }
+
+          // Per-set Done button
+          const checkBtn = e.target.closest('[data-check-ex][data-check-set]');
+          if (checkBtn && viewState.mode === 'active') {
+            const exId = checkBtn.getAttribute('data-check-ex');
+            const setIdx = Number(checkBtn.getAttribute('data-check-set'));
+            const restSec = Number(checkBtn.getAttribute('data-rest')) || 90;
+            const wDef = WORKOUTS[viewState.workoutNumber - 1];
+            const ex = wDef.exercises.find((item) => item.id === exId);
+            if (!ex) return;
+
+            const checks = getActiveCycleSetChecks(viewState.workoutNumber, ex.id, ex.sets);
+            const newVal = !checks[setIdx];
+            checks[setIdx] = newVal;
+            saveState();
+            renderAll();
+
+            if (newVal && state.prefs.autoTimer) {
+              startRestTimer(restSec, `Set ${setIdx + 1} Done • Rest ${restSec}s`);
+            }
+            return;
+          }
+
+          // Complete Active Workout button
+          if (e.target.closest('#completeActiveWorkoutBtn')) {
+            openCompleteModal();
+            return;
+          }
+
+          // Rest Timer presets
+          const timerPreset = e.target.closest('.timer-preset-btn');
+          if (timerPreset) {
+            const sec = Number(timerPreset.getAttribute('data-timer-sec')) || 90;
+            startRestTimer(sec, `Rest Timer (${sec}s)`);
+          }
+        });
+
+        // Live Auto-Save for Seat/Pin, Weight, Reps, and Notes (NO DOM rebuild so iOS keyboard stays open)
+        document.getElementById('exercisesSection').addEventListener('input', (e) => {
+          if (viewState.mode !== 'active') return;
+          const target = e.target;
+          const storageKey = target.getAttribute('data-ex-key');
+          if (!storageKey) return;
+
+          const wDef = WORKOUTS[viewState.workoutNumber - 1];
+          let setsCount = 3;
+          wDef.exercises.forEach((ex) => {
+            if (ex.id === storageKey) setsCount = ex.sets;
+            if (ex.isDualOption && (ex.options.A.storageKey === storageKey || ex.options.B.storageKey === storageKey)) {
+              setsCount = ex.sets;
+            }
+          });
+
+          const rec = getPersistentExerciseRecord(storageKey, setsCount);
+          const directField = target.getAttribute('data-ex-field');
+          if (directField === 'seatPin' || directField === 'notes') {
+            rec[directField] = target.value;
+            saveState();
+            return;
+          }
+
+          const setIdxAttr = target.getAttribute('data-set-input-idx');
+          const setProp = target.getAttribute('data-set-prop');
+          if (setIdxAttr !== null && (setProp === 'weight' || setProp === 'reps')) {
+            const idx = Number(setIdxAttr);
+            if (rec.sets[idx]) {
+              rec.sets[idx][setProp] = target.value;
+              saveState();
+            }
+          }
+        });
+
+        // Guardrails Banner Toggle
+        document.getElementById('guardrailsToggleBtn').addEventListener('click', () => {
+          state.prefs.guardrailsOpen = !state.prefs.guardrailsOpen;
+          saveState();
+          renderPanelsState();
+        });
+
+        // Settings Drawer Toggle
+        document.getElementById('toggleSettingsBtn').addEventListener('click', () => {
+          state.prefs.settingsOpen = !state.prefs.settingsOpen;
+          document.getElementById('resetConfirmBox').classList.add('hidden');
+          saveState();
+          renderPanelsState();
+        });
+
+        // Auto Timer Toggle
+        document.getElementById('autoTimerToggle').addEventListener('click', () => {
+          state.prefs.autoTimer = !state.prefs.autoTimer;
+          saveState();
+          renderPanelsState();
+        });
+
+        // Header Rest Timer button & controls
+        document.getElementById('headerTimerBtn').addEventListener('click', () => {
+          const bar = document.getElementById('restTimerBar');
+          if (bar.classList.contains('hidden')) {
+            startRestTimer(90, 'Rest Timer (90s)');
+          } else {
+            bar.classList.add('hidden');
+          }
+        });
+
+        document.getElementById('timerPlus30Btn').addEventListener('click', () => {
+          timerRemainingSec += 30;
+          timerTotalSec = Math.max(timerTotalSec, timerRemainingSec);
+          if (!timerInterval) {
+            startRestTimer(timerRemainingSec, 'Rest Timer (+30s)');
+          } else {
+            updateTimerUI();
+          }
+        });
+
+        document.getElementById('timerStopBtn').addEventListener('click', stopRestTimer);
+
+        // Complete Workout Modal buttons
+        document.getElementById('cancelCompleteModalBtn').addEventListener('click', closeCompleteModal);
+        document.getElementById('confirmCompleteModalBtn').addEventListener('click', confirmCompleteActiveWorkout);
+
+        // Undo Last Completed Workout
+        document.getElementById('undoWorkoutBtn').addEventListener('click', undoLastCompletedWorkout);
+
+        // Export JSON Backup
+        document.getElementById('exportJsonBtn').addEventListener('click', () => {
+          const payload = JSON.stringify(state, null, 2);
+          const blob = new Blob([payload], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          const dateStr = new Date().toISOString().slice(0, 10);
+          a.href = url;
+          a.download = `pf-cycle${state.activeCycle}-w${state.activeWorkout}-backup-${dateStr}.json`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          showToast('JSON backup downloaded!');
+        });
+
+        // Import JSON Backup
+        document.getElementById('importJsonInput').addEventListener('change', (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            try {
+              const parsed = JSON.parse(String(ev.target.result));
+              if (!parsed || typeof parsed !== 'object') {
+                showToast('Invalid JSON backup file.');
+                return;
+              }
+              const def = createDefaultState();
+              state = {
+                ...def,
+                ...parsed,
+                activeCycle: Math.max(1, Number(parsed.activeCycle) || 1),
+                activeWorkout: Math.min(6, Math.max(1, Number(parsed.activeWorkout) || 1)),
+                currentCycleWorkouts: {
+                  ...createBlankCycleWorkoutsProgress(),
+                  ...(parsed.currentCycleWorkouts || {})
+                },
+                cycleHistory: Array.isArray(parsed.cycleHistory) ? parsed.cycleHistory : [],
+                undoStack: Array.isArray(parsed.undoStack) ? parsed.undoStack : []
+              };
+              saveState();
+              jumpToActive();
+              showToast(`Backup restored! Active: Cycle ${state.activeCycle}, Workout ${state.activeWorkout}.`);
+            } catch (err) {
+              console.error(err);
+              showToast('Could not read JSON backup file.');
+            }
+          };
+          reader.readAsText(file);
+          e.target.value = '';
+        });
+
+        // Two-Step Reset All Data (No browser alert/confirm)
+        document.getElementById('resetStep1Btn').addEventListener('click', () => {
+          document.getElementById('resetConfirmBox').classList.remove('hidden');
+        });
+        document.getElementById('cancelResetBtn').addEventListener('click', () => {
+          document.getElementById('resetConfirmBox').classList.add('hidden');
+        });
+        document.getElementById('confirmResetAllBtn').addEventListener('click', () => {
+          localStorage.removeItem(STORAGE_KEY);
+          localStorage.removeItem(LEGACY_KEY_V1);
+          state = createDefaultState();
+          saveState();
+          stopRestTimer();
+          document.getElementById('resetConfirmBox').classList.add('hidden');
+          jumpToActive();
+          showToast('All data reset. Fresh start at Cycle 1, Workout 1.');
+        });
+      }
+
+      // Boot Tracker on Active Cycle + Active Workout
+      bindEvents();
+      renderAll();
+    })();
+  </script>
+</body>
+</html>
