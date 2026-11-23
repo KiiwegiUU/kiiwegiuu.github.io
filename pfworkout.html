@@ -209,13 +209,34 @@
           <div id="progressFillBar" class="h-full bg-gradient-to-r from-purple-500 to-pf-gold transition-all duration-300" style="width: 0%"></div>
         </div>
       </div>
+
+      <!-- Quick Collapse / Expand All Exercise Cards Bar -->
+      <div class="pt-1 flex items-center justify-between gap-2 border-t border-pf-border/60">
+        <span class="text-[11px] font-semibold text-slate-400">Tap any exercise header to fold/unfold</span>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button
+            id="collapseAllExBtn"
+            type="button"
+            class="min-h-[32px] px-2.5 py-1 rounded-lg bg-[#090c14] hover:bg-slate-800 border border-pf-border text-[11px] font-bold text-slate-300 active:scale-95 transition"
+          >
+            Collapse All
+          </button>
+          <button
+            id="expandAllExBtn"
+            type="button"
+            class="min-h-[32px] px-2.5 py-1 rounded-lg bg-[#090c14] hover:bg-slate-800 border border-pf-border text-[11px] font-bold text-purple-300 active:scale-95 transition"
+          >
+            Expand All
+          </button>
+        </div>
+      </div>
     </section>
 
     <!-- Warm-Up Block -->
     <section id="warmupSection"></section>
 
     <!-- Exercises List -->
-    <section id="exercisesSection" class="space-y-4" aria-label="Exercises"></section>
+    <section id="exercisesSection" class="space-y-3" aria-label="Exercises"></section>
 
     <!-- Cool-Down Block -->
     <section id="cooldownSection"></section>
@@ -259,6 +280,22 @@
             aria-label="Toggle Auto Rest Timer"
           >
             <span id="autoTimerKnob" class="w-6 h-6 rounded-full bg-white shadow transform transition-transform duration-200 translate-x-6"></span>
+          </button>
+        </div>
+
+        <!-- Auto-Collapse Completed Exercise Switch -->
+        <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-pf-cardAlt border border-pf-border">
+          <div>
+            <p class="text-xs sm:text-sm font-bold text-white">Auto-Collapse Exercise When All Sets Done</p>
+            <p class="text-[11px] text-slate-400">Folds completed cards automatically to reduce scrolling</p>
+          </div>
+          <button
+            id="autoCollapseToggle"
+            type="button"
+            class="w-14 h-8 rounded-full p-1 transition-colors duration-200 bg-purple-600 flex items-center shrink-0"
+            aria-label="Toggle Auto-Collapse Completed Exercise"
+          >
+            <span id="autoCollapseKnob" class="w-6 h-6 rounded-full bg-white shadow transform transition-transform duration-200 translate-x-6"></span>
           </button>
         </div>
 
@@ -919,8 +956,11 @@
           prefs: {
             guardrailsOpen: false,
             autoTimer: true,
+            autoCollapseDone: true,
             settingsOpen: false
           },
+          // UI-only collapsed state keyed by `${mode}_${cycleNumber}_${ex.id}`
+          collapsedExercises: {},
           // Persistent across ALL cycles! Keyed by exercise.id (or dual option storageKey)
           exercises: {},
           // Current active cycle's checkmarks & per-workout completion status
@@ -947,6 +987,7 @@
               activeCycle: Math.max(1, Number(parsed.activeCycle) || 1),
               activeWorkout: Math.min(6, Math.max(1, Number(parsed.activeWorkout) || 1)),
               prefs: { ...def.prefs, ...(parsed.prefs || {}) },
+              collapsedExercises: parsed.collapsedExercises && typeof parsed.collapsedExercises === 'object' ? parsed.collapsedExercises : {},
               exercises: parsed.exercises || {},
               currentCycleWorkouts: {
                 ...createBlankCycleWorkoutsProgress(),
@@ -1019,6 +1060,27 @@
       }
 
       /**
+       * Collapse key helper scoped per view mode & cycle
+       */
+      function getCollapseKey(exId) {
+        return `${viewState.mode}_${viewState.cycleNumber}_${exId}`;
+      }
+
+      function isExerciseCollapsed(exId) {
+        return Boolean(state.collapsedExercises && state.collapsedExercises[getCollapseKey(exId)]);
+      }
+
+      function setExerciseCollapsed(exId, collapsed) {
+        if (!state.collapsedExercises) state.collapsedExercises = {};
+        const key = getCollapseKey(exId);
+        if (collapsed) {
+          state.collapsedExercises[key] = true;
+        } else {
+          delete state.collapsedExercises[key];
+        }
+      }
+
+      /**
        * Resolve an exercise's active config & storageKey (handles Dual Option on W1 Ex 6)
        */
       function resolveExerciseConfig(ex, quadOptOverride) {
@@ -1081,6 +1143,25 @@
           wProg.setsDone[exId] = Array(setsCount).fill(false);
         }
         return wProg.setsDone[exId];
+      }
+
+      /**
+       * Compact summary chip shown when a card is collapsed (e.g. "90 lbs × 10")
+       */
+      function getCompactWeightChip(rec) {
+        if (!rec || !Array.isArray(rec.sets)) return '';
+        const populated = rec.sets.filter((s) => (s.weight && String(s.weight).trim() !== '') || (s.reps && String(s.reps).trim() !== ''));
+        if (populated.length === 0) return '';
+        let best = populated[0];
+        populated.forEach((s) => {
+          if (parseFloat(s.weight) > parseFloat(best.weight || '0')) best = s;
+        });
+        const w = String(best.weight || '').trim();
+        const r = String(best.reps || '').trim();
+        if (w && r) return `${w} lbs × ${r}`;
+        if (w) return `${w} lbs`;
+        if (r) return `${r} reps`;
+        return '';
       }
 
       /**
@@ -1201,7 +1282,6 @@
       }
 
       function startRestTimer(seconds, label) {
-        // Unlock audio context on user tap
         try {
           const AudioContextClass = window.AudioContext || window.webkitAudioContext;
           if (AudioContextClass && !audioCtx) audioCtx = new AudioContextClass();
@@ -1460,6 +1540,19 @@
           knob.classList.remove('translate-x-6');
         }
 
+        // Auto-collapse completed exercise switch
+        const acSw = document.getElementById('autoCollapseToggle');
+        const acKnob = document.getElementById('autoCollapseKnob');
+        if (state.prefs.autoCollapseDone) {
+          acSw.classList.remove('bg-slate-700');
+          acSw.classList.add('bg-purple-600');
+          acKnob.classList.add('translate-x-6');
+        } else {
+          acSw.classList.add('bg-slate-700');
+          acSw.classList.remove('bg-purple-600');
+          acKnob.classList.remove('translate-x-6');
+        }
+
         // Undo button state
         const undoBtn = document.getElementById('undoWorkoutBtn');
         const undoDesc = document.getElementById('undoDescription');
@@ -1650,7 +1743,7 @@
           isReadOnly
         );
 
-        // Render Exercise Cards
+        // Render Exercise Cards (with collapsible caret!)
         const exSection = document.getElementById('exercisesSection');
         exSection.innerHTML = wDef.exercises.map((ex, idx) => {
           const quadOptForView =
@@ -1684,7 +1777,10 @@
             setChecks = getActiveCycleSetChecks(wNum, ex.id, resolved.setsCount);
           }
 
-          const allSetsDone = !isFuture && setChecks.every(Boolean);
+          const completedCount = setChecks.filter(Boolean).length;
+          const allSetsDone = !isFuture && completedCount === resolved.setsCount;
+          const isCollapsed = isExerciseCollapsed(ex.id);
+          const compactWeight = getCompactWeightChip(rec);
           const lastCycleBadge = getLastCycleBadgeText(storageKey, viewState.cycleNumber);
 
           const rehabHeroUrl = `https://www.google.com/search?q=${encodeURIComponent('site:rehabhero.ca ' + resolved.query)}`;
@@ -1693,27 +1789,56 @@
           return `
             <article class="rounded-2xl border ${
               allSetsDone ? 'border-emerald-500/45 bg-pf-card/95' : 'border-pf-border bg-pf-card'
-            } p-4 shadow-md space-y-3.5 transition">
+            } ${isCollapsed ? 'p-3' : 'p-4'} shadow-md transition">
 
-              <!-- Exercise Title & Last Cycle Badge -->
-              <div class="flex items-start justify-between gap-2">
-                <div class="flex items-start gap-2.5 min-w-0">
+              <!-- Collapsible Exercise Header Button -->
+              <button
+                type="button"
+                data-toggle-ex-collapse="${ex.id}"
+                aria-expanded="${!isCollapsed}"
+                class="w-full flex items-start justify-between gap-2.5 text-left active:opacity-85 transition"
+              >
+                <div class="flex items-start gap-2.5 min-w-0 flex-1">
                   <span class="w-7 h-7 rounded-lg ${
                     allSetsDone ? 'bg-emerald-500 text-slate-950' : 'bg-purple-600/25 text-purple-300 border border-purple-500/30'
                   } font-extrabold text-xs flex items-center justify-center shrink-0 mt-0.5">
                     ${allSetsDone ? '✓' : idx + 1}
                   </span>
-                  <div class="min-w-0">
-                    <h3 class="text-base font-bold text-white leading-snug">
+                  <div class="min-w-0 flex-1">
+                    <h3 class="text-sm sm:text-base font-bold text-white leading-snug ${isCollapsed ? 'truncate' : ''}">
                       ${escapeHtml(resolved.name)}
                     </h3>
                     <div class="flex flex-wrap items-center gap-1.5 mt-1">
                       <span class="px-2 py-0.5 rounded-md bg-pf-gold/15 text-pf-gold font-bold text-xs">
                         ${escapeHtml(resolved.prescription)}
                       </span>
-                      <span class="text-xs text-slate-400">Rest ${ex.restSec}s</span>
                       ${
-                        lastCycleBadge
+                        !isFuture
+                          ? `<span class="px-2 py-0.5 rounded-md text-[11px] font-bold ${
+                              allSetsDone
+                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30'
+                                : completedCount > 0
+                                ? 'bg-amber-500/15 text-amber-200 border border-amber-400/30'
+                                : 'bg-[#090c14] text-slate-400 border border-pf-border'
+                            }">
+                              ${completedCount}/${resolved.setsCount} sets
+                            </span>`
+                          : ''
+                      }
+                      ${
+                        isCollapsed && compactWeight
+                          ? `<span class="px-2 py-0.5 rounded-md bg-purple-500/20 border border-purple-400/30 text-purple-200 font-semibold text-[11px]">
+                              ${escapeHtml(compactWeight)}
+                            </span>`
+                          : ''
+                      }
+                      ${
+                        !isCollapsed
+                          ? `<span class="text-xs text-slate-400">Rest ${ex.restSec}s</span>`
+                          : ''
+                      }
+                      ${
+                        !isCollapsed && lastCycleBadge
                           ? `<span class="px-2 py-0.5 rounded-md bg-purple-500/20 border border-purple-400/30 text-purple-200 font-semibold text-[11px]">
                               ${escapeHtml(lastCycleBadge)}
                             </span>`
@@ -1722,188 +1847,207 @@
                     </div>
                   </div>
                 </div>
-              </div>
 
-              ${
-                ex.isDualOption
-                  ? `
-                  <!-- Dual Option A / Option B Selector -->
-                  <div class="p-1 rounded-xl bg-[#090c14] border border-pf-border grid grid-cols-2 gap-1">
-                    <button
-                      type="button"
-                      ${isPast ? 'disabled' : 'data-quad-switch="A"'}
-                      class="min-h-[42px] px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${
-                        resolved.selectedOption === 'A'
-                          ? 'bg-purple-600 text-white shadow'
-                          : 'text-slate-400 hover:text-slate-200'
-                      } ${isPast ? 'cursor-default' : ''}"
+                <!-- Caret Indicator -->
+                <span
+                  class="w-8 h-8 rounded-xl bg-[#090c14]/80 border border-pf-border flex items-center justify-center text-slate-300 shrink-0 mt-0.5"
+                  aria-hidden="true"
+                >
+                  <svg
+                    class="w-4 h-4 transition-transform duration-200 ${isCollapsed ? '-rotate-90' : 'rotate-0'}"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    viewBox="0 0 24 24"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </span>
+              </button>
+
+              <!-- Collapsible Card Body -->
+              <div class="${isCollapsed ? 'hidden' : 'mt-3.5 space-y-3.5'}">
+                ${
+                  ex.isDualOption
+                    ? `
+                    <!-- Dual Option A / Option B Selector -->
+                    <div class="p-1 rounded-xl bg-[#090c14] border border-pf-border grid grid-cols-2 gap-1">
+                      <button
+                        type="button"
+                        ${isPast ? 'disabled' : 'data-quad-switch="A"'}
+                        class="min-h-[42px] px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${
+                          resolved.selectedOption === 'A'
+                            ? 'bg-purple-600 text-white shadow'
+                            : 'text-slate-400 hover:text-slate-200'
+                        } ${isPast ? 'cursor-default' : ''}"
+                      >
+                        Option A: Cable/Band TKE
+                      </button>
+                      <button
+                        type="button"
+                        ${isPast ? 'disabled' : 'data-quad-switch="B"'}
+                        class="min-h-[42px] px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${
+                          resolved.selectedOption === 'B'
+                            ? 'bg-purple-600 text-white shadow'
+                            : 'text-slate-400 hover:text-slate-200'
+                        } ${isPast ? 'cursor-default' : ''}"
+                      >
+                        Option B: Short-Arc Press
+                      </button>
+                    </div>
+                  `
+                    : ''
+                }
+
+                <!-- PT Form Cue + Form Check Links -->
+                <div class="p-3 rounded-xl bg-[#090c14]/85 border border-pf-border/80 space-y-2">
+                  <p class="text-xs text-slate-200 leading-relaxed">
+                    <strong class="text-purple-300 font-bold">Cue:</strong> ${escapeHtml(resolved.cue)}
+                  </p>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <a
+                      href="${rehabHeroUrl}"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-pf-cardAlt hover:bg-slate-800 border border-pf-border text-[11px] font-semibold text-purple-300 transition"
                     >
-                      Option A: Cable/Band TKE
-                    </button>
-                    <button
-                      type="button"
-                      ${isPast ? 'disabled' : 'data-quad-switch="B"'}
-                      class="min-h-[42px] px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${
-                        resolved.selectedOption === 'B'
-                          ? 'bg-purple-600 text-white shadow'
-                          : 'text-slate-400 hover:text-slate-200'
-                      } ${isPast ? 'cursor-default' : ''}"
+                      <span>Form Check (RehabHero)</span>
+                      <span>↗</span>
+                    </a>
+                    <a
+                      href="${ytFormUrl}"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-pf-cardAlt hover:bg-slate-800 border border-pf-border text-[11px] font-semibold text-slate-300 transition"
                     >
-                      Option B: Short-Arc Press
-                    </button>
+                      <span>YouTube Demo</span>
+                      <span>↗</span>
+                    </a>
                   </div>
-                `
-                  : ''
-              }
-
-              <!-- PT Form Cue + Form Check Links -->
-              <div class="p-3 rounded-xl bg-[#090c14]/85 border border-pf-border/80 space-y-2">
-                <p class="text-xs text-slate-200 leading-relaxed">
-                  <strong class="text-purple-300 font-bold">Cue:</strong> ${escapeHtml(resolved.cue)}
-                </p>
-                <div class="flex flex-wrap items-center gap-2">
-                  <a
-                    href="${rehabHeroUrl}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-pf-cardAlt hover:bg-slate-800 border border-pf-border text-[11px] font-semibold text-purple-300 transition"
-                  >
-                    <span>Form Check (RehabHero)</span>
-                    <span>↗</span>
-                  </a>
-                  <a
-                    href="${ytFormUrl}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-pf-cardAlt hover:bg-slate-800 border border-pf-border text-[11px] font-semibold text-slate-300 transition"
-                  >
-                    <span>YouTube Demo</span>
-                    <span>↗</span>
-                  </a>
                 </div>
-              </div>
 
-              <!-- Seat / Pin # + Copy Set 1 Helper -->
-              <div class="flex items-center justify-between gap-2">
-                <div class="flex items-center gap-2 flex-1">
-                  <label class="text-xs font-semibold text-slate-400 whitespace-nowrap" for="pin_${storageKey}_${wNum}">
-                    Seat / Pin #:
-                  </label>
+                <!-- Seat / Pin # + Copy Set 1 Helper -->
+                <div class="flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-2 flex-1">
+                    <label class="text-xs font-semibold text-slate-400 whitespace-nowrap" for="pin_${storageKey}_${wNum}">
+                      Seat / Pin #:
+                    </label>
+                    <input
+                      id="pin_${storageKey}_${wNum}"
+                      type="text"
+                      ${isReadOnly ? 'readonly' : ''}
+                      data-ex-key="${storageKey}"
+                      data-ex-field="seatPin"
+                      value="${escapeHtml(rec.seatPin || '')}"
+                      placeholder="e.g. Seat 4 / Pin 2"
+                      class="w-full min-h-[42px] px-3 py-1.5 rounded-xl bg-[#090c14] border border-pf-border focus:border-purple-500 focus:outline-none text-white placeholder-slate-600 ${
+                        isReadOnly ? 'opacity-75' : ''
+                      }"
+                    />
+                  </div>
+                  ${
+                    !isReadOnly
+                      ? `<button
+                          type="button"
+                          data-copy-set1="${storageKey}"
+                          data-sets-count="${resolved.setsCount}"
+                          class="min-h-[42px] px-2.5 py-1.5 rounded-xl bg-pf-cardAlt hover:bg-slate-800 border border-pf-border text-[11px] font-bold text-purple-300 shrink-0 active:scale-95 transition"
+                          title="Copy Set 1 weight & reps to all sets below"
+                        >
+                          Copy Set 1 ↓
+                        </button>`
+                      : ''
+                  }
+                </div>
+
+                <!-- Per-Set Weight, Reps & Checkmark Rows -->
+                <div class="space-y-2">
+                  ${Array.from({ length: resolved.setsCount }).map((_, setIdx) => {
+                    const setObj = (rec.sets && rec.sets[setIdx]) ? rec.sets[setIdx] : { weight: '', reps: '' };
+                    const isSetDone = Boolean(setChecks[setIdx]);
+
+                    return `
+                      <div class="grid grid-cols-12 gap-2 items-center">
+                        <div class="col-span-2">
+                          <span class="text-xs font-bold text-slate-400 block text-center">S${setIdx + 1}</span>
+                        </div>
+                        <div class="col-span-4">
+                          <input
+                            type="text"
+                            inputmode="decimal"
+                            aria-label="Set ${setIdx + 1} Weight in lbs"
+                            ${isReadOnly ? 'readonly' : ''}
+                            data-ex-key="${storageKey}"
+                            data-set-input-idx="${setIdx}"
+                            data-set-prop="weight"
+                            value="${escapeHtml(setObj.weight || '')}"
+                            placeholder="lbs"
+                            class="w-full min-h-[44px] px-2.5 py-1.5 rounded-xl bg-[#090c14] border border-pf-border focus:border-purple-500 focus:outline-none text-white font-semibold placeholder-slate-600 text-center ${
+                              isReadOnly ? 'opacity-75' : ''
+                            }"
+                          />
+                        </div>
+                        <div class="col-span-3">
+                          <input
+                            type="text"
+                            aria-label="Set ${setIdx + 1} Reps"
+                            ${isReadOnly ? 'readonly' : ''}
+                            data-ex-key="${storageKey}"
+                            data-set-input-idx="${setIdx}"
+                            data-set-prop="reps"
+                            value="${escapeHtml(setObj.reps || '')}"
+                            placeholder="${escapeHtml(resolved.targetReps)}"
+                            class="w-full min-h-[44px] px-2 py-1.5 rounded-xl bg-[#090c14] border border-pf-border focus:border-purple-500 focus:outline-none text-white placeholder-slate-600 text-center ${
+                              isReadOnly ? 'opacity-75' : ''
+                            }"
+                          />
+                        </div>
+                        <div class="col-span-3">
+                          ${
+                            isReadOnly
+                              ? `<div class="min-h-[44px] rounded-xl border flex items-center justify-center text-xs font-bold ${
+                                  isSetDone
+                                    ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
+                                    : 'bg-[#090c14] border-pf-border text-slate-500'
+                                }">
+                                  ${isSetDone ? '✓ Done' : '—'}
+                                </div>`
+                              : `<button
+                                  type="button"
+                                  data-check-ex="${ex.id}"
+                                  data-check-set="${setIdx}"
+                                  data-rest="${ex.restSec}"
+                                  class="w-full min-h-[44px] rounded-xl border font-bold text-xs flex items-center justify-center gap-1 transition active:scale-95 ${
+                                    isSetDone
+                                      ? 'bg-emerald-500/25 border-emerald-400 text-emerald-200 shadow-inner'
+                                      : 'bg-pf-cardAlt border-pf-border text-slate-300 hover:border-purple-400/50'
+                                  }"
+                                >
+                                  <span>${isSetDone ? '✓' : '○'}</span>
+                                  <span>Done</span>
+                                </button>`
+                          }
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+
+                <!-- Exercise Notes -->
+                <div>
                   <input
-                    id="pin_${storageKey}_${wNum}"
                     type="text"
+                    aria-label="Exercise Notes"
                     ${isReadOnly ? 'readonly' : ''}
                     data-ex-key="${storageKey}"
-                    data-ex-field="seatPin"
-                    value="${escapeHtml(rec.seatPin || '')}"
-                    placeholder="e.g. Seat 4 / Pin 2"
-                    class="w-full min-h-[42px] px-3 py-1.5 rounded-xl bg-[#090c14] border border-pf-border focus:border-purple-500 focus:outline-none text-white placeholder-slate-600 ${
+                    data-ex-field="notes"
+                    value="${escapeHtml(rec.notes || '')}"
+                    placeholder="Notes (e.g. smooth knee angle, add +5 lbs next cycle)"
+                    class="w-full min-h-[42px] px-3 py-1.5 rounded-xl bg-[#090c14]/70 border border-pf-border/80 focus:border-purple-500 focus:outline-none text-slate-200 placeholder-slate-600 ${
                       isReadOnly ? 'opacity-75' : ''
                     }"
                   />
                 </div>
-                ${
-                  !isReadOnly
-                    ? `<button
-                        type="button"
-                        data-copy-set1="${storageKey}"
-                        data-sets-count="${resolved.setsCount}"
-                        class="min-h-[42px] px-2.5 py-1.5 rounded-xl bg-pf-cardAlt hover:bg-slate-800 border border-pf-border text-[11px] font-bold text-purple-300 shrink-0 active:scale-95 transition"
-                        title="Copy Set 1 weight & reps to all sets below"
-                      >
-                        Copy Set 1 ↓
-                      </button>`
-                    : ''
-                }
-              </div>
-
-              <!-- Per-Set Weight, Reps & Checkmark Rows -->
-              <div class="space-y-2">
-                ${Array.from({ length: resolved.setsCount }).map((_, setIdx) => {
-                  const setObj = (rec.sets && rec.sets[setIdx]) ? rec.sets[setIdx] : { weight: '', reps: '' };
-                  const isSetDone = Boolean(setChecks[setIdx]);
-
-                  return `
-                    <div class="grid grid-cols-12 gap-2 items-center">
-                      <div class="col-span-2">
-                        <span class="text-xs font-bold text-slate-400 block text-center">S${setIdx + 1}</span>
-                      </div>
-                      <div class="col-span-4">
-                        <input
-                          type="text"
-                          inputmode="decimal"
-                          aria-label="Set ${setIdx + 1} Weight in lbs"
-                          ${isReadOnly ? 'readonly' : ''}
-                          data-ex-key="${storageKey}"
-                          data-set-input-idx="${setIdx}"
-                          data-set-prop="weight"
-                          value="${escapeHtml(setObj.weight || '')}"
-                          placeholder="lbs"
-                          class="w-full min-h-[44px] px-2.5 py-1.5 rounded-xl bg-[#090c14] border border-pf-border focus:border-purple-500 focus:outline-none text-white font-semibold placeholder-slate-600 text-center ${
-                            isReadOnly ? 'opacity-75' : ''
-                          }"
-                        />
-                      </div>
-                      <div class="col-span-3">
-                        <input
-                          type="text"
-                          aria-label="Set ${setIdx + 1} Reps"
-                          ${isReadOnly ? 'readonly' : ''}
-                          data-ex-key="${storageKey}"
-                          data-set-input-idx="${setIdx}"
-                          data-set-prop="reps"
-                          value="${escapeHtml(setObj.reps || '')}"
-                          placeholder="${escapeHtml(resolved.targetReps)}"
-                          class="w-full min-h-[44px] px-2 py-1.5 rounded-xl bg-[#090c14] border border-pf-border focus:border-purple-500 focus:outline-none text-white placeholder-slate-600 text-center ${
-                            isReadOnly ? 'opacity-75' : ''
-                          }"
-                        />
-                      </div>
-                      <div class="col-span-3">
-                        ${
-                          isReadOnly
-                            ? `<div class="min-h-[44px] rounded-xl border flex items-center justify-center text-xs font-bold ${
-                                isSetDone
-                                  ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
-                                  : 'bg-[#090c14] border-pf-border text-slate-500'
-                              }">
-                                ${isSetDone ? '✓ Done' : '—'}
-                              </div>`
-                            : `<button
-                                type="button"
-                                data-check-ex="${ex.id}"
-                                data-check-set="${setIdx}"
-                                data-rest="${ex.restSec}"
-                                class="w-full min-h-[44px] rounded-xl border font-bold text-xs flex items-center justify-center gap-1 transition active:scale-95 ${
-                                  isSetDone
-                                    ? 'bg-emerald-500/25 border-emerald-400 text-emerald-200 shadow-inner'
-                                    : 'bg-pf-cardAlt border-pf-border text-slate-300 hover:border-purple-400/50'
-                                }"
-                              >
-                                <span>${isSetDone ? '✓' : '○'}</span>
-                                <span>Done</span>
-                              </button>`
-                        }
-                      </div>
-                    </div>
-                  `;
-                }).join('')}
-              </div>
-
-              <!-- Exercise Notes -->
-              <div>
-                <input
-                  type="text"
-                  aria-label="Exercise Notes"
-                  ${isReadOnly ? 'readonly' : ''}
-                  data-ex-key="${storageKey}"
-                  data-ex-field="notes"
-                  value="${escapeHtml(rec.notes || '')}"
-                  placeholder="Notes (e.g. smooth knee angle, add +5 lbs next cycle)"
-                  class="w-full min-h-[42px] px-3 py-1.5 rounded-xl bg-[#090c14]/70 border border-pf-border/80 focus:border-purple-500 focus:outline-none text-slate-200 placeholder-slate-600 ${
-                    isReadOnly ? 'opacity-75' : ''
-                  }"
-                />
               </div>
             </article>
           `;
@@ -2130,6 +2274,16 @@
       function bindEvents() {
         // Delegated Click Handler
         document.addEventListener('click', (e) => {
+          // Toggle single exercise card collapse/expand via caret header
+          const collapseHeaderBtn = e.target.closest('[data-toggle-ex-collapse]');
+          if (collapseHeaderBtn) {
+            const exId = collapseHeaderBtn.getAttribute('data-toggle-ex-collapse');
+            setExerciseCollapsed(exId, !isExerciseCollapsed(exId));
+            saveState();
+            renderWorkoutView();
+            return;
+          }
+
           // Cycle Browser Bar pills
           const cycleBtn = e.target.closest('[data-cycle-mode]');
           if (cycleBtn) {
@@ -2213,6 +2367,12 @@
             const checks = getActiveCycleSetChecks(viewState.workoutNumber, ex.id, ex.sets);
             const newVal = !checks[setIdx];
             checks[setIdx] = newVal;
+
+            // Auto-collapse card if all sets are now checked off
+            if (newVal && state.prefs.autoCollapseDone && checks.every(Boolean)) {
+              setExerciseCollapsed(ex.id, true);
+            }
+
             saveState();
             renderAll();
 
@@ -2234,6 +2394,21 @@
             const sec = Number(timerPreset.getAttribute('data-timer-sec')) || 90;
             startRestTimer(sec, `Rest Timer (${sec}s)`);
           }
+        });
+
+        // Collapse All / Expand All buttons in Hero Card
+        document.getElementById('collapseAllExBtn').addEventListener('click', () => {
+          const wDef = WORKOUTS[viewState.workoutNumber - 1];
+          wDef.exercises.forEach((ex) => setExerciseCollapsed(ex.id, true));
+          saveState();
+          renderWorkoutView();
+        });
+
+        document.getElementById('expandAllExBtn').addEventListener('click', () => {
+          const wDef = WORKOUTS[viewState.workoutNumber - 1];
+          wDef.exercises.forEach((ex) => setExerciseCollapsed(ex.id, false));
+          saveState();
+          renderWorkoutView();
         });
 
         // Live Auto-Save for Seat/Pin, Weight, Reps, and Notes (NO DOM rebuild so iOS keyboard stays open)
@@ -2289,6 +2464,13 @@
         // Auto Timer Toggle
         document.getElementById('autoTimerToggle').addEventListener('click', () => {
           state.prefs.autoTimer = !state.prefs.autoTimer;
+          saveState();
+          renderPanelsState();
+        });
+
+        // Auto-Collapse Completed Exercise Toggle
+        document.getElementById('autoCollapseToggle').addEventListener('click', () => {
+          state.prefs.autoCollapseDone = !state.prefs.autoCollapseDone;
           saveState();
           renderPanelsState();
         });
@@ -2356,6 +2538,8 @@
                 ...parsed,
                 activeCycle: Math.max(1, Number(parsed.activeCycle) || 1),
                 activeWorkout: Math.min(6, Math.max(1, Number(parsed.activeWorkout) || 1)),
+                prefs: { ...def.prefs, ...(parsed.prefs || {}) },
+                collapsedExercises: parsed.collapsedExercises && typeof parsed.collapsedExercises === 'object' ? parsed.collapsedExercises : {},
                 currentCycleWorkouts: {
                   ...createBlankCycleWorkoutsProgress(),
                   ...(parsed.currentCycleWorkouts || {})
